@@ -83,3 +83,27 @@ Rules:
 - If a merge conflicts, stop on that branch, comment on the PR/issue with the conflict files, and leave Status/board note — do not force-push.
 - Follow the worktree rules above (including switching the human off a target branch only when needed, and removing the sync worktree after push).
 - Skip branches whose remote tip already contains `origin/main`.
+
+## After a PR is merged
+
+When a PR is merged into `main`, **delete both the remote and local feature branches**. Do not leave merged branches around.
+
+```bash
+# Prefer letting GitHub delete the remote head on merge:
+gh pr merge <number> --merge --delete-branch
+
+# If the PR was already merged without deleting the branch:
+BRANCH=<head-branch-name>
+git fetch origin
+git push origin --delete "$BRANCH" 2>/dev/null || true
+# If the main checkout is on that branch, move to main first:
+if [ "$(git branch --show-current)" = "$BRANCH" ]; then git checkout main; fi
+git branch -d "$BRANCH" 2>/dev/null || git branch -D "$BRANCH" 2>/dev/null || true
+git fetch --prune
+```
+
+Also:
+
+- Remove any leftover worktree for that branch (`git worktree remove …`).
+- Update the linked issue / Project board Status to **Done** (see `docs/agents/issue-tracker.md`).
+- Then run the “Keep open branches current with `main`” sync so remaining open PR remotes pick up the merge.
