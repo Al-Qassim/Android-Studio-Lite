@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Android(Studio Lite"
+rootProject.name = "Android Studio Lite"
 include(":app")
