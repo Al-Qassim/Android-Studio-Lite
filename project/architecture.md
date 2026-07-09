@@ -9,15 +9,17 @@
 
 **Android Studio Lite** is a native Kotlin / Jetpack Compose IDE that runs on the phone:
 
-| Capability | v0.1 |
-|---|---|
-| Create Android project (single Activity + Compose template) | Yes |
-| List / open projects | Yes |
-| Browse & manage project files/folders | Yes |
-| Edit source files | Yes (basic editor) |
-| Build APK via cloud / GitHub Actions (or equivalent) | Yes |
-| Download APK → system install screen | Yes |
-| Edit → rebuild → reinstall loop | Yes |
+
+| Capability                                                  | v0.1               |
+| ----------------------------------------------------------- | ------------------ |
+| Create Android project (single Activity + Compose template) | Yes                |
+| List / open projects                                        | Yes                |
+| Browse & manage project files/folders                       | Yes                |
+| Edit source files                                           | Yes (basic editor) |
+| Build APK via cloud / GitHub Actions (or equivalent)        | Yes                |
+| Download APK → system install screen                        | Yes                |
+| Edit → rebuild → reinstall loop                             | Yes                |
+
 
 **Later:** Git, AI assistant, syntax highlighting.
 
@@ -33,16 +35,20 @@ Existing foundation: `:designsystem` (colors, typography, shared Compose primiti
 
 ---
 
+
+
 ## 2. Architectural goals
 
 1. **Capability modules are self-contained** — each owns its data + presentation for its domain.
 2. **Public surface is thin** — outside consumers see **interfaces + immutable data types only**, never implementations.
 3. **Integration modules wire capabilities** — they do not invent domain logic; they compose APIs into product flows.
-4. **`:app` stays thin** — Application class, DI graph, root navigation host, permissions, install intents.
+4. `:app` **stays thin** — Application class, DI graph, root navigation host, permissions, install intents.
 5. **Replaceable backends** — especially Build (GHA today, other cloud later) behind one interface.
 6. **Safe file sandbox** — all file ops stay under a project root (`projectDir`).
 
 ---
+
+
 
 ## 3. Module map
 
@@ -54,24 +60,26 @@ AndroidStudioLite/
 │   └── model                   # tiny shared types (Path, Result, Ids) — optional but recommended
 ├── feature/
 │   ├── projects/
-│   │   ├── api                 # ProjectService + models
+│   │   ├── api                 # ProjectService + ProjectsScreens + models
 │   │   └── impl                # data + UI for projects
 │   ├── files/
-│   │   ├── api                 # FileExplorerService + models
+│   │   ├── api                 # FileExplorerService + FilesScreens + models
 │   │   └── impl                # data + UI for file management
 │   ├── editor/
-│   │   ├── api                 # EditorSession / DocumentStore
+│   │   ├── api                 # EditorSession / DocumentStore + EditorScreens
 │   │   └── impl                # editor screen + dirty/save
 │   └── build/
-│       ├── api                 # BuildService + models
+│       ├── api                 # BuildService + BuildScreens + models
 │       └── impl                # upload → remote build → download → install
 └── integration/
     └── ide                     # wires Projects → Files → Editor → Build into one graph
 ```
 
+
+
 ### Why `api` / `impl` pairs?
 
-Gradle consumers depend on **`:feature:X:api`**. Implementations live in **`:feature:X:impl`** and are only pulled by `:app` / `:integration:ide`. That enforces “interfaces and types only” at the module boundary.
+Gradle consumers depend on `:feature:X:api`. Implementations live in `:feature:X:impl` and are only pulled by `:app` / `:integration:ide`. That enforces “interfaces and types only” at the module boundary.
 
 ```text
 :feature:projects:api   →  interfaces + data classes
@@ -80,7 +88,11 @@ Gradle consumers depend on **`:feature:X:api`**. Implementations live in **`:fea
 
 ---
 
+
+
 ## 4. Dependency rules
+
+
 
 ### Allowed direction
 
@@ -135,17 +147,25 @@ flowchart TB
   bApi --> core
 ```
 
+
+
+
+
 ### Hard rules
 
-| Rule | Reason |
-|---|---|
-| `*:api` must not depend on `*:impl` | Keeps public surface pure |
-| Feature `impl`s must not depend on other feature `impl`s | Avoid spaghetti; talk via APIs or integration |
+
+| Rule                                                                         | Reason                                                    |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `*:api` must not depend on `*:impl`                                          | Keeps public surface pure                                 |
+| Feature `impl`s must not depend on other feature `impl`s                     | Avoid spaghetti; talk via APIs or integration             |
 | Feature `impl`s should not depend on other feature `api`s unless unavoidable | Prefer integration module for cross-feature orchestration |
-| Only `:app` / `:integration:ide` compose multiple features | Clear ownership of product flows |
-| `:designsystem` depends on nothing in `feature/` | UI kit stays reusable |
+| Only `:app` / `:integration:ide` compose multiple features                   | Clear ownership of product flows                          |
+| `:designsystem` depends on nothing in `feature/`                             | UI kit stays reusable                                     |
+
 
 ---
+
+
 
 ## 5. Layering inside a capability module
 
@@ -153,23 +173,23 @@ Each `impl` follows the same internal shape:
 
 ```text
 feature/files/impl/
-  ui/           # Compose screens, ViewModels (presentation)
-  domain/       # use-cases (optional if thin) — still internal
-  data/         # FileSystemDataSource, repositories
+  ui/           # Compose screens, screens impl, ViewModels (presentation)
+  data/         # FileSystemDataSource, service implementations
 ```
 
 ```mermaid
 flowchart LR
-  UI["Presentation<br/>Screens / ViewModels"]
-  API["Public API<br/>interfaces + models"]
-  DATA["Data<br/>FS / network / cache"]
+  PRESENTATION["PRESENTATION<br/>Screens impl / ViewModels"]
+  API["Public API<br/>interfaces + models<br/>+ screen launchers"]
+  DATA["DATA<br/>FS / network / cache /service impl"]
 
-  UI --> API
-  UI --> DATA
+  PRESENTATION --> API
   DATA --> API
 ```
 
-**Outside the module**, only `API` is visible. Presentation can be launched via a **navigation entry** exposed by the integration module (or a small `FilesEntry` interface), not by leaking ViewModels.
+
+
+**Outside the module**, only `API` is visible. The API should provide an interface to open screens (e.g., via a navigation entry or a dedicated screen launcher), instead of leaking ViewModels or internal presentation logic.
 
 ---
 
@@ -199,18 +219,40 @@ data class CreateProjectRequest(
 )
 
 interface ProjectService {
+    fun observeProjects(): Flow<List<Project>>
     suspend fun getProject(id: ProjectId): Project?
     suspend fun createProject(request: CreateProjectRequest): Project
     suspend fun deleteProject(id: ProjectId)
     suspend fun markOpened(id: ProjectId)
 }
+
+/**
+ * Screen launcher — public UI entry points for this feature.
+ * Implemented in :impl; consumed by :integration:ide / :app.
+ * Never expose ViewModels or internal Composables through this API.
+ */
+interface ProjectsScreens {
+    @Composable
+    fun ProjectsList(
+        onOpenProject: (projectId: String) -> Unit,
+        onCreateProject: () -> Unit = {},
+    )
+
+    @Composable
+    fun CreateProject(
+        onCreated: (projectId: String) -> Unit,
+        onCancel: () -> Unit,
+    )
+}
 ```
 
-**UI owned by `impl`:** Projects list, Create Project dialog/screen (Figma Main Screens).
+**UI owned by** `impl`**:** Projects list, Create Project dialog/screen (Figma Main Screens) — reached only via `ProjectsScreens`.
 
 **Does not own:** browsing files inside a project (that’s Files).
 
 ---
+
+
 
 ### 6.2 Files — `:feature:files:api`
 
@@ -252,9 +294,24 @@ interface FileExplorerService {
     suspend fun readText(root: ProjectRoot, relativePath: String): Result<String, FileOpError>
     suspend fun writeText(root: ProjectRoot, relativePath: String, content: String): Result<Unit, FileOpError>
 }
+
+/**
+ * Screen launcher — file browser / management UI for a project root.
+ * Cross-feature exits (open file → editor) are callbacks wired by integration.
+ */
+interface FilesScreens {
+    @Composable
+    fun FileBrowser(
+        root: ProjectRoot,
+        projectName: String,
+        initialRelativePath: String = "",
+        onOpenFile: (relativePath: String) -> Unit,
+        onNavigateBack: () -> Unit,
+    )
+}
 ```
 
-**UI owned by `impl`:** path bar, folder/file rows, create/rename/move/delete dialogs, empty states, context menus — using `:designsystem` components (`AslPathBar`, `AslFileRow`, `AslDialogForm`, …).
+**UI owned by** `impl`**:** path bar, folder/file rows, create/rename/move/delete dialogs, empty states, context menus — using `:designsystem` components (`PathBar`, `FileRow`, `DialogForm`, …). Reached only via `FilesScreens`.
 
 **Shared UI state model (from Figma notes):**
 
@@ -265,6 +322,8 @@ all ops clamped to projectDir
 ```
 
 ---
+
+
 
 ### 6.3 Editor — `:feature:editor:api`
 
@@ -291,13 +350,28 @@ interface DocumentStore {
     suspend fun load(root: ProjectRoot, relativePath: String): String
     suspend fun save(root: ProjectRoot, relativePath: String, content: String)
 }
+
+/**
+ * Screen launcher — editor UI for an open document.
+ * Save / Run / close are callbacks or session ops; integration wires Run → Build.
+ */
+interface EditorScreens {
+    @Composable
+    fun Editor(
+        documentId: DocumentId,
+        onNavigateBack: () -> Unit,
+        onRun: (() -> Unit)? = null,
+    )
+}
 ```
 
 `DocumentStore` may be implemented by adapting `FileExplorerService.readText/writeText` inside `editor:impl` or via a binding in `:integration:ide`. Prefer **adapter in integration** so `editor` does not hard-depend on `files:api` if we want maximum isolation — or allow a soft `editor:impl → files:api` dependency for pragmatism in v0.1.
 
-**Recommendation for v0.1:** `editor:impl` may depend on `files:api` for load/save. Integration still owns navigation.
+**Recommendation for v0.1:** `editor:impl` may depend on `files:api` for load/save. Integration still owns navigation and calls `EditorScreens` / `FilesScreens` / `BuildScreens` — never feature `impl` types.
 
 ---
+
+
 
 ### 6.4 Build — `:feature:build:api`
 
@@ -333,13 +407,47 @@ interface BuildService {
 interface ApkInstaller {
     fun requestInstall(apkLocalPath: String)
 }
+
+/**
+ * Screen launcher — build progress / result UI.
+ * Install hand-off uses ApkInstaller (often bound in :app).
+ */
+interface BuildScreens {
+    @Composable
+    fun BuildProgress(
+        jobId: String,
+        onReadyToInstall: (apkLocalPath: String) -> Unit,
+        onDismiss: () -> Unit,
+        onRetry: (() -> Unit)? = null,
+    )
+}
 ```
 
-**UI owned by `impl`:** Run button states, progress sheet/screen, failure toast (Figma Run/Build).
+**UI owned by** `impl`**:** Run button states, progress sheet/screen, failure toast (Figma Run/Build) — reached only via `BuildScreens`.
 
 **Impl details (hidden):** zip/upload project, trigger GHA/cloud, poll status, download artifact, write to cache dir. Swap provider without touching Projects/Files.
 
 ---
+
+### 6.5 Screen-launcher rule (all feature `:api`s)
+
+Every capability `:api` exposes **two** public surfaces:
+
+| Surface | Examples | Purpose |
+|---|---|---|
+| Domain services | `ProjectService`, `FileExplorerService`, `BuildService` | Data / use-cases |
+| Screen launchers | `ProjectsScreens`, `FilesScreens`, `EditorScreens`, `BuildScreens` | Open that feature’s UI |
+
+**Rules:**
+
+1. Launchers live in `:api` and are implemented in `:impl`.
+2. Launchers accept **callbacks** for exits that leave the feature (open project → files, open file → editor, run → build). Integration wires those callbacks.
+3. Launchers must not return or expose ViewModels, repositories, or other `impl` types.
+4. `:integration:ide` / `:app` depend on launcher interfaces from `:api` only — never on feature screen classes in `:impl`.
+
+---
+
+
 
 ## 7. Integration module — `:integration:ide`
 
@@ -348,11 +456,14 @@ This is the module you described: **not a domain specialist**, but the place tha
 ### Responsibilities
 
 - Navigation graph for the IDE experience
-- Mapping: open project → hand `ProjectRoot` to Files
-- Mapping: open file → hand path + content to Editor
-- Mapping: Run → call `BuildService` with current project
+- Calling feature **screen launchers** (`ProjectsScreens`, `FilesScreens`, …) — never `impl` screen types
+- Mapping: open project → hand `ProjectRoot` to `FilesScreens.FileBrowser`
+- Mapping: open file → hand path to `EditorScreens.Editor`
+- Mapping: Run → `BuildService.startBuild` + `BuildScreens.BuildProgress`
 - Coordinating “file deleted while open in editor” (Figma case 17)
 - Providing entry points / routes consumed by `:app`
+
+
 
 ### Does **not**
 
@@ -365,39 +476,48 @@ This is the module you described: **not a domain specialist**, but the place tha
 sequenceDiagram
   actor User
   participant IDE as integration:ide
+  participant PS as ProjectsScreens
   participant P as ProjectService
+  participant FS as FilesScreens
   participant F as FileExplorerService
+  participant ES as EditorScreens
   participant E as EditorSession
+  participant BS as BuildScreens
   participant B as BuildService
   participant I as ApkInstaller
 
   User->>IDE: Open Projects
-  IDE->>P: observeProjects()
+  IDE->>PS: ProjectsList(...)
   User->>IDE: Create project
+  IDE->>PS: CreateProject(...)
   IDE->>P: createProject(...)
   User->>IDE: Open project
   IDE->>P: markOpened(id)
-  IDE->>F: observeListing(root, "")
+  IDE->>FS: FileBrowser(root, ...)
   User->>IDE: Open file
-  IDE->>F: readText(...)
-  IDE->>E: open(docId, content)
+  IDE->>ES: Editor(documentId, ...)
   User->>IDE: Save
-  IDE->>E: (dirty content)
+  IDE->>E: (dirty content via session)
   IDE->>F: writeText(...)
-  IDE->>E: markSaved(...)
   User->>IDE: Run
   IDE->>B: startBuild(request)
+  IDE->>BS: BuildProgress(jobId, ...)
   B-->>IDE: ReadyToInstall + apk path
   IDE->>I: requestInstall(apk)
 ```
 
-### Suggested façade (optional)
 
-If you want a single “IDE brain” for the app shell:
+
+
+
+### Suggested façade (deferred past v0.1)
+
+`IdeCoordinator` (command façade for open project / open file / run) is **optional and deferred**.  
+v0.1 uses the **nav graph + screen-launcher callbacks** only. Revisit if a second entry point (deep link, notification, widget) appears.
 
 ```kotlin
+// Deferred — not required for v0.1
 interface IdeCoordinator {
-    // navigation intents / high-level commands
     fun openProjects()
     fun openProject(id: ProjectId)
     fun openFile(projectId: ProjectId, relativePath: String)
@@ -405,23 +525,30 @@ interface IdeCoordinator {
 }
 ```
 
-Implemented only in `:integration:ide`. `:app` calls this; features never call each other through it.
-
 ---
+
+
 
 ## 8. App shell — `:app`
 
-| Concern | Owner |
-|---|---|
-| Hilt/Koin modules binding `api` → `impl` | `:app` |
-| Root `NavHost` that includes `:integration:ide` graph | `:app` |
-| `REQUEST_INSTALL_PACKAGES` / install activity result | `:app` (+ `ApkInstaller` impl) |
-| Application / MainActivity | `:app` |
-| Theme wrapper using `:designsystem` | `:app` |
 
-`:app` depends on all `impl` modules **only** to register bindings; UI composition preferably goes through integration routes.
+| Concern                                               | Owner                          |
+| ----------------------------------------------------- | ------------------------------ |
+| Start Koin; aggregate feature + integration modules   | `:app`                         |
+| Per-feature Koin modules (`api` → `impl` bindings)    | each `:feature:*:impl`         |
+| Integration wiring Koin module                        | `:integration:ide`             |
+| IDE `NavHost` / nav graph                             | `:integration:ide`             |
+| Host Activity that embeds the IDE graph               | `:app`                         |
+| `REQUEST_INSTALL_PACKAGES` / install activity result  | `:app` (+ `ApkInstaller` impl) |
+| Application / MainActivity                            | `:app`                         |
+| Theme wrapper using `:designsystem`                   | `:app`                         |
+
+
+`:app` depends on `impl` modules to start Koin with their modules; UI composition goes through `:integration:ide` routes and screen launchers.
 
 ---
+
+
 
 ## 9. Design system — `:designsystem`
 
@@ -434,9 +561,13 @@ Already present. Role stays:
 
 ---
 
+
+
 ## 10. End-to-end product flows
 
-### 10.1 Create → open → edit → run
+
+
+### 10.1 Create → open → edit → save
 
 ```mermaid
 flowchart TD
@@ -447,32 +578,34 @@ flowchart TD
   A -->|tap project| E[Files browser]
   E -->|tap .kt file| F[Editor]
   F -->|edit + save| G[FileExplorerService.writeText]
-  F -->|Run| H[BuildService.startBuild]
-  H --> I[Upload + remote Gradle]
-  I --> J[Download APK]
-  J --> K[ApkInstaller → system UI]
-  K --> L[User installs & launches]
-  L -->|edit again| F
 ```
+
+
+
+
 
 ### 10.2 File management (Figma coverage → API)
 
-| Figma case | API / behavior |
-|---|---|
-| Create file / folder | `createFile` / `createFolder` at `currentPath` |
-| Nested create | navigate first → create at new `currentPath` |
-| Rename | `rename` |
-| Delete file / non-empty folder | `delete` (+ confirm UI) |
-| Move / copy | `move` / `copy` |
-| Name conflict / invalid name | `FileOpError` |
-| Breadcrumbs / up | listing `relativePath` changes |
-| Open → editor → save | integration + Editor + `writeText` |
-| Empty folder | empty state UI |
-| Invalid move into self/child | `InvalidMove` |
-| Delete/move while open | integration closes or prompts EditorSession |
-| Sandbox guardrails | `OutsideSandbox` |
+
+| Figma case                     | API / behavior                                 |
+| ------------------------------ | ---------------------------------------------- |
+| Create file / folder           | `createFile` / `createFolder` at `currentPath` |
+| Nested create                  | navigate first → create at new `currentPath`   |
+| Rename                         | `rename`                                       |
+| Delete file / non-empty folder | `delete` (+ confirm UI)                        |
+| Move / copy                    | `move` / `copy`                                |
+| Name conflict / invalid name   | `FileOpError`                                  |
+| Breadcrumbs / up               | listing `relativePath` changes                 |
+| Open → editor → save           | integration + Editor + `writeText`             |
+| Empty folder                   | empty state UI                                 |
+| Invalid move into self/child   | `InvalidMove`                                  |
+| Delete/move while open         | integration closes or prompts EditorSession    |
+| Sandbox guardrails             | `OutsideSandbox`                               |
+
 
 ---
+
+
 
 ## 11. Data ownership
 
@@ -497,11 +630,15 @@ flowchart TB
   B --> ci
 ```
 
+
+
 - **Projects** create the root folder + template + metadata row.
 - **Files / Editor** mutate files under that root only.
 - **Build** reads the tree for upload; writes APK only to cache; never mutates source as part of build.
 
 ---
+
+
 
 ## 12. Gradle include sketch
 
@@ -525,38 +662,54 @@ include(":integration:ide")
 
 ---
 
+
+
 ## 13. What stays out of v0.1 modules
 
-| Later feature | Likely module |
-|---|---|
-| Git push/pull/commit | `:feature:git:api` / `impl` |
-| AI assistant | `:feature:assistant:api` / `impl` |
-| Syntax highlighting | enhance `:feature:editor` (or `:feature:editor:highlight`) |
+
+| Later feature        | Likely module                                              |
+| -------------------- | ---------------------------------------------------------- |
+| Git push/pull/commit | `:feature:git:api` / `impl`                                |
+| AI assistant         | `:feature:assistant:api` / `impl`                          |
+| Syntax highlighting  | enhance `:feature:editor` (or `:feature:editor:highlight`) |
+
 
 Integration grows new edges; existing APIs stay stable.
 
 ---
 
-## 14. Decisions to confirm before coding
 
-1. **DI framework** — Hilt vs Koin (affects `:app` binding style only).
-2. **Project storage location** — app-specific directory vs user-visible Documents (recommend app-private for sandbox simplicity).
-3. **Build provider for demo** — GitHub Actions vs custom cloud endpoint (hidden behind `BuildService`).
-4. **Editor ↔ Files coupling** — soft depend (`editor:impl → files:api`) vs adapter only in integration.
-5. **Whether `:core:model` is worth it now** — yes if `ProjectId` / path types are shared; otherwise duplicate tiny types in each `api` (worse).
+
+## 14. Implementation decisions
+
+Resolved in grilling; recorded in **`project/v0.1-implementation-plan.md`** (and GitHub issue #5).  
+Do **not** expand this architecture doc with ephemeral impl details (timings, asset paths, test matrix, etc.).
+
+High-level locks that affect module shape:
+
+- **Koin** (modules in `:impl` + `:integration:ide`; `:app` starts Koin)
+- **App-private** project storage; **Room** in **`:core:database`**
+- **`:core:model`** now
+- **`editor:impl` → `files:api`**
+- **Fake `BuildService`** for v0.1 (real GitHub Actions later, same API)
+- **IDE nav graph** in `:integration:ide` (no `IdeCoordinator` in v0.1)
 
 ---
 
+
+
 ## 15. Summary
 
-| Module | Role | Public surface |
-|---|---|---|
-| `:designsystem` | Visual language | Compose components + tokens |
-| `:feature:projects` | Project lifecycle | `ProjectService` + models |
-| `:feature:files` | Tree navigation & CRUD | `FileExplorerService` + models |
-| `:feature:editor` | Edit / dirty / save | `EditorSession` + models |
-| `:feature:build` | Remote APK pipeline | `BuildService` + models |
-| `:integration:ide` | Product wiring & nav | Routes / `IdeCoordinator` |
-| `:app` | Host | Bindings + permissions |
+
+| Module              | Role                   | Public surface                                      |
+| ------------------- | ---------------------- | --------------------------------------------------- |
+| `:designsystem`     | Visual language        | Compose components + tokens                         |
+| `:feature:projects` | Project lifecycle      | `ProjectService` + `ProjectsScreens` + models       |
+| `:feature:files`    | Tree navigation & CRUD | `FileExplorerService` + `FilesScreens` + models     |
+| `:feature:editor`   | Edit / dirty / save    | `EditorSession` + `EditorScreens` + models          |
+| `:feature:build`    | Remote APK pipeline    | `BuildService` + `BuildScreens` + models            |
+| `:integration:ide`  | Product wiring & nav   | IDE nav graph + screen-launcher wiring              |
+| `:app`              | Host                   | Bindings + permissions                              |
+
 
 This matches the intended shape: **specialist capability modules** with clean interfaces, plus **integration modules** that assemble them into Android Studio Lite — without leaking implementations across boundaries.
