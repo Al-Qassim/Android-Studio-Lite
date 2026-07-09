@@ -28,15 +28,15 @@ import com.robotopia.androidstudiolite.designsystem.typography.Typography
 @Composable
 fun DialogForm(
     title: String,
-    locationLabel: String,
     fieldValue: String,
     onFieldChange: (String) -> Unit,
     primaryActionLabel: String,
     onCancel: () -> Unit = {},
     onPrimaryAction: () -> Unit = {},
     modifier: Modifier = Modifier,
+    locationLabel: String? = null,
     fieldPlaceholder: String = "",
-    isError: Boolean = false,
+    errorMessage: String? = null,
 ) {
     val shape = RoundedCornerShape(14.dp)
     Column(
@@ -51,18 +51,21 @@ fun DialogForm(
             text = title,
             style = Typography.Headline.copy(color = Colors.Text),
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        BasicText(
-            text = locationLabel,
-            style = Typography.Caption.copy(color = Colors.Muted),
-        )
+        if (!locationLabel.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            BasicText(
+                text = locationLabel,
+                style = Typography.Caption.copy(color = Colors.Muted),
+            )
+        }
         Spacer(modifier = Modifier.height(12.dp))
         TextField(
             value = fieldValue,
             onValueChange = onFieldChange,
             placeholder = fieldPlaceholder,
             variant = TextFieldVariant.Dialog,
-            isError = isError,
+            isError = !errorMessage.isNullOrBlank(),
+            errorMessage = errorMessage,
         )
         Spacer(modifier = Modifier.height(20.dp))
         Row(
@@ -138,9 +141,9 @@ fun DialogMessageAction(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · empty + location")
 @Composable
-private fun DialogFormPreview() {
+private fun DialogFormEmptyWithLocationPreview() {
     var value by remember { mutableStateOf("") }
     DialogForm(
         title = "New file",
@@ -149,6 +152,66 @@ private fun DialogFormPreview() {
         onFieldChange = { value = it },
         primaryActionLabel = "Create",
         fieldPlaceholder = "File name",
+        modifier = Modifier.padding(16.dp),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · no location")
+@Composable
+private fun DialogFormNoLocationPreview() {
+    var value by remember { mutableStateOf("") }
+    DialogForm(
+        title = "Rename",
+        fieldValue = value,
+        onFieldChange = { value = it },
+        primaryActionLabel = "Rename",
+        fieldPlaceholder = "New name",
+        modifier = Modifier.padding(16.dp),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · filled")
+@Composable
+private fun DialogFormFilledPreview() {
+    var value by remember { mutableStateOf("MainActivity.kt") }
+    DialogForm(
+        title = "Rename",
+        locationLabel = "Location: app/src/main/java",
+        fieldValue = value,
+        onFieldChange = { value = it },
+        primaryActionLabel = "Rename",
+        fieldPlaceholder = "File name",
+        modifier = Modifier.padding(16.dp),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · error")
+@Composable
+private fun DialogFormErrorPreview() {
+    var value by remember { mutableStateOf("Main Activity.kt") }
+    DialogForm(
+        title = "New file",
+        locationLabel = "Location: app/src/main/java",
+        fieldValue = value,
+        onFieldChange = { value = it },
+        primaryActionLabel = "Create",
+        fieldPlaceholder = "File name",
+        errorMessage = "Name cannot contain spaces",
+        modifier = Modifier.padding(16.dp),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · error, no location")
+@Composable
+private fun DialogFormErrorNoLocationPreview() {
+    var value by remember { mutableStateOf("") }
+    DialogForm(
+        title = "New folder",
+        fieldValue = value,
+        onFieldChange = { value = it },
+        primaryActionLabel = "Create",
+        fieldPlaceholder = "Folder name",
+        errorMessage = "Name is required",
         modifier = Modifier.padding(16.dp),
     )
 }

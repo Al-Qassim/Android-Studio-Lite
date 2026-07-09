@@ -134,13 +134,6 @@ object Typography {
         fontSize = 10.sp,
         lineHeight = 16.sp,
     )
-
-    val Status = TextStyle(
-        fontFamily = Family,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 14.sp,
-    )
 }
 
 private data class TypographyToken(
@@ -169,7 +162,6 @@ private fun TypographyPreview() {
         TypographyToken("ButtonCompact", Typography.ButtonCompact, "12 / Bold · 16 LH", "+ New"),
         TypographyToken("Code", Typography.Code, "11 / Regular · 16 LH", "val name = \"ASL\""),
         TypographyToken("CodeGutter", Typography.CodeGutter, "10 / Regular · 16 LH", "12"),
-        TypographyToken("Status", Typography.Status, "11 / Medium · 14 LH", "9:41"),
     )
 
     Column(

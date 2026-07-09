@@ -37,12 +37,14 @@ fun TextField(
     placeholder: String = "",
     variant: TextFieldVariant = TextFieldVariant.Form,
     isError: Boolean = false,
+    errorMessage: String? = null,
     singleLine: Boolean = true,
 ) {
     val height = if (variant == TextFieldVariant.Form) 40.dp else 36.dp
     val shape = RoundedCornerShape(8.dp)
+    val showError = isError || !errorMessage.isNullOrBlank()
     val borderColor = when {
-        isError -> Colors.Danger
+        showError -> Colors.Danger
         variant == TextFieldVariant.Form -> Colors.Border
         else -> null
     }
@@ -82,9 +84,9 @@ fun TextField(
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        if (isError) {
+        if (!errorMessage.isNullOrBlank()) {
             BasicText(
-                text = "Invalid value",
+                text = errorMessage,
                 style = Typography.Caption.copy(color = Colors.Danger),
                 modifier = Modifier.padding(top = 4.dp, start = 4.dp),
             )
@@ -118,6 +120,7 @@ private fun TextFieldPreview() {
             onValueChange = { error = it },
             variant = TextFieldVariant.Form,
             isError = true,
+            errorMessage = "Invalid value",
         )
     }
 }

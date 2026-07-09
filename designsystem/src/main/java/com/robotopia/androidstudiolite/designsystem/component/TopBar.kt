@@ -3,13 +3,11 @@ package com.robotopia.androidstudiolite.designsystem.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -37,16 +35,20 @@ fun TopBarTitleAction(
             .height(48.dp)
             .background(Colors.Bg)
             .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BasicText(
             text = title,
             style = Typography.TitleNav.copy(color = Colors.Text),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
         )
         BasicText(
             text = actionLabel,
             style = Typography.ButtonCompact.copy(color = Colors.Primary),
+            maxLines = 1,
             modifier = Modifier.clickable(onClick = onActionClick),
         )
     }
@@ -66,21 +68,24 @@ fun TopBarBackTitle(
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TopBarIconButton(onClick = onBackClick) {
-            IconBack(tint = Colors.Text, size = 20.dp)
-        }
+        IconButton(
+            onClick = onBackClick,
+            icon = { tint, size -> IconBack(tint = tint, size = size) },
+        )
         Spacer(modifier = Modifier.width(8.dp))
         BasicText(
             text = title,
             style = Typography.TitleNav.copy(color = Colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
         )
     }
 }
 
 /**
  * Path bar: back, truncated path (priority on current dir name), add.
+ * Deep paths collapse leading parents to …; long current names ellipsize at the end.
  */
 @Composable
 fun TopBarPathAdd(
@@ -97,16 +102,22 @@ fun TopBarPathAdd(
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TopBarIconButton(onClick = onBackClick) {
-            IconBack(tint = Colors.Text, size = 20.dp)
-        }
+        IconButton(
+            onClick = onBackClick,
+            icon = { tint, size -> IconBack(tint = tint, size = size) },
+        )
         Spacer(modifier = Modifier.width(8.dp))
-        Box(modifier = Modifier.weight(1f)) {
-            PathText(segments = pathSegments)
-        }
-        TopBarIconButton(onClick = onAddClick) {
-            IconAdd(tint = Colors.Primary, size = 20.dp)
-        }
+        PathTrail(
+            segments = pathSegments,
+            modifier = Modifier.weight(1f),
+            parentStyle = Typography.Body.copy(color = Colors.Muted),
+            currentStyle = Typography.BodyStrong.copy(color = Colors.Text),
+            separatorStyle = Typography.Body.copy(color = Colors.Muted2),
+        )
+        IconButton(
+            onClick = onAddClick,
+            icon = { _, size -> IconAdd(tint = Colors.Primary, size = size) },
+        )
     }
 }
 
@@ -126,9 +137,10 @@ fun TopBarEditorMore(
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TopBarIconButton(onClick = onBackClick) {
-            IconBack(tint = Colors.Text, size = 20.dp)
-        }
+        IconButton(
+            onClick = onBackClick,
+            icon = { tint, size -> IconBack(tint = tint, size = size) },
+        )
         Spacer(modifier = Modifier.width(8.dp))
         BasicText(
             text = if (isDirty) "$fileName •" else fileName,
@@ -137,75 +149,94 @@ fun TopBarEditorMore(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        TopBarIconButton(onClick = onMoreClick) {
-            IconMore(tint = Colors.Text, size = 20.dp)
-        }
-    }
-}
-
-@Composable
-private fun TopBarIconButton(
-    onClick: () -> Unit,
-    content: @Composable () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        content()
-    }
-}
-
-@Composable
-private fun PathText(segments: List<String>) {
-    if (segments.isEmpty()) return
-    val current = segments.last()
-    val prefix = if (segments.size > 1) {
-        segments.dropLast(1).joinToString("/") + "/"
-    } else {
-        ""
-    }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (prefix.isNotEmpty()) {
-            BasicText(
-                text = prefix,
-                style = Typography.Body.copy(color = Colors.Muted),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-        }
-        BasicText(
-            text = current,
-            style = Typography.BodyStrong.copy(color = Colors.Text),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+        IconButton(
+            onClick = onMoreClick,
+            icon = { tint, size -> IconMore(tint = tint, size = size) },
         )
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "TitleAction · normal")
 @Composable
 private fun TopBarTitleActionPreview() {
     TopBarTitleAction(title = "Projects", actionLabel = "+ New")
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 280, name = "TitleAction · long title")
+@Composable
+private fun TopBarTitleActionLongPreview() {
+    TopBarTitleAction(
+        title = "Very Long Project List Title That Should Ellipsize",
+        actionLabel = "+ New",
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "BackTitle · normal")
 @Composable
 private fun TopBarBackTitlePreview() {
     TopBarBackTitle(title = "MyApp")
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 280, name = "BackTitle · long title")
+@Composable
+private fun TopBarBackTitleLongPreview() {
+    TopBarBackTitle(title = "VeryLongAndroidStudioLiteProjectNameThatNeedsEllipsis")
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "PathAdd · normal")
 @Composable
 private fun TopBarPathAddPreview() {
     TopBarPathAdd(pathSegments = listOf("app", "src", "main", "java"))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14)
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 280, name = "PathAdd · deep (auto collapse)")
+@Composable
+private fun TopBarPathAddDeepPreview() {
+    TopBarPathAdd(
+        pathSegments = listOf(
+            "MyApp",
+            "app",
+            "src",
+            "main",
+            "java",
+            "com",
+            "robotopia",
+            "androidstudiolite",
+            "ui",
+        ),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 280, name = "PathAdd · long name (auto ellipsis)")
+@Composable
+private fun TopBarPathAddLongNamePreview() {
+    TopBarPathAdd(
+        pathSegments = listOf(
+            "app",
+            "src",
+            "main",
+            "VeryLongDirectoryNameThatNeedsEllipsis",
+        ),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 200, name = "PathAdd · narrow")
+@Composable
+private fun TopBarPathAddNarrowPreview() {
+    TopBarPathAdd(pathSegments = listOf("app", "src", "main", "java", "com", "robotopia"))
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 360, name = "EditorMore · normal")
 @Composable
 private fun TopBarEditorMorePreview() {
     TopBarEditorMore(fileName = "MainActivity.kt", isDirty = true)
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 280, name = "EditorMore · long name")
+@Composable
+private fun TopBarEditorMoreLongPreview() {
+    TopBarEditorMore(
+        fileName = "VeryLongActivityNameThatShouldEllipsizeAtTheEnd.kt",
+        isDirty = true,
+    )
 }
