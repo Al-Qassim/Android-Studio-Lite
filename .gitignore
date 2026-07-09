@@ -5,15 +5,6 @@
 .DS_Store
 /build
 **/build/
-# Keep :feature:build module sources (path collides with **/build/)
-!feature/build/
-!feature/build/api/
-!feature/build/api/**
-!feature/build/impl/
-!feature/build/impl/**
-# Still ignore Gradle outputs inside that module
-feature/build/api/build/
-feature/build/impl/build/
 /captures
 .externalNativeBuild
 .cxx

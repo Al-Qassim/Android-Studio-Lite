@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.build.api
+package com.robotopia.androidstudiolite.feature.buildapk.api
 
 import androidx.compose.runtime.Composable
 import com.robotopia.androidstudiolite.core.model.ProjectId

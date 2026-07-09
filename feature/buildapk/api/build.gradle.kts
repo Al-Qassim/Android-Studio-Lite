@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.robotopia.androidstudiolite.feature.build.impl"
+    namespace = "com.robotopia.androidstudiolite.feature.buildapk.api"
     compileSdk {
         version = release(37)
     }
@@ -25,12 +25,8 @@ android {
 }
 
 dependencies {
-    api(project(":feature:build:api"))
-    implementation(project(":designsystem"))
+    api(project(":core:model"))
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.koin.android)
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.compose.runtime)
+    api(libs.kotlinx.coroutines.core)
 }

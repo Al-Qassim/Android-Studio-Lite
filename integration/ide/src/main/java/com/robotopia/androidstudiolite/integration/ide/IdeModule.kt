@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.robotopia.androidstudiolite.core.database.databaseModule
-import com.robotopia.androidstudiolite.feature.build.impl.buildModule
+import com.robotopia.androidstudiolite.feature.buildapk.impl.buildModule
 import com.robotopia.androidstudiolite.feature.editor.impl.editorModule
 import com.robotopia.androidstudiolite.feature.files.impl.filesModule
 import com.robotopia.androidstudiolite.feature.projects.impl.projectsModule

@@ -68,7 +68,7 @@ AndroidStudioLite/
 │   ├── editor/
 │   │   ├── api                 # EditorSession / DocumentStore + EditorScreens
 │   │   └── impl                # editor screen + dirty/save
-│   └── build/
+│   └── buildapk/
 │       ├── api                 # BuildService + BuildScreens + models
 │       └── impl                # upload → remote build → download → install
 └── integration/
@@ -109,8 +109,8 @@ flowchart TB
   fImpl[":feature:files:impl"]
   eApi[":feature:editor:api"]
   eImpl[":feature:editor:impl"]
-  bApi[":feature:build:api"]
-  bImpl[":feature:build:impl"]
+  bApi[":feature:buildapk:api"]
+  bImpl[":feature:buildapk:impl"]
 
   app --> ide
   app --> pImpl
@@ -373,7 +373,7 @@ interface EditorScreens {
 
 
 
-### 6.4 Build — `:feature:build:api`
+### 6.4 Build APK — `:feature:buildapk:api`
 
 **Owns:** remote build lifecycle + APK delivery. Clear, swappable interface.
 
@@ -403,7 +403,7 @@ interface BuildService {
     suspend fun cancelBuild(jobId: String)
 }
 
-/** Side-effect at the Android boundary — usually implemented in :app or build:impl */
+/** Side-effect at the Android boundary — usually implemented in :app or buildapk:impl */
 interface ApkInstaller {
     fun requestInstall(apkLocalPath: String)
 }
@@ -625,7 +625,7 @@ flowchart TB
   P --> fs
   F[files:impl] --> fs
   E[editor:impl] --> fs
-  B[build:impl] --> fs
+  B[buildapk:impl] --> fs
   B --> apkCache
   B --> ci
 ```
@@ -654,8 +654,8 @@ include(":feature:files:api")
 include(":feature:files:impl")
 include(":feature:editor:api")
 include(":feature:editor:impl")
-include(":feature:build:api")
-include(":feature:build:impl")
+include(":feature:buildapk:api")
+include(":feature:buildapk:impl")
 
 include(":integration:ide")
 ```
@@ -707,7 +707,7 @@ High-level locks that affect module shape:
 | `:feature:projects` | Project lifecycle      | `ProjectService` + `ProjectsScreens` + models       |
 | `:feature:files`    | Tree navigation & CRUD | `FileExplorerService` + `FilesScreens` + models     |
 | `:feature:editor`   | Edit / dirty / save    | `EditorSession` + `EditorScreens` + models          |
-| `:feature:build`    | Remote APK pipeline    | `BuildService` + `BuildScreens` + models            |
+| `:feature:buildapk`    | Remote APK pipeline    | `BuildService` + `BuildScreens` + models            |
 | `:integration:ide`  | Product wiring & nav   | IDE nav graph + screen-launcher wiring              |
 | `:app`              | Host                   | Bindings + permissions                              |
 

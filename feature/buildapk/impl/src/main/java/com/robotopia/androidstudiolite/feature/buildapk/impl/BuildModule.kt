@@ -1,11 +1,11 @@
-package com.robotopia.androidstudiolite.feature.build.impl
+package com.robotopia.androidstudiolite.feature.buildapk.impl
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.robotopia.androidstudiolite.feature.build.api.BuildProgress
-import com.robotopia.androidstudiolite.feature.build.api.BuildRequest
-import com.robotopia.androidstudiolite.feature.build.api.BuildScreens
-import com.robotopia.androidstudiolite.feature.build.api.BuildService
+import com.robotopia.androidstudiolite.feature.buildapk.api.BuildProgress
+import com.robotopia.androidstudiolite.feature.buildapk.api.BuildRequest
+import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
+import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import org.koin.dsl.module
