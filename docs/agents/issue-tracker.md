@@ -27,11 +27,73 @@ GitHub shares one number space across issues and PRs, so a bare `#42` may be eit
 
 ## When a skill says "publish to the issue tracker"
 
-Create a GitHub issue.
+Create a GitHub issue. Also add it to this repo's GitHub Project board (see *Project board sync* below) with Status **Todo** unless the user specifies otherwise.
 
 ## When a skill says "fetch the relevant ticket"
 
 Run `gh issue view <number> --comments`.
+
+## Project board sync
+
+Every branch/PR push that advances work **must** update the linked GitHub Issue(s) and their card(s) on the repo's GitHub Project board. Do not leave board Status stale while code moved.
+
+### Auth
+
+Project commands need `read:project` and `project` scopes. If `gh project …` fails with missing scopes, tell the human to run:
+
+```bash
+gh auth refresh -h github.com -s read:project,project
+```
+
+### Required linkage
+
+- Every implementation PR must reference its issue (`Fixes #N` / `Closes #N` / `Refs #N` in the PR body).
+- If work starts without an issue, create one first, add it to the Project, then open the PR.
+
+### Status mapping (Project field: Status)
+
+| Event | Set Status to |
+| --- | --- |
+| Issue created / ticket filed, not started | `Todo` |
+| Agent starts work / first push of the feature branch | `In Progress` |
+| PR opened or updated with new commits | `In Progress` (comment on the issue with the PR URL) |
+| PR merged / issue closed | `Done` |
+| Blocked on human decision | leave Status; comment on the issue explaining the blocker |
+
+If the board uses different option names, map to the closest match after listing field options with `gh project field-list`.
+
+### How to update (GitHub Projects v2 via `gh`)
+
+Resolve the project (owner `Al-Qassim`, linked to `Android-Studio-Lite`):
+
+```bash
+gh project list --owner Al-Qassim
+```
+
+Add an issue to the project (if missing):
+
+```bash
+gh project item-add <PROJECT_NUMBER> --owner Al-Qassim --url https://github.com/Al-Qassim/Android-Studio-Lite/issues/<N>
+```
+
+Set Status (get field/option IDs from `gh project field-list <PROJECT_NUMBER> --owner Al-Qassim --format json`):
+
+```bash
+gh project item-edit --project-id <PROJECT_NODE_ID> --id <ITEM_NODE_ID> --field-id <STATUS_FIELD_ID> --single-select-option-id <OPTION_ID>
+```
+
+Also leave a short issue comment when Status changes because of a push/PR:
+
+```bash
+gh issue comment <N> --body "Moved to In Progress — PR: <url>"
+```
+
+### Checklist after every push that affects a PR/branch
+
+1. Confirm the PR body links the issue.
+2. Ensure the issue is on the Project board.
+3. Set Status per the table above.
+4. Comment on the issue with branch/PR URL and what changed.
 
 ## Wayfinding operations
 
