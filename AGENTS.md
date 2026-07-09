@@ -25,12 +25,21 @@ git fetch origin
 git worktree add "../AndroidStudioLite-wt-<short-name>" -b feature/<short-name> origin/main
 ```
 
-2. Do all edits, commits, and pushes only inside that worktree.
-3. Open a PR from that branch; do not push to `main`.
-4. When finished, leave cleanup to the human (or remove the worktree only if asked):
+2. Do all edits and commits only inside that worktree. Do not push to `main`.
+3. Push the branch to the remote, then **immediately remove the local worktree** so the human can check out that branch in the main folder:
 
 ```bash
+git push -u origin HEAD
 git worktree remove "../AndroidStudioLite-wt-<short-name>"
 ```
 
-Existing example: `../AndroidStudioLite-architecture` on `docs/architecture-v0.1`.
+4. Open or update the PR from the remote branch (via `gh`) after the push. The remote branch stays; only the local worktree is removed.
+5. If more edits are needed (review feedback, follow-ups), recreate the worktree on the **same** branch, edit, push, then remove it again:
+
+```bash
+git fetch origin
+git worktree add "../AndroidStudioLite-wt-<short-name>" feature/<short-name>
+# ... edit, commit ...
+git push
+git worktree remove "../AndroidStudioLite-wt-<short-name>"
+```
