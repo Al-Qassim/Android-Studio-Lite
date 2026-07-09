@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-GitHub Issues in this repo via `gh`; external PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
+GitHub Issues in this repo via `gh`; external PRs are not a triage surface. Keep linked Project board Status in sync when pushing branch/PR work. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
@@ -50,4 +50,5 @@ git worktree remove "../AndroidStudioLite-wt-<short-name>"
 ```
 
 5. Open or update the PR from the remote branch (via `gh`) after the push. The remote branch stays; only the local worktree is removed.
-6. If more edits are needed (review feedback, follow-ups), repeat: if the main checkout is on that branch, switch it to `main` first; recreate the worktree; edit; push; remove the worktree again.
+6. **Update the linked GitHub Issue + Project board** for that work (Status, comment with PR/branch link). See `docs/agents/issue-tracker.md` → *Project board sync*.
+7. If more edits are needed (review feedback, follow-ups), repeat: if the main checkout is on that branch, switch it to `main` first; recreate the worktree; edit; push; remove the worktree; update the ticket/board again.
