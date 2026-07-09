@@ -55,25 +55,31 @@ git worktree remove "../AndroidStudioLite-wt-<short-name>"
 
 ## Keep open branches current with `main`
 
-Whenever `main` advances (local commit pushed, or PR merged into `main`), **merge `origin/main` into every other open branch** that still has an open PR (or is actively in progress). Do not leave open branches behind `main`.
+Whenever `main` advances (local commit pushed, or PR merged into `main`), **merge `origin/main` into every other open remote branch** that still has an open PR (or is actively in progress), then **push those merges to `origin`**. Local-only merges are not enough — the remote PR branches must be updated too.
 
 After `main` is updated and pushed:
 
 ```bash
 git fetch origin
-# Open PR head branches (preferred source of truth):
+# Open PR head branches on the remote (source of truth):
 gh pr list --state open --json headRefName --jq '.[].headRefName' | while read -r branch; do
   [ "$branch" = "main" ] && continue
-  git worktree add "../AndroidStudioLite-wt-sync-${branch//\//-}" "$branch"
+  # Skip if remote branch already contains origin/main
+  if git merge-base --is-ancestor origin/main "origin/$branch" 2>/dev/null; then
+    continue
+  fi
+  git worktree add "../AndroidStudioLite-wt-sync-${branch//\//-}" "origin/$branch"
+  git -C "../AndroidStudioLite-wt-sync-${branch//\//-}" checkout -B "$branch"
   git -C "../AndroidStudioLite-wt-sync-${branch//\//-}" merge origin/main -m "Merge branch 'main' into $branch"
-  git -C "../AndroidStudioLite-wt-sync-${branch//\//-}" push
+  git -C "../AndroidStudioLite-wt-sync-${branch//\//-}" push -u origin "HEAD:$branch"
   git worktree remove "../AndroidStudioLite-wt-sync-${branch//\//-}"
 done
 ```
 
 Rules:
 
+- Target **remote** branches (`origin/<branch>` / open PR heads). Always `git push` after a successful merge — the sync is incomplete until the remote is updated.
 - Prefer **merge** (not rebase) so shared PR history stays intact.
 - If a merge conflicts, stop on that branch, comment on the PR/issue with the conflict files, and leave Status/board note — do not force-push.
 - Follow the worktree rules above (including switching the human off a target branch only when needed, and removing the sync worktree after push).
-- Skip branches that are already up to date with `origin/main`.
+- Skip branches whose remote tip already contains `origin/main`.
