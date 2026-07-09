@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-GitHub Issues in this repo via `gh`; external PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
+GitHub Issues in this repo via `gh`; external PRs are not a triage surface. Keep linked Project board Status in sync when pushing branch/PR work. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
@@ -50,4 +50,30 @@ git worktree remove "../AndroidStudioLite-wt-<short-name>"
 ```
 
 5. Open or update the PR from the remote branch (via `gh`) after the push. The remote branch stays; only the local worktree is removed.
-6. If more edits are needed (review feedback, follow-ups), repeat: if the main checkout is on that branch, switch it to `main` first; recreate the worktree; edit; push; remove the worktree again.
+6. **Update the linked GitHub Issue + Project board** for that work (Status, comment with PR/branch link). See `docs/agents/issue-tracker.md` → *Project board sync*.
+7. If more edits are needed (review feedback, follow-ups), repeat: if the main checkout is on that branch, switch it to `main` first; recreate the worktree; edit; push; remove the worktree; update the ticket/board again.
+
+## Keep open branches current with `main`
+
+Whenever `main` advances (local commit pushed, or PR merged into `main`), **merge `origin/main` into every other open branch** that still has an open PR (or is actively in progress). Do not leave open branches behind `main`.
+
+After `main` is updated and pushed:
+
+```bash
+git fetch origin
+# Open PR head branches (preferred source of truth):
+gh pr list --state open --json headRefName --jq '.[].headRefName' | while read -r branch; do
+  [ "$branch" = "main" ] && continue
+  git worktree add "../AndroidStudioLite-wt-sync-${branch//\//-}" "$branch"
+  git -C "../AndroidStudioLite-wt-sync-${branch//\//-}" merge origin/main -m "Merge branch 'main' into $branch"
+  git -C "../AndroidStudioLite-wt-sync-${branch//\//-}" push
+  git worktree remove "../AndroidStudioLite-wt-sync-${branch//\//-}"
+done
+```
+
+Rules:
+
+- Prefer **merge** (not rebase) so shared PR history stays intact.
+- If a merge conflicts, stop on that branch, comment on the PR/issue with the conflict files, and leave Status/board note — do not force-push.
+- Follow the worktree rules above (including switching the human off a target branch only when needed, and removing the sync worktree after push).
+- Skip branches that are already up to date with `origin/main`.
