@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Android Studio Lite"
 include(":app")
+include(":designsystem")
