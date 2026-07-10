@@ -19,11 +19,21 @@ interface FileExplorerService {
 }
 
 interface FilesScreens {
+    /** Feature-owned entry; integration calls this rather than individual screens. */
+    @Composable
+    fun NavHost(
+        root: ProjectRoot,
+        projectName: String,
+        initialRelativePath: String,
+        onOpenFile: (relativePath: String) -> Unit,
+        onNavigateBack: () -> Unit,
+    )
+
     @Composable
     fun FileBrowser(
         root: ProjectRoot,
         projectName: String,
-        initialRelativePath: String = "",
+        initialRelativePath: String,
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
     )

@@ -28,10 +28,8 @@ dependencies {
     api(project(":feature:files:api"))
     api(project(":feature:editor:api"))
     api(project(":feature:buildapk:api"))
-    implementation(project(":designsystem"))
+    implementation(libs.koin.androidx.compose)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.core.ktx)
 }

@@ -6,6 +6,21 @@ import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 
 class StubBuildScreens : BuildScreens {
     @Composable
+    override fun NavHost(
+        jobId: String,
+        onReadyToInstall: (apkLocalPath: String) -> Unit,
+        onDismiss: () -> Unit,
+        onRetry: (() -> Unit)?,
+    ) {
+        BuildProgress(
+            jobId = jobId,
+            onReadyToInstall = onReadyToInstall,
+            onDismiss = onDismiss,
+            onRetry = onRetry,
+        )
+    }
+
+    @Composable
     override fun BuildProgress(
         jobId: String,
         onReadyToInstall: (apkLocalPath: String) -> Unit,

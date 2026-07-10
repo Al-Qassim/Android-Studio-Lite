@@ -29,9 +29,10 @@ Known Figma pages (from prior work):
 
 - **Main Screens** — Projects, Create Project, File Browser, Editor, Run/Build
 - **file management flows** — create / rename / move / delete / copy / conflicts / sandbox rules
+- **Loading & error states** — loading / failure UI for Projects, Create, Files, Editor, Build ([open](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite?node-id=90-2))
 - **Architecture** — module dependency flowchart + create→edit→run product flow ([open](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite?node-id=59-2))
 
-Existing foundation: `:designsystem` (colors, typography, shared Compose primitives).
+Existing foundation: `:designsystem` (colors, typography, shared Compose primitives); `:core:error` (`AppException` for planned UI messages).
 
 ---
 
@@ -56,6 +57,8 @@ Existing foundation: `:designsystem` (colors, typography, shared Compose primiti
 AndroidStudioLite/
 ├── app                         # shell: start Koin, permissions, install
 ├── designsystem                # tokens + UI primitives
+├── core/
+│   └── error                   # AppException + UI message helper (not domain models)
 ├── feature/
 │   ├── projects/
 │   │   ├── model               # Project, ProjectId, CreateProjectRequest
@@ -94,7 +97,7 @@ Outside a feature, consumers depend on **`:api` (+ `:model` as needed)**. `:inte
 :feature:projects:di            →  projectsDiModule
 :integration:database           →  AslDatabase (entities from feature data modules)
 :integration:di                 →  integrationDiModule (includes feature + database modules)
-:integration:navigation         →  IdeNavHost (composes screen launchers)
+:integration:navigation         →  IdeNavHost (switches between feature NavHosts)
 :app                            →  startKoin(integrationDiModule) + host IdeNavHost
 ```
 
@@ -228,6 +231,7 @@ data class Project(
 data class CreateProjectRequest(
     val name: String,
     val packageName: String,
+    val minSdk: Int = 26,
 )
 
 interface ProjectService {
@@ -239,15 +243,17 @@ interface ProjectService {
 }
 
 /**
- * Screen launcher — public UI entry points for this feature.
- * Implemented in :data / :presentation; consumed by :integration:navigation / :app.
- * Never expose ViewModels or internal Composables through this API.
+ * Feature UI surface. Integration calls [NavHost] only; list ↔ create is owned here.
+ * Individual screens stay available for previews / tests.
  */
 interface ProjectsScreens {
     @Composable
+    fun NavHost(onOpenProject: (projectId: ProjectId) -> Unit)
+
+    @Composable
     fun ProjectsList(
         onOpenProject: (projectId: ProjectId) -> Unit,
-        onCreateProject: () -> Unit = {},
+        onCreateProject: () -> Unit,
     )
 
     @Composable
@@ -258,7 +264,7 @@ interface ProjectsScreens {
 }
 ```
 
-**UI owned by** `:presentation`**:** Projects list, Create Project dialog/screen (Figma Main Screens) — reached only via `ProjectsScreens`.
+**UI owned by** `:presentation`**:** Projects list, Create Project dialog/screen (Figma Main Screens) — reached only via `ProjectsScreens.NavHost` (feature sub-navigation).
 
 **Does not own:** browsing files inside a project (that’s Files).
 
@@ -305,17 +311,26 @@ interface FileExplorerService {
  */
 interface FilesScreens {
     @Composable
+    fun NavHost(
+        root: ProjectRoot,
+        projectName: String,
+        initialRelativePath: String,
+        onOpenFile: (relativePath: String) -> Unit,
+        onNavigateBack: () -> Unit,
+    )
+
+    @Composable
     fun FileBrowser(
         root: ProjectRoot,
         projectName: String,
-        initialRelativePath: String = "",
+        initialRelativePath: String,
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
     )
 }
 ```
 
-**UI owned by** `:presentation`**:** path bar, folder/file rows, create/rename/move/delete dialogs, empty states, context menus — using `:designsystem` components (`PathBar`, `FileRow`, `DialogForm`, …). Reached only via `FilesScreens`.
+**UI owned by** `:presentation`**:** path bar, folder/file rows, create/rename/move/delete dialogs, empty states, context menus — using `:designsystem` components (`PathBar`, `FileRow`, `DialogForm`, …). Reached only via `FilesScreens.NavHost` (feature sub-navigation).
 
 **Shared UI state model (from Figma notes):**
 
@@ -361,17 +376,24 @@ interface DocumentStore {
  */
 interface EditorScreens {
     @Composable
+    fun NavHost(
+        documentId: DocumentId,
+        onNavigateBack: () -> Unit,
+        onRun: (() -> Unit)?,
+    )
+
+    @Composable
     fun Editor(
         documentId: DocumentId,
         onNavigateBack: () -> Unit,
-        onRun: (() -> Unit)? = null,
+        onRun: (() -> Unit)?,
     )
 }
 ```
 
 `DocumentStore` may be implemented by adapting `FileExplorerService.readText/writeText` inside `editor:data` or via a binding in `:integration:di`. Prefer **adapter in integration** so `editor` does not hard-depend on `files:api` if we want maximum isolation — or allow a soft `editor:data → files:api` dependency for pragmatism in v0.1.
 
-**Recommendation for v0.1:** `editor:data` may depend on `files:api` for load/save. Integration still owns navigation and calls `EditorScreens` / `FilesScreens` / `BuildScreens` — never feature presentation types.
+**Recommendation for v0.1:** `editor:data` may depend on `files:api` for load/save. Integration still owns cross-feature navigation and calls feature `NavHost`s — never feature presentation types.
 
 ---
 
@@ -418,16 +440,24 @@ interface ApkInstaller {
  */
 interface BuildScreens {
     @Composable
+    fun NavHost(
+        jobId: String,
+        onReadyToInstall: (apkLocalPath: String) -> Unit,
+        onDismiss: () -> Unit,
+        onRetry: (() -> Unit)?,
+    )
+
+    @Composable
     fun BuildProgress(
         jobId: String,
         onReadyToInstall: (apkLocalPath: String) -> Unit,
         onDismiss: () -> Unit,
-        onRetry: (() -> Unit)? = null,
+        onRetry: (() -> Unit)?,
     )
 }
 ```
 
-**UI owned by** `:presentation`**:** Run button states, progress sheet/screen, failure toast (Figma Run/Build) — reached only via `BuildScreens`.
+**UI owned by** `:presentation`**:** Run button states, progress sheet/screen, failure toast (Figma Run/Build) — reached only via `BuildScreens.NavHost` (feature sub-navigation).
 
 **Data details (hidden in `:data`):** zip/upload project, trigger GHA/cloud, poll status, download artifact, write to cache dir. Swap provider without touching Projects/Files.
 
@@ -440,14 +470,15 @@ Every capability `:api` exposes **two** public surfaces:
 | Surface | Examples | Purpose |
 |---|---|---|
 | Domain services | `ProjectService`, `FileExplorerService`, `BuildService` | Data / use-cases |
-| Screen launchers | `ProjectsScreens`, `FilesScreens`, `EditorScreens`, `BuildScreens` | Open that feature’s UI |
+| Screen launchers | `ProjectsScreens`, `FilesScreens`, … | Feature UI; each exposes `NavHost` for internal routes |
 
 **Rules:**
 
 1. Launchers live in `:api` and are implemented in `:presentation` (bound via `:di`).
-2. Launchers accept **callbacks** for exits that leave the feature (open project → files, open file → editor, run → build). `:integration:navigation` wires those callbacks.
-3. Launchers must not return or expose ViewModels, repositories, or other `:data` / `:presentation` types.
-4. `:integration:navigation` / `:app` depend on launcher interfaces from `:api` only — never on feature screen classes in `:presentation`.
+2. **Feature sub-navigation** (e.g. projects list ↔ create) lives inside the feature’s `NavHost`. Integration does not own those routes.
+3. Launchers accept **callbacks** for exits that leave the feature (open project → files, open file → editor, run → build). `:integration:navigation` wires those callbacks between feature `NavHost`s.
+4. Launchers must not return or expose ViewModels, repositories, or other `:data` / `:presentation` types.
+5. `:integration:navigation` / `:app` depend on launcher interfaces from `:api` only — never on feature screen classes in `:presentation`.
 
 ---
 
@@ -464,13 +495,10 @@ These are **not domain specialists** — they **connect** specialists into produ
 
 ### `:integration:navigation`
 
-- Navigation graph for the IDE experience (`IdeNavHost`)
-- Calling feature **screen launchers** (`ProjectsScreens`, `FilesScreens`, …) — never presentation screen types
-- Mapping: open project → hand `ProjectRoot` to `FilesScreens.FileBrowser`
-- Mapping: open file → hand path to `EditorScreens.Editor`
-- Mapping: Run → `BuildService.startBuild` + `BuildScreens.BuildProgress`
-- Coordinating “file deleted while open in editor” (Figma case 17)
-- Providing entry points / routes consumed by `:app`
+- Cross-feature IDE graph (`IdeNavHost`) — switches between feature `NavHost`s
+- Does **not** implement feature-internal routes (list ↔ create, etc.)
+- Wires exit callbacks between features (open project → files, open file → editor, run → build)
+- Providing the root entry consumed by `:app`
 
 
 
@@ -488,31 +516,31 @@ sequenceDiagram
   participant PS as ProjectsScreens
   participant P as ProjectService
   participant FS as FilesScreens
-  participant F as FileExplorerService
   participant ES as EditorScreens
   participant E as EditorSession
   participant BS as BuildScreens
   participant B as BuildService
   participant I as ApkInstaller
 
-  User->>Nav: Open Projects
-  Nav->>PS: ProjectsList(...)
-  User->>Nav: Create project
-  Nav->>PS: CreateProject(...)
-  Nav->>P: createProject(...)
-  User->>Nav: Open project
-  Nav->>P: markOpened(id)
-  Nav->>FS: FileBrowser(root, ...)
-  User->>Nav: Open file
-  Nav->>ES: Editor(documentId, ...)
-  User->>Nav: Save
-  Nav->>E: (dirty content via session)
-  Nav->>F: writeText(...)
-  User->>Nav: Run
-  Nav->>B: startBuild(request)
-  Nav->>BS: BuildProgress(jobId, ...)
-  B-->>Nav: ReadyToInstall + apk path
-  Nav->>I: requestInstall(apk)
+  User->>Nav: Launch IDE
+  Nav->>PS: NavHost(onOpenProject)
+  User->>PS: Create project (feature-internal)
+  PS->>P: createProject(...)
+  User->>PS: Open project
+  PS->>P: markOpened(id)
+  PS-->>Nav: onOpenProject(id)
+  Nav->>FS: NavHost(root, onOpenFile, ...)
+  User->>FS: Open file
+  FS-->>Nav: onOpenFile(path)
+  Nav->>ES: NavHost(documentId, onRun, ...)
+  User->>ES: Save
+  ES->>E: save()
+  User->>ES: Run
+  ES-->>Nav: onRun()
+  Nav->>B: startBuild(root)
+  Nav->>BS: NavHost(jobId, onReadyToInstall, ...)
+  BS-->>Nav: onReadyToInstall(apkPath)
+  Nav->>I: install(apkPath)
 ```
 
 
@@ -656,6 +684,7 @@ flowchart TB
 // settings.gradle.kts
 include(":app")
 include(":designsystem")
+include(":core:error")
 
 include(":feature:projects:model")
 include(":feature:projects:api")
@@ -698,7 +727,8 @@ High-level locks that affect module shape:
 
 - **Koin** — per-feature `:di` modules; `:integration:di` includes them; `:app` starts Koin
 - **App-private** project storage; **Room** assembled in **`:integration:database`**; feature tables/DAOs live in **`:feature:*:data`**
-- **Models per feature** (`:feature:*:model`) — no shared core model module
+- **Models per feature** (`:feature:*:model`) — no shared core *domain* model module
+- **`:core:error`** — shared `AppException(uiMessage)` for planned user-facing failures; unexpected errors are logged and must not show `Throwable.message`
 - **`editor:data` may use `files:api`** for load/save
 - **Fake `BuildService`** for v0.1 (real GitHub Actions later, same API)
 - **IDE nav graph** in `:integration:navigation` (no `IdeCoordinator` in v0.1)
@@ -713,6 +743,7 @@ High-level locks that affect module shape:
 | Module              | Role                   | Public surface                                      |
 | ------------------- | ---------------------- | --------------------------------------------------- |
 | `:designsystem`     | Visual language        | Compose components + tokens                         |
+| `:core:error`       | Planned failures       | `AppException` + `userMessageOrNull`                |
 | `:feature:projects` | Project lifecycle | `model` + `api` + `data` + `presentation` + `di` |
 | `:feature:files` | Tree navigation & CRUD | same five-way split |
 | `:feature:editor` | Edit / dirty / save | same five-way split |

@@ -13,4 +13,15 @@ data class Project(
 data class CreateProjectRequest(
     val name: String,
     val packageName: String,
+    val minSdk: Int = 26,
 )
+
+/** Per-field errors for the create-project form. Null means the field is valid. */
+data class CreateProjectFieldErrors(
+    val name: String? = null,
+    val packageName: String? = null,
+    val minSdk: String? = null,
+) {
+    val hasErrors: Boolean
+        get() = name != null || packageName != null || minSdk != null
+}

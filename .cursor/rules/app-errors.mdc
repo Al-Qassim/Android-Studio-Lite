@@ -1,0 +1,20 @@
+---
+description: App errors — AppException.uiMessage for users; log unexpected errors
+globs: "**/*.kt"
+alwaysApply: false
+---
+
+# App errors (`:core:error`)
+
+- Planned failures throw `AppException(uiMessage = "…")`.
+- UI shows **only** `AppException.uiMessage` (via `userMessageOrNull(tag)`).
+- Unexpected `Throwable`s: **log** for debugging; never show `Throwable.message`. After a user action, use a fixed generic string (e.g. `"Something went wrong"`) if feedback is required.
+- Data ops that must not silently no-op: **succeed or throw** (and roll back side effects when needed).
+
+```kotlin
+// ❌ BAD
+actionError = it.message ?: "Could not delete"
+
+// ✅ GOOD
+actionError = it.userMessageOrNull(TAG) ?: "Something went wrong"
+```

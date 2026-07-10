@@ -22,8 +22,10 @@ android {
 dependencies {
     api(project(":feature:projects:api"))
     api(project(":feature:projects:model"))
+    api(project(":core:error"))
     api(libs.androidx.room.runtime)
     api(libs.androidx.room.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.core)
+    testImplementation(libs.junit)
 }

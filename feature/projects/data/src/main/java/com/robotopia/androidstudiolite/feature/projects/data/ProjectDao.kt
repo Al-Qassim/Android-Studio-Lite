@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProjectDao {
-    @Query("SELECT * FROM projects ORDER BY name ASC")
+    @Query("SELECT * FROM projects ORDER BY lastOpenedAt DESC, name ASC")
     fun observeAll(): Flow<List<ProjectEntity>>
 
     @Query("SELECT * FROM projects WHERE id = :id LIMIT 1")

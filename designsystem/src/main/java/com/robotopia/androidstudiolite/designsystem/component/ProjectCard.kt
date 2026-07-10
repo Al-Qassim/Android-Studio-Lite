@@ -2,9 +2,10 @@ package com.robotopia.androidstudiolite.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,12 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.icon.IconMore
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 @Composable
@@ -26,6 +29,8 @@ fun ProjectCard(
     packageName: String,
     meta: String,
     onClick: () -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
+    onMenuClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(12.dp)
@@ -35,15 +40,33 @@ fun ProjectCard(
             .clip(shape)
             .background(Colors.Surface)
             .border(1.dp, Colors.Border, shape)
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            )
             .padding(16.dp),
     ) {
-        BasicText(
-            text = name,
-            style = Typography.Subtitle.copy(color = Colors.Text),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BasicText(
+                text = name,
+                style = Typography.Subtitle.copy(color = Colors.Text),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            if (onMenuClick != null) {
+                IconButton(
+                    onClick = onMenuClick,
+                    variant = IconButtonVariant.Ghost,
+                    size = 32.dp,
+                    iconSize = 18.dp,
+                    icon = { tint, size -> IconMore(tint = tint, size = size) },
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(4.dp))
         BasicText(
             text = packageName,
@@ -71,7 +94,8 @@ private fun ProjectCardPreview() {
         ProjectCard(
             name = "Android Studio Lite",
             packageName = "com.robotopia.androidstudiolite",
-            meta = "Last opened · Today",
+            meta = "Opened just now",
+            onMenuClick = {},
         )
     }
 }
