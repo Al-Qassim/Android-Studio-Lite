@@ -11,21 +11,29 @@ class DefaultEditorSession : EditorSession {
     private val _document = MutableStateFlow<OpenDocument?>(null)
     override val document: StateFlow<OpenDocument?> = _document.asStateFlow()
 
+    private var lastSavedContent: String = ""
+
     override fun open(id: DocumentId, initialContent: String) {
+        lastSavedContent = initialContent
         _document.value = OpenDocument(id, initialContent, isDirty = false)
     }
 
     override fun updateContent(content: String) {
         val current = _document.value ?: return
-        _document.value = current.copy(content = content, isDirty = true)
+        _document.value = current.copy(
+            content = content,
+            isDirty = content != lastSavedContent,
+        )
     }
 
     override fun markSaved(content: String) {
         val current = _document.value ?: return
+        lastSavedContent = content
         _document.value = current.copy(content = content, isDirty = false)
     }
 
     override fun close() {
+        lastSavedContent = ""
         _document.value = null
     }
 }

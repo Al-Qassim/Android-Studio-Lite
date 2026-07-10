@@ -7,6 +7,8 @@ import kotlinx.coroutines.launch
 
 internal fun EditorScreenContext.requestLeave(state: EditorUiState) {
     when {
+        state.actionError != null ->
+            updateState { copy(actionError = null) }
         state.dialog != null ->
             updateState { copy(dialog = null) }
         state.menuOpen ->

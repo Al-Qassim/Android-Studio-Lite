@@ -10,8 +10,9 @@ private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
 
 internal fun EditorScreenContext.onContentChange(content: String) {
     editorSession.updateContent(content)
+    val dirty = editorSession.document.value?.isDirty == true
     updateState {
-        copy(content = content, isDirty = true, toastMessage = null, actionError = null)
+        copy(content = content, isDirty = dirty, toastMessage = null, actionError = null)
     }
 }
 

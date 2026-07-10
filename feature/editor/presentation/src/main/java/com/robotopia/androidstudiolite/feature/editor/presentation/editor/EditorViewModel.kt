@@ -17,7 +17,7 @@ data class EditorUiState(
     val isDirty: Boolean = false,
     val isLoading: Boolean = true,
     val loadError: String? = null,
-    val autoSave: Boolean = true,
+    val autoSave: Boolean = false,
     val menuOpen: Boolean = false,
     val dialog: EditorDialog? = null,
     val actionError: String? = null,

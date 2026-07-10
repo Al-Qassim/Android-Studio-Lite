@@ -26,8 +26,8 @@ internal fun EditorScreenContext.EditorOverflowMenu(state: EditorUiState) {
             autoSave = state.autoSave,
             onAutoSaveToggle = { toggleAutoSave(state) },
             onSave = { saveDocument(state) },
-            onEditorSettings = { closeMenu() },
-            onRename = { closeMenu() },
+            showEditorSettings = false,
+            showRename = false,
             modifier = Modifier.padding(top = 48.dp, end = 12.dp),
         )
     }

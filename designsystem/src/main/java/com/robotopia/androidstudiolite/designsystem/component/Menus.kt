@@ -86,11 +86,13 @@ fun CreateMenu(
 
 @Composable
 fun EditorMenu(
-    autoSave: Boolean = true,
+    autoSave: Boolean = false,
     onAutoSaveToggle: () -> Unit = {},
     onSave: () -> Unit = {},
     onEditorSettings: () -> Unit = {},
     onRename: () -> Unit = {},
+    showEditorSettings: Boolean = true,
+    showRename: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(10.dp)
@@ -116,12 +118,16 @@ fun EditorMenu(
             enabled = !autoSave,
             muted = autoSave,
         )
-        MenuItem(
-            label = "Editor settings",
-            onClick = onEditorSettings,
-            muted = true,
-        )
-        MenuItem(label = "Rename", onClick = onRename)
+        if (showEditorSettings) {
+            MenuItem(
+                label = "Editor settings",
+                onClick = onEditorSettings,
+                muted = true,
+            )
+        }
+        if (showRename) {
+            MenuItem(label = "Rename", onClick = onRename)
+        }
     }
 }
 

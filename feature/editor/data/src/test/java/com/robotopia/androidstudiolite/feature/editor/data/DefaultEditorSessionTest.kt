@@ -44,6 +44,32 @@ class DefaultEditorSessionTest {
     }
 
     @Test
+    fun updateContent_revertingToLastSaved_clearsDirty() {
+        session.open(documentId, "hello")
+        session.updateContent("edited")
+        assertTrue(session.document.value!!.isDirty)
+
+        session.updateContent("hello")
+
+        val doc = session.document.value!!
+        assertEquals("hello", doc.content)
+        assertFalse(doc.isDirty)
+    }
+
+    @Test
+    fun updateContent_revertingToContentAfterSave_clearsDirty() {
+        session.open(documentId, "hello")
+        session.updateContent("edited")
+        session.markSaved("edited")
+        session.updateContent("edited again")
+        assertTrue(session.document.value!!.isDirty)
+
+        session.updateContent("edited")
+
+        assertFalse(session.document.value!!.isDirty)
+    }
+
+    @Test
     fun close_clearsDocument() {
         session.open(documentId, "hello")
         session.close()

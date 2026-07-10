@@ -43,7 +43,9 @@ class DefaultEditorScreens(
         onNavigateBack: () -> Unit,
         onRun: (() -> Unit)?,
     ) {
-        val viewModel: EditorViewModel = koinViewModel {
+        val viewModel: EditorViewModel = koinViewModel(
+            key = "${documentId.projectId.value}/${documentId.relativePath}",
+        ) {
             parametersOf(documentId, root)
         }
         val state by viewModel.uiState.collectAsStateWithLifecycle()
