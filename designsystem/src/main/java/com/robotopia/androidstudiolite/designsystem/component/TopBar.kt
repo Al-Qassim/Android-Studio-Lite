@@ -83,6 +83,41 @@ fun TopBarBackTitle(
     }
 }
 
+/** Back + title + add — file browser chrome (path lives in [PathBar] below). */
+@Composable
+fun TopBarBackTitleAdd(
+    title: String,
+    onBackClick: () -> Unit = {},
+    onAddClick: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .background(Colors.Bg)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(
+            onClick = onBackClick,
+            icon = { tint, size -> IconBack(tint = tint, size = size) },
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        BasicText(
+            text = title,
+            style = Typography.TitleNav.copy(color = Colors.Text),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        IconButton(
+            onClick = onAddClick,
+            icon = { _, size -> IconAdd(tint = Colors.Primary, size = size) },
+        )
+    }
+}
+
 /**
  * Path bar: back, truncated path (priority on current dir name), add.
  * Deep paths collapse leading parents to …; long current names ellipsize at the end.
@@ -181,6 +216,12 @@ private fun TopBarBackTitlePreview() {
 @Composable
 private fun TopBarBackTitleLongPreview() {
     TopBarBackTitle(title = "VeryLongAndroidStudioLiteProjectNameThatNeedsEllipsis")
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "BackTitleAdd · normal")
+@Composable
+private fun TopBarBackTitleAddPreview() {
+    TopBarBackTitleAdd(title = "MyApp")
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "PathAdd · normal")

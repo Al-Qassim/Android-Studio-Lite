@@ -34,7 +34,8 @@ import com.robotopia.androidstudiolite.designsystem.component.DialogMessageActio
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.FileRow
 import com.robotopia.androidstudiolite.designsystem.component.FolderRow
-import com.robotopia.androidstudiolite.designsystem.component.TopBarPathAdd
+import com.robotopia.androidstudiolite.designsystem.component.PathBar
+import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitleAdd
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 
@@ -70,11 +71,15 @@ internal fun FileBrowserContent(
             .fillMaxSize()
             .background(Colors.Bg),
     ) {
-        TopBarPathAdd(
-            pathSegments = pathSegments(state.projectName, state.currentRelativePath),
+        TopBarBackTitleAdd(
+            title = state.projectName,
             onBackClick = onBackClick,
             onAddClick = onAddClick,
         )
+        val pathSegments = relativePathSegments(state.currentRelativePath)
+        if (pathSegments.isNotEmpty()) {
+            PathBar(segments = pathSegments)
+        }
         FileBrowserBody(
             entries = state.entries,
             menuItem = state.menuItem,
@@ -470,10 +475,8 @@ private fun FileBrowserFooterHint() {
     }
 }
 
-private fun pathSegments(projectName: String, relativePath: String): List<String> {
-    val tail = relativePath.split('/').filter { it.isNotEmpty() }
-    return listOf(projectName) + tail
-}
+private fun relativePathSegments(relativePath: String): List<String> =
+    relativePath.split('/').filter { it.isNotEmpty() }
 
 private fun locationLabel(relativePath: String): String {
     val display = if (relativePath.isEmpty()) "/" else relativePath
@@ -487,17 +490,10 @@ private val previewEntries = listOf(
     FsNode.File(name = "settings.gradle.kts", relativePath = "settings.gradle.kts"),
 )
 
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · empty",
-)
 @Composable
-private fun FileBrowserEmptyPreview() {
+private fun FileBrowserPreviewHost(state: FileBrowserUiState) {
     FileBrowserContent(
-        state = FileBrowserUiState(projectName = "MyApp"),
+        state = state,
         onBackClick = {},
         onAddClick = {},
         onAddMenuDismiss = {},
@@ -529,39 +525,49 @@ private fun FileBrowserEmptyPreview() {
     backgroundColor = 0xFF12171C,
     widthDp = 360,
     heightDp = 640,
+    name = "Browser · empty",
+)
+@Composable
+private fun FileBrowserEmptyPreview() {
+    FileBrowserPreviewHost(state = FileBrowserUiState(projectName = "MyApp"))
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
     name = "Browser · filled",
 )
 @Composable
 private fun FileBrowserFilledPreview() {
-    FileBrowserContent(
+    FileBrowserPreviewHost(
         state = FileBrowserUiState(
             projectName = "MyApp",
             currentRelativePath = "",
             entries = previewEntries,
         ),
-        onBackClick = {},
-        onAddClick = {},
-        onAddMenuDismiss = {},
-        onNewFileClick = {},
-        onNewFolderClick = {},
-        onPasteClick = {},
-        onFolderClick = {},
-        onFileClick = {},
-        onItemLongClick = {},
-        onMenuDismiss = {},
-        onRenameMenuClick = {},
-        onCopyMenuClick = {},
-        onMoveMenuClick = {},
-        onDeleteMenuClick = {},
-        onDialogCancel = {},
-        onCreateFileNameChange = {},
-        onCreateFileConfirm = {},
-        onCreateFolderNameChange = {},
-        onCreateFolderConfirm = {},
-        onRenameNameChange = {},
-        onRenameConfirm = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · nested path",
+)
+@Composable
+private fun FileBrowserNestedPathPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            currentRelativePath = "app/src/main",
+            entries = listOf(
+                FsNode.Folder(name = "java", relativePath = "app/src/main/java"),
+                FsNode.Folder(name = "res", relativePath = "app/src/main/res"),
+            ),
+        ),
     )
 }
 
@@ -574,35 +580,55 @@ private fun FileBrowserFilledPreview() {
 )
 @Composable
 private fun FileBrowserCreateFilePreview() {
-    FileBrowserContent(
+    FileBrowserPreviewHost(
         state = FileBrowserUiState(
             projectName = "MyApp",
             entries = previewEntries,
             dialog = FileBrowserDialog.CreateFile(name = "MainActivity.kt"),
         ),
-        onBackClick = {},
-        onAddClick = {},
-        onAddMenuDismiss = {},
-        onNewFileClick = {},
-        onNewFolderClick = {},
-        onPasteClick = {},
-        onFolderClick = {},
-        onFileClick = {},
-        onItemLongClick = {},
-        onMenuDismiss = {},
-        onRenameMenuClick = {},
-        onCopyMenuClick = {},
-        onMoveMenuClick = {},
-        onDeleteMenuClick = {},
-        onDialogCancel = {},
-        onCreateFileNameChange = {},
-        onCreateFileConfirm = {},
-        onCreateFolderNameChange = {},
-        onCreateFolderConfirm = {},
-        onRenameNameChange = {},
-        onRenameConfirm = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · create file field error",
+)
+@Composable
+private fun FileBrowserCreateFileFieldErrorPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            dialog = FileBrowserDialog.CreateFile(
+                name = "bad/name",
+                nameError = "Name contains invalid characters",
+            ),
+        ),
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · rename field error",
+)
+@Composable
+private fun FileBrowserRenameFieldErrorPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            dialog = FileBrowserDialog.Rename(
+                item = previewEntries.last(),
+                name = "",
+                nameError = "Name is required",
+            ),
+        ),
     )
 }
 
@@ -615,35 +641,12 @@ private fun FileBrowserCreateFilePreview() {
 )
 @Composable
 private fun FileBrowserMenuPreview() {
-    FileBrowserContent(
+    FileBrowserPreviewHost(
         state = FileBrowserUiState(
             projectName = "MyApp",
             entries = previewEntries,
             menuItem = previewEntries.first(),
         ),
-        onBackClick = {},
-        onAddClick = {},
-        onAddMenuDismiss = {},
-        onNewFileClick = {},
-        onNewFolderClick = {},
-        onPasteClick = {},
-        onFolderClick = {},
-        onFileClick = {},
-        onItemLongClick = {},
-        onMenuDismiss = {},
-        onRenameMenuClick = {},
-        onCopyMenuClick = {},
-        onMoveMenuClick = {},
-        onDeleteMenuClick = {},
-        onDialogCancel = {},
-        onCreateFileNameChange = {},
-        onCreateFileConfirm = {},
-        onCreateFolderNameChange = {},
-        onCreateFolderConfirm = {},
-        onRenameNameChange = {},
-        onRenameConfirm = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
     )
 }
 
@@ -656,35 +659,12 @@ private fun FileBrowserMenuPreview() {
 )
 @Composable
 private fun FileBrowserDeletePreview() {
-    FileBrowserContent(
+    FileBrowserPreviewHost(
         state = FileBrowserUiState(
             projectName = "MyApp",
             entries = previewEntries,
             dialog = FileBrowserDialog.DeleteConfirm(previewEntries.last()),
         ),
-        onBackClick = {},
-        onAddClick = {},
-        onAddMenuDismiss = {},
-        onNewFileClick = {},
-        onNewFolderClick = {},
-        onPasteClick = {},
-        onFolderClick = {},
-        onFileClick = {},
-        onItemLongClick = {},
-        onMenuDismiss = {},
-        onRenameMenuClick = {},
-        onCopyMenuClick = {},
-        onMoveMenuClick = {},
-        onDeleteMenuClick = {},
-        onDialogCancel = {},
-        onCreateFileNameChange = {},
-        onCreateFileConfirm = {},
-        onCreateFolderNameChange = {},
-        onCreateFolderConfirm = {},
-        onRenameNameChange = {},
-        onRenameConfirm = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
     )
 }
 
@@ -697,34 +677,11 @@ private fun FileBrowserDeletePreview() {
 )
 @Composable
 private fun FileBrowserActionErrorPreview() {
-    FileBrowserContent(
+    FileBrowserPreviewHost(
         state = FileBrowserUiState(
             projectName = "MyApp",
             entries = previewEntries,
             actionError = "A file or folder with that name already exists",
         ),
-        onBackClick = {},
-        onAddClick = {},
-        onAddMenuDismiss = {},
-        onNewFileClick = {},
-        onNewFolderClick = {},
-        onPasteClick = {},
-        onFolderClick = {},
-        onFileClick = {},
-        onItemLongClick = {},
-        onMenuDismiss = {},
-        onRenameMenuClick = {},
-        onCopyMenuClick = {},
-        onMoveMenuClick = {},
-        onDeleteMenuClick = {},
-        onDialogCancel = {},
-        onCreateFileNameChange = {},
-        onCreateFileConfirm = {},
-        onCreateFolderNameChange = {},
-        onCreateFolderConfirm = {},
-        onRenameNameChange = {},
-        onRenameConfirm = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
     )
 }

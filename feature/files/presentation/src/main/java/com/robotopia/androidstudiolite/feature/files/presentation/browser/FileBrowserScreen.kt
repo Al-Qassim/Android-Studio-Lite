@@ -9,7 +9,10 @@ import com.robotopia.androidstudiolite.core.error.userMessageOrNull
 import com.robotopia.androidstudiolite.feature.files.api.FileExplorerService
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
+import com.robotopia.androidstudiolite.feature.files.model.parentRelativePathOrNull
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -48,7 +51,7 @@ internal fun FileBrowserScreen(
     FileBrowserContent(
         state = state,
         onBackClick = {
-            val parent = parentPath(state.currentRelativePath)
+            val parent = parentRelativePathOrNull(state.currentRelativePath)
             if (parent == null) {
                 onNavigateBack()
             } else {
@@ -164,21 +167,17 @@ internal fun FileBrowserScreen(
         onCreateFileConfirm = {
             val dialog = viewModel.uiState.value.dialog as? FileBrowserDialog.CreateFile
                 ?: return@FileBrowserContent
-            val nameError = fileExplorerService.validateFileName(dialog.name).name
-            if (nameError != null) {
-                updateCreateFileDialog(viewModel.uiState, dialog.name, nameError)
-                return@FileBrowserContent
-            }
-            val currentPath = viewModel.uiState.value.currentRelativePath
-            viewModel.uiState.update { it.copy(dialog = null) }
-            scope.launch {
-                runMutation(
-                    fileExplorerService = fileExplorerService,
-                    root = root,
-                    uiState = viewModel.uiState,
-                ) {
-                    fileExplorerService.createFile(root, currentPath, dialog.name)
-                }
+            val parentPath = viewModel.uiState.value.currentRelativePath
+            confirmNamedMutation(
+                name = dialog.name,
+                fileExplorerService = fileExplorerService,
+                uiState = viewModel.uiState,
+                scope = scope,
+                onInvalid = { nameError ->
+                    updateCreateFileDialog(viewModel.uiState, dialog.name, nameError)
+                },
+            ) {
+                fileExplorerService.createFile(root, parentPath, dialog.name)
             }
         },
         onCreateFolderNameChange = { name ->
@@ -188,21 +187,17 @@ internal fun FileBrowserScreen(
         onCreateFolderConfirm = {
             val dialog = viewModel.uiState.value.dialog as? FileBrowserDialog.CreateFolder
                 ?: return@FileBrowserContent
-            val nameError = fileExplorerService.validateFileName(dialog.name).name
-            if (nameError != null) {
-                updateCreateFolderDialog(viewModel.uiState, dialog.name, nameError)
-                return@FileBrowserContent
-            }
-            val currentPath = viewModel.uiState.value.currentRelativePath
-            viewModel.uiState.update { it.copy(dialog = null) }
-            scope.launch {
-                runMutation(
-                    fileExplorerService = fileExplorerService,
-                    root = root,
-                    uiState = viewModel.uiState,
-                ) {
-                    fileExplorerService.createFolder(root, currentPath, dialog.name)
-                }
+            val parentPath = viewModel.uiState.value.currentRelativePath
+            confirmNamedMutation(
+                name = dialog.name,
+                fileExplorerService = fileExplorerService,
+                uiState = viewModel.uiState,
+                scope = scope,
+                onInvalid = { nameError ->
+                    updateCreateFolderDialog(viewModel.uiState, dialog.name, nameError)
+                },
+            ) {
+                fileExplorerService.createFolder(root, parentPath, dialog.name)
             }
         },
         onRenameNameChange = { name ->
@@ -216,22 +211,18 @@ internal fun FileBrowserScreen(
         onRenameConfirm = {
             val dialog = viewModel.uiState.value.dialog as? FileBrowserDialog.Rename
                 ?: return@FileBrowserContent
-            val nameError = fileExplorerService.validateFileName(dialog.name).name
-            if (nameError != null) {
-                viewModel.uiState.update {
-                    it.copy(dialog = dialog.copy(nameError = nameError))
-                }
-                return@FileBrowserContent
-            }
-            viewModel.uiState.update { it.copy(dialog = null) }
-            scope.launch {
-                runMutation(
-                    fileExplorerService = fileExplorerService,
-                    root = root,
-                    uiState = viewModel.uiState,
-                ) {
-                    fileExplorerService.rename(root, dialog.item.relativePath, dialog.name)
-                }
+            confirmNamedMutation(
+                name = dialog.name,
+                fileExplorerService = fileExplorerService,
+                uiState = viewModel.uiState,
+                scope = scope,
+                onInvalid = { nameError ->
+                    viewModel.uiState.update {
+                        it.copy(dialog = dialog.copy(nameError = nameError))
+                    }
+                },
+            ) {
+                fileExplorerService.rename(root, dialog.item.relativePath, dialog.name)
             }
         },
         onDeleteConfirm = {
@@ -239,11 +230,7 @@ internal fun FileBrowserScreen(
                 ?: return@FileBrowserContent
             viewModel.uiState.update { it.copy(dialog = null) }
             scope.launch {
-                runMutation(
-                    fileExplorerService = fileExplorerService,
-                    root = root,
-                    uiState = viewModel.uiState,
-                ) {
+                runMutation(uiState = viewModel.uiState) {
                     fileExplorerService.delete(root, dialog.item.relativePath)
                 }
             }
@@ -260,17 +247,27 @@ private suspend fun collectListing(
     relativePath: String,
     uiState: MutableStateFlow<FileBrowserUiState>,
 ) {
-    fileExplorerService.observeListing(root, relativePath).collect { listing ->
-        uiState.update { state ->
-            state.copy(
-                currentRelativePath = listing.currentRelativePath,
-                entries = listing.entries,
-                menuItem = state.menuItem?.takeIf { menu ->
-                    listing.entries.any { it.relativePath == menu.relativePath }
-                },
-            )
+    fileExplorerService.observeListing(root, relativePath)
+        .catch { error ->
+            uiState.update {
+                it.copy(
+                    entries = emptyList(),
+                    menuItem = null,
+                    actionError = error.userMessageOrNull(TAG) ?: GENERIC_ERROR_MESSAGE,
+                )
+            }
         }
-    }
+        .collect { listing ->
+            uiState.update { state ->
+                state.copy(
+                    currentRelativePath = listing.currentRelativePath,
+                    entries = listing.entries,
+                    menuItem = state.menuItem?.takeIf { menu ->
+                        listing.entries.any { it.relativePath == menu.relativePath }
+                    },
+                )
+            }
+        }
 }
 
 private suspend fun pasteClipboard(
@@ -280,11 +277,7 @@ private suspend fun pasteClipboard(
     clipboard: ClipboardState,
 ) {
     val destination = uiState.value.currentRelativePath
-    runMutation(
-        fileExplorerService = fileExplorerService,
-        root = root,
-        uiState = uiState,
-    ) {
+    val succeeded = runMutation(uiState = uiState) {
         when (clipboard.mode) {
             ClipboardMode.Copy ->
                 fileExplorerService.copy(root, clipboard.relativePath, destination)
@@ -292,22 +285,41 @@ private suspend fun pasteClipboard(
                 fileExplorerService.move(root, clipboard.relativePath, destination)
         }
     }
-    uiState.update { it.copy(clipboard = null) }
+    if (succeeded) {
+        uiState.update { it.copy(clipboard = null) }
+    }
+}
+
+private fun confirmNamedMutation(
+    name: String,
+    fileExplorerService: FileExplorerService,
+    uiState: MutableStateFlow<FileBrowserUiState>,
+    scope: CoroutineScope,
+    onInvalid: (nameError: String) -> Unit,
+    block: suspend () -> Unit,
+) {
+    val nameError = fileExplorerService.validateFileName(name).name
+    if (nameError != null) {
+        onInvalid(nameError)
+        return
+    }
+    uiState.update { it.copy(dialog = null) }
+    scope.launch {
+        runMutation(uiState = uiState, block = block)
+    }
 }
 
 private suspend fun runMutation(
-    fileExplorerService: FileExplorerService,
-    root: ProjectRoot,
     uiState: MutableStateFlow<FileBrowserUiState>,
     block: suspend () -> Unit,
-) {
+): Boolean =
     runCatching { block() }
         .onFailure { error ->
             uiState.update {
                 it.copy(actionError = error.userMessageOrNull(TAG) ?: GENERIC_ERROR_MESSAGE)
             }
         }
-}
+        .isSuccess
 
 private fun updateCreateFileDialog(
     uiState: MutableStateFlow<FileBrowserUiState>,
@@ -325,12 +337,6 @@ private fun updateCreateFolderDialog(
 ) {
     val dialog = uiState.value.dialog as? FileBrowserDialog.CreateFolder ?: return
     uiState.update { it.copy(dialog = dialog.copy(name = name, nameError = nameError)) }
-}
-
-private fun parentPath(relativePath: String): String? {
-    if (relativePath.isEmpty()) return null
-    val lastSlash = relativePath.lastIndexOf('/')
-    return if (lastSlash < 0) "" else relativePath.substring(0, lastSlash)
 }
 
 private const val TAG = "FileBrowser"

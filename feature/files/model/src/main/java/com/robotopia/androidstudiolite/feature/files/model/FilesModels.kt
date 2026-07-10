@@ -29,3 +29,14 @@ data class FileNameFieldErrors(
     val hasErrors: Boolean
         get() = name != null
 }
+
+/**
+ * Parent of [relativePath] for in-project navigation.
+ * Returns `null` at project root (caller should leave the feature).
+ * Returns `""` when stepping up from a top-level entry.
+ */
+fun parentRelativePathOrNull(relativePath: String): String? {
+    if (relativePath.isEmpty()) return null
+    val lastSlash = relativePath.lastIndexOf('/')
+    return if (lastSlash < 0) "" else relativePath.substring(0, lastSlash)
+}
