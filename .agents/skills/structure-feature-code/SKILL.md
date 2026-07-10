@@ -1,81 +1,84 @@
 ---
 name: structure-feature-code
 description: >-
-  Structures Android feature modules (Compose screens, ViewModels, validation,
-  errors, navigation) to match Android Studio Lite code-review conventions.
-  Use when adding or refactoring a feature screen, splitting Content vs Screen,
-  placing validation, wiring AppException, or when the user asks to structure
-  feature UI/code the project way.
+  Structures feature UI and domain code: thin app navigation, state-only
+  ViewModels, Screen vs Content split, shallow UI trees, multi-state previews,
+  validation in the data layer exposed via API, and user-safe errors. Use when
+  adding or refactoring a feature screen, placing validation, wiring app
+  errors, splitting drawing from wiring, or when the user asks to structure
+  feature code for reuse across projects.
 ---
 
 # Structure feature code
 
-Apply this when building or refactoring a feature under `feature/<name>/` (model / api / data / presentation / di).
+Reusable conventions for feature modules (mobile or similar layered apps). Adapt names (`NavHost`, Koin, Compose) to the project stack; keep the **roles** the same.
 
 ## 1. Module & navigation
 
-1. Keep public types in `:model`, contracts in `:api`, impl in `:data`, UI in `:presentation`, Koin in `:di`.
-2. Expose `*Screens` with a feature-owned `NavHost(...)` for in-feature routes.
-3. `:integration:navigation` only injects `*Screens` and passes **cross-feature** callbacks — no feature toasts/dialogs/routes.
+1. Split by role: **model** (types) · **api** (contracts) · **data** (impl) · **presentation** (UI) · **di** (bindings) — or the project’s equivalent.
+2. Each feature owns its **in-feature** navigation (e.g. list ↔ create).
+3. The app / integration navigator only wires **cross-feature** exits. No feature toasts, dialogs, or internal routes in the root host.
 
 ## 2. Errors
 
-1. Planned failures: `throw AppException(uiMessage = "…")` from `:data` (and validation).
-2. Presentation: `error.userMessageOrNull(TAG) ?: "Something went wrong"`.
-3. Never show raw `Throwable.message`.
-4. Mutating ops (`delete`, `markOpened`, etc.): succeed or throw; roll back partial side effects (e.g. restore DB row if file delete fails).
+1. Planned, user-facing failures use a shared app error type with an explicit **UI message** field (e.g. `AppException(uiMessage)`).
+2. UI shows **only** that UI message (or a fixed generic string after a user action).
+3. Unexpected errors: **log** for debugging; never show raw `Throwable.message` / exception text to the user.
+4. Mutating operations: **succeed or throw**. On failure, roll back partial side effects (e.g. restore DB row if file delete fails). No silent no-ops for “must work” actions.
 
 ## 3. Validation
 
-1. Implement rules once in `:data`.
-2. Add API methods that return field errors (or similar) for forms.
-3. Presentation calls the API; do not duplicate regex/range/copy checks in the UI layer.
-4. Write paths still call the same validation before persisting.
+1. Implement validation **once** in the data/domain layer.
+2. Expose it on the feature API so the UI can show field errors.
+3. Do **not** duplicate business rules (regex, ranges, copy) in the UI.
+4. Write/persist paths still run the same validation before mutating storage.
 
 ## 4. Screen package layout
 
-For each screen (e.g. list, create):
+Per screen:
 
 ```text
 presentation/<screen>/
-  <Screen>ViewModel.kt   # state holder only
-  <Screen>Screen.kt      # wiring + private helpers
-  <Screen>Content.kt     # drawing + previews
+  <Screen>ViewModel   # in-memory UI state only (survive lifecycle)
+  <Screen>Screen      # wiring + private data helpers
+  <Screen>Content     # drawing + previews
 ```
 
-### ViewModel
+### ViewModel / state holder
 
-```kotlin
-class FooViewModel : ViewModel() {
-    val uiState = MutableStateFlow(FooUiState())
-}
-```
-
-No service, no validation, no one-shot navigation channels unless the human explicitly asks otherwise.
+- Holds UI state across configuration changes only.
+- No service calls, validation, or navigation side effects unless the human explicitly asks otherwise.
 
 ### Screen (wiring)
 
-- Takes feature `*Service` (+ navigation lambdas).
-- `koinViewModel()` for state.
-- Private suspend/helpers for fetch/mutate; update `viewModel.uiState`.
-- Calls `*Content(...)` with state + callbacks.
+- Depends on the feature service/API + navigation callbacks.
+- Private helpers for load/mutate; update state holder.
+- Renders by calling Content with state + event lambdas.
 
 ### Content (drawing)
 
-- Pure UI from state + event lambdas.
-- Extract children so **each composable nests ≤ 2–3 levels**.
-- Private `@Preview`s with **many** named cases (empty, filled, errors, loading, menus, dialogs).
+- Pure UI from state + callbacks.
+- Nesting **≤ 2–3 levels** per composable/function; extract children when deeper.
+- Many named previews: empty, filled, field errors, loading, menus, dialogs, action errors.
 
-## 5. Checklist before PR slice
+## 5. Incremental delivery (when on a PR)
 
-- [ ] Feature owns sub-nav; IdeNavHost stays thin
-- [ ] Validation only in data; API exposed for UI
-- [ ] `AppException` / `userMessageOrNull` used correctly
-- [ ] ViewModel is state-only
-- [ ] Screen vs Content split; shallow composable trees
+1. One focused change.
+2. Commit with a clear message.
+3. Push.
+4. Comment on the PR for that slice.
+5. Repeat.
+
+## 6. Checklist
+
+- [ ] Feature owns sub-navigation; root host stays thin
+- [ ] Validation only in data/domain; API exposed for UI
+- [ ] User-safe errors (UI message vs log-only unexpected)
+- [ ] State holder is state-only
+- [ ] Screen vs Content split; shallow UI trees
 - [ ] Multi-state previews on Content
-- [ ] One focused commit → push → PR comment
+- [ ] Focused commit → push → PR comment (if on a PR)
 
-## Reference
+## Portability
 
-Canonical example: `feature/projects/presentation/list/` and `…/create/`, plus `:core:error` and `ProjectService.validateCreateProject`.
+Copy this skill into another repo’s `.agents/skills/structure-feature-code/` or `~/.cursor/skills/structure-feature-code/`. Pair with project-local Cursor rules for stack-specific names (package paths, DI, design system).
