@@ -16,44 +16,46 @@ Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
 
 The main checkout (`AndroidStudioLite/`) is reserved for the human. Agents must not casually `git checkout` / switch branches there — **except** the shared-branch case below.
 
-For any implementation or PR work:
+**Every** implementation, PR, review-fix, or follow-up round uses the same rules below (first push and later edits alike).
 
-1. **If the main checkout is already on the target branch:** work **directly in the main checkout with the human**. Do **not** switch them to `main`, and do **not** create a worktree.
+1. **Choose mode by where the human is right now** (re-check before every edit round):
+   - **Shared-branch:** main checkout is already on the target branch → work **directly in the main checkout with the human**. Do **not** switch them to `main`, and do **not** create a worktree.
+   - **Worktree:** main checkout is on a different branch (or the target branch is not checked out here) → create a dedicated worktree. Do **not** move the human off their current branch.
 
 ```bash
-# Detect shared-branch mode (run from main checkout):
-git branch --show-current   # equals the branch the agent needs → stay and edit here
+# Detect mode (run from main checkout) before each edit round:
+git branch --show-current   # equals target → shared-branch; otherwise → worktree
 ```
 
-In this mode: edit, commit, and push in place; keep the human on that branch; skip worktree create/remove.
-
-2. **Otherwise** (main checkout is on a different branch, or the target branch is not checked out here): create a dedicated worktree. Do **not** move the human off their current branch.
+2. **Start or resume the branch:**
+   - Shared-branch: edit in place on the existing checkout.
+   - Worktree — new branch:
 
 ```bash
 git fetch origin
 git worktree add "../AndroidStudioLite-wt-<short-name>" -b feature/<short-name> origin/main
 ```
 
-For follow-up work on an existing branch the human is **not** on:
+   - Worktree — existing branch (including review feedback / follow-ups when the human is **not** on it):
 
 ```bash
 git fetch origin
 git worktree add "../AndroidStudioLite-wt-<short-name>" feature/<short-name>
 ```
 
-3. In worktree mode: do all edits and commits only inside that worktree. Do not push to `main`.
-4. In worktree mode: push the branch to the remote, then **immediately remove the local worktree** so the human can check out that branch in the main folder if they want:
+3. Edit and commit only in the chosen place (main checkout or worktree). Do not push to `main`.
+4. Push, then clean up according to mode:
+   - **Worktree:** push, then **immediately remove** the local worktree:
 
 ```bash
 git push -u origin HEAD
 git worktree remove "../AndroidStudioLite-wt-<short-name>"
 ```
 
-In shared-branch mode: push from the main checkout and leave the human on the branch (no worktree to remove).
+   - **Shared-branch:** push from the main checkout and leave the human on the branch (no worktree to remove).
 
 5. Open or update the PR from the remote branch (via `gh`) after the push.
-6. **Update the linked GitHub Issue + Project board** for that work (Status, comment with PR/branch link). See `docs/agents/issue-tracker.md` → *Project board sync*.
-7. If more edits are needed (review feedback, follow-ups): if the human is already on that branch, continue in shared-branch mode; otherwise recreate a worktree, edit, push, remove the worktree, and update the ticket/board again.
+6. **Update the linked GitHub Issue + Project board** for that work (Status, comment with PR/branch link). See `docs/agents/issue-tracker.md` → *Project board sync*. Then, if more edits are needed later, start again at step 1 (re-detect shared-branch vs worktree).
 
 ## Keep open branches current with `main`
 
