@@ -26,4 +26,5 @@ dependencies {
     api(libs.androidx.room.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.core)
+    testImplementation(libs.junit)
 }

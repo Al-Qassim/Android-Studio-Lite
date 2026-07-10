@@ -18,6 +18,7 @@ import com.robotopia.androidstudiolite.designsystem.component.Toast
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import kotlinx.coroutines.delay
+import org.koin.compose.koinInject
 
 private sealed interface IdeRoute {
     data object ProjectsList : IdeRoute
@@ -28,7 +29,7 @@ private sealed interface IdeRoute {
  * IDE navigation root. Temporary host for Projects (#7); full NavHost graph lands in #11.
  */
 @Composable
-fun IdeNavHost(projectsScreens: ProjectsScreens) {
+fun IdeNavHost(projectsScreens: ProjectsScreens = koinInject()) {
     var route by remember { mutableStateOf<IdeRoute>(IdeRoute.ProjectsList) }
     var openedToast by remember { mutableStateOf<ProjectId?>(null) }
 
