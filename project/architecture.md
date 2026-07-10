@@ -1,6 +1,6 @@
 # Android Studio Lite — Architecture (v0.1)
 
-> Design-only document. No implementation yet.  
+> Module map and contracts for Android Studio Lite v0.1.  
 > Sources: `project/requierments.md`, Figma (`Android-Studio-Lite`), existing `:designsystem`.
 
 ---
@@ -42,7 +42,7 @@ Existing foundation: `:designsystem` (colors, typography, shared Compose primiti
 1. **Capability modules are self-contained** — each owns its data + presentation for its domain.
 2. **Public surface is thin** — outside consumers see **interfaces + immutable data types only**, never implementations.
 3. **Integration modules wire capabilities** — they do not invent domain logic; they compose APIs into product flows.
-4. `:app` **stays thin** — Application class, DI graph, root navigation host, permissions, install intents.
+4. `:app` **stays thin** — Application class, start Koin, host `IdeNavHost`, permissions, install intents.
 5. **Replaceable backends** — especially Build (GHA today, other cloud later) behind one interface.
 6. **Safe file sandbox** — all file ops stay under a project root (`projectDir`).
 
@@ -93,6 +93,9 @@ Outside a feature, consumers depend on **`:api` (+ `:model` as needed)**. `:inte
 :feature:projects:presentation  →  ProjectsScreens impl
 :feature:projects:di            →  projectsDiModule
 :integration:database           →  AslDatabase (entities from feature data modules)
+:integration:di                 →  integrationDiModule (includes feature + database modules)
+:integration:navigation         →  IdeNavHost (composes screen launchers)
+:app                            →  startKoin(integrationDiModule) + host IdeNavHost
 ```
 
 ---
@@ -110,6 +113,7 @@ flowchart TB
   app[":app"]
   di[":integration:di"]
   nav[":integration:navigation"]
+  db[":integration:database"]
   ds[":designsystem"]
 
   pApi[":feature:projects:api"]
@@ -125,6 +129,7 @@ flowchart TB
   app --> nav
   app --> ds
 
+  di --> db
   di --> pDi
   di --> fDi
   di --> eDi
@@ -151,11 +156,12 @@ flowchart TB
 
 | Rule                                                                         | Reason                                                    |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `*:api` must not depend on `*:impl`                                          | Keeps public surface pure                                 |
-| Feature `impl`s must not depend on other feature `impl`s                     | Avoid spaghetti; talk via APIs or integration             |
-| Feature `impl`s should not depend on other feature `api`s unless unavoidable | Prefer integration module for cross-feature orchestration |
+| `*:api` must not depend on `:data` / `:presentation` / `:di`                 | Keeps public surface pure                                 |
+| Feature `:data` / `:presentation` must not depend on other features’ internals | Avoid spaghetti; talk via APIs or integration           |
+| Feature modules should not depend on other feature `:api`s unless unavoidable | Prefer `:integration:navigation` / `:integration:di` for cross-feature orchestration |
 | Only `:app` / `:integration:navigation` compose multiple features            | Clear ownership of product flows                          |
 | `:designsystem` depends on nothing in `feature/`                             | UI kit stays reusable                                     |
+| `:integration:di` owns Koin aggregation; `:integration:navigation` owns nav  | Separate wiring concerns                                  |
 
 
 ---
@@ -164,27 +170,38 @@ flowchart TB
 
 ## 5. Layering inside a capability module
 
-Each `impl` follows the same internal shape:
+Each feature is five Gradle modules with the same shape:
 
 ```text
-feature/files/impl/
-  ui/           # Compose screens, screens impl, ViewModels (presentation)
-  data/         # FileSystemDataSource, service implementations
+feature/files/
+  model/          # FsNode, ProjectRoot, DirectoryListing
+  api/            # FileExplorerService, FilesScreens
+  data/           # FS / Room / service implementations
+  presentation/   # Compose screens, ViewModels
+  di/             # Koin bindings (api ← data/presentation)
 ```
 
 ```mermaid
 flowchart LR
-  PRESENTATION["PRESENTATION<br/>Screens impl / ViewModels"]
-  API["Public API<br/>interfaces + models<br/>+ screen launchers"]
-  DATA["DATA<br/>FS / network / cache /service impl"]
+  DI[":di"]
+  PRESENTATION[":presentation<br/>Screens / ViewModels"]
+  API[":api<br/>interfaces + screen launchers"]
+  MODEL[":model<br/>immutable types"]
+  DATA[":data<br/>FS / network / Room / service impl"]
 
+  DI --> PRESENTATION
+  DI --> DATA
+  DI --> API
   PRESENTATION --> API
   DATA --> API
+  API --> MODEL
+  PRESENTATION --> MODEL
+  DATA --> MODEL
 ```
 
 
 
-**Outside the module**, only `API` is visible. The API should provide an interface to open screens (e.g., via a navigation entry or a dedicated screen launcher), instead of leaking ViewModels or internal presentation logic.
+**Outside the feature**, only `:api` (+ `:model` as needed) is visible. The API should provide an interface to open screens (screen launchers), instead of leaking ViewModels or internal presentation logic.
 
 ---
 
@@ -241,7 +258,7 @@ interface ProjectsScreens {
 }
 ```
 
-**UI owned by** `impl`**:** Projects list, Create Project dialog/screen (Figma Main Screens) — reached only via `ProjectsScreens`.
+**UI owned by** `:presentation`**:** Projects list, Create Project dialog/screen (Figma Main Screens) — reached only via `ProjectsScreens`.
 
 **Does not own:** browsing files inside a project (that’s Files).
 
@@ -298,7 +315,7 @@ interface FilesScreens {
 }
 ```
 
-**UI owned by** `impl`**:** path bar, folder/file rows, create/rename/move/delete dialogs, empty states, context menus — using `:designsystem` components (`PathBar`, `FileRow`, `DialogForm`, …). Reached only via `FilesScreens`.
+**UI owned by** `:presentation`**:** path bar, folder/file rows, create/rename/move/delete dialogs, empty states, context menus — using `:designsystem` components (`PathBar`, `FileRow`, `DialogForm`, …). Reached only via `FilesScreens`.
 
 **Shared UI state model (from Figma notes):**
 
@@ -410,9 +427,9 @@ interface BuildScreens {
 }
 ```
 
-**UI owned by** `impl`**:** Run button states, progress sheet/screen, failure toast (Figma Run/Build) — reached only via `BuildScreens`.
+**UI owned by** `:presentation`**:** Run button states, progress sheet/screen, failure toast (Figma Run/Build) — reached only via `BuildScreens`.
 
-**Impl details (hidden):** zip/upload project, trigger GHA/cloud, poll status, download artifact, write to cache dir. Swap provider without touching Projects/Files.
+**Data details (hidden in `:data`):** zip/upload project, trigger GHA/cloud, poll status, download artifact, write to cache dir. Swap provider without touching Projects/Files.
 
 ---
 
@@ -427,9 +444,9 @@ Every capability `:api` exposes **two** public surfaces:
 
 **Rules:**
 
-1. Launchers live in `:api` and are implemented in `:impl`.
-2. Launchers accept **callbacks** for exits that leave the feature (open project → files, open file → editor, run → build). Integration wires those callbacks.
-3. Launchers must not return or expose ViewModels, repositories, or other `impl` types.
+1. Launchers live in `:api` and are implemented in `:presentation` (bound via `:di`).
+2. Launchers accept **callbacks** for exits that leave the feature (open project → files, open file → editor, run → build). `:integration:navigation` wires those callbacks.
+3. Launchers must not return or expose ViewModels, repositories, or other `:data` / `:presentation` types.
 4. `:integration:navigation` / `:app` depend on launcher interfaces from `:api` only — never on feature screen classes in `:presentation`.
 
 ---
@@ -549,7 +566,7 @@ Already present. Role stays:
 - `AslColors`, `AslTypography`, `AslIcons`
 - Primitives: buttons, text fields, dialogs, file/folder rows, path bar, project card, menus, toasts, top/status bars
 
-**Rule:** feature UIs compose these; they do not redefine tokens. Feature-specific layouts live in feature `impl`, not in the design system (unless a pattern is reused 3+ times).
+**Rule:** feature UIs compose these; they do not redefine tokens. Feature-specific layouts live in feature `:presentation`, not in the design system (unless a pattern is reused 3+ times).
 
 ---
 
@@ -588,10 +605,10 @@ flowchart TD
 | Move / copy                    | `move` / `copy`                                |
 | Name conflict / invalid name   | throw / catch → UI message                     |
 | Breadcrumbs / up               | listing `relativePath` changes                 |
-| Open → editor → save           | integration + Editor + `writeText`             |
+| Open → editor → save           | `:integration:navigation` + Editor + `writeText` |
 | Empty folder                   | empty state UI                                 |
 | Invalid move into self/child   | throw / catch → UI message                     |
-| Delete/move while open         | integration closes or prompts EditorSession    |
+| Delete/move while open         | navigation closes or prompts EditorSession     |
 | Sandbox guardrails             | throw / catch → UI message                     |
 
 
@@ -613,13 +630,14 @@ flowchart TB
     ci[Cloud / GitHub Actions]
   end
 
-  P[projects:impl] --> meta
+  P[projects:data] --> meta
   P --> fs
-  F[files:impl] --> fs
-  E[editor:impl] --> fs
-  B[buildapk:data / :integration:database] --> fs
+  F[files:data] --> fs
+  E[editor:data] --> fs
+  B[buildapk:data] --> fs
   B --> apkCache
   B --> ci
+  DB[":integration:database"] --> meta
 ```
 
 
@@ -660,8 +678,8 @@ include(":integration:navigation")
 
 | Later feature        | Likely module                                              |
 | -------------------- | ---------------------------------------------------------- |
-| Git push/pull/commit | `:feature:git:api` / `impl`                                |
-| AI assistant         | `:feature:assistant:api` / `impl`                          |
+| Git push/pull/commit | `:feature:git` (model / api / data / presentation / di)    |
+| AI assistant         | `:feature:assistant` (same five-way split)                 |
 | Syntax highlighting  | enhance `:feature:editor` (or `:feature:editor:highlight`) |
 
 
