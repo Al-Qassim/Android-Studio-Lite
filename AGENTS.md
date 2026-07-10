@@ -56,6 +56,38 @@ git worktree remove "../AndroidStudioLite-wt-<short-name>"
 
 5. Open or update the PR from the remote branch (via `gh`) after the push.
 6. **Update the linked GitHub Issue + Project board** for that work (Status, comment with PR/branch link). See `docs/agents/issue-tracker.md` → *Project board sync*. Then, if more edits are needed later, start again at step 1 (re-detect shared-branch vs worktree).
+7. **Before calling the work finished** (ready for human merge / board → Done): run the full **Finish reviews** checklist below. Fix findings, then push again using steps 1–6. Do not mark the ticket Done until all three reviews pass or remaining issues are explicitly waived by the human.
+
+## Finish reviews
+
+Required after implementation work is “done” and before asking the human to merge. Run all three; fix issues in the same branch (shared-branch or worktree per rules above), then re-push.
+
+### 1. Architecture / code review
+
+Confirm the diff aligns with the intended project architecture:
+
+- Read `project/architecture.md` (and `project/v0.1-implementation-plan.md` when relevant).
+- Check module boundaries (`api` / `impl` or `model` / `api` / `data` / `presentation` / `di`), dependency direction, and that `:app` stays thin.
+- Prefer `/code-review` against `main` (Standards + Spec), with architecture docs as the Spec/standards source for structure.
+- Fix architecture violations before merge; do not leave “follow-up later” for boundary leaks.
+
+### 2. Test review
+
+Confirm the app runs without crashing and does what the ticket/spec requires:
+
+- Build the affected modules (e.g. `./gradlew :app:assembleDebug` and any module compile tasks touched by the change).
+- Run relevant unit/instrumentation tests if they exist for the change; add or extend tests when behavior is non-trivial and untested.
+- Manually or via emulator/device: exercise the happy path and obvious failure paths for the feature (no crash on open, navigation, and primary actions).
+- Record what was run (commands + result) in the PR/issue comment. If the environment cannot run the app, say so explicitly and still do everything possible offline (compile + unit tests).
+
+### 3. Design review
+
+Compare UI/UX to Figma and fix mismatches:
+
+- Source of truth: [Figma — Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) (also linked from `project/requierments.md` / `project/architecture.md`).
+- Use Figma MCP / screenshots for the screens touched by the change (Main Screens, file management flows, Run/Build, etc.).
+- Check layout, spacing, typography, colors, icons, empty/error/loading states, and copy against `:designsystem` tokens/components.
+- Fix visual/UX gaps in the same PR when feasible; if blocked (missing asset, ambiguous Figma), comment on the issue with screenshots/notes — do not silently ship obvious drift.
 
 ## Keep open branches current with `main`
 
