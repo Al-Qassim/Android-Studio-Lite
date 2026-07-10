@@ -25,10 +25,13 @@ android {
 
 dependencies {
     api(project(":feature:projects:api"))
+    api(project(":feature:projects:model"))
     api(project(":feature:files:api"))
+    api(project(":feature:files:model"))
     api(project(":feature:editor:api"))
     api(project(":feature:buildapk:api"))
     implementation(libs.koin.androidx.compose)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.core.ktx)

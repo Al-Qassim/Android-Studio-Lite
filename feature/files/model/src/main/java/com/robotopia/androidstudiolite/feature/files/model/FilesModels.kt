@@ -21,3 +21,11 @@ data class DirectoryListing(
     val currentRelativePath: String,
     val entries: List<FsNode>,
 )
+
+/** Per-field errors for file/folder name forms. Null means the field is valid. */
+data class FileNameFieldErrors(
+    val name: String? = null,
+) {
+    val hasErrors: Boolean
+        get() = name != null
+}

@@ -1,11 +1,15 @@
 package com.robotopia.androidstudiolite.feature.files.presentation
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.robotopia.androidstudiolite.feature.files.api.FileExplorerService
 import com.robotopia.androidstudiolite.feature.files.api.FilesScreens
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreen
 
-class StubFilesScreens : FilesScreens {
+class DefaultFilesScreens(
+    private val fileExplorerService: FileExplorerService,
+) : FilesScreens {
+
     @Composable
     override fun NavHost(
         root: ProjectRoot,
@@ -31,6 +35,13 @@ class StubFilesScreens : FilesScreens {
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
     ) {
-        Text("Files (stub)")
+        FileBrowserScreen(
+            root = root,
+            projectName = projectName,
+            initialRelativePath = initialRelativePath,
+            fileExplorerService = fileExplorerService,
+            onOpenFile = onOpenFile,
+            onNavigateBack = onNavigateBack,
+        )
     }
 }

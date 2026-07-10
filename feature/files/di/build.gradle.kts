@@ -24,4 +24,5 @@ dependencies {
     implementation(project(":feature:files:data"))
     implementation(project(":feature:files:presentation"))
     implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
 }

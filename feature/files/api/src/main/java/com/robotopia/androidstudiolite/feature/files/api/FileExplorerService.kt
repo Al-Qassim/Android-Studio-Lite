@@ -2,6 +2,7 @@ package com.robotopia.androidstudiolite.feature.files.api
 
 import androidx.compose.runtime.Composable
 import com.robotopia.androidstudiolite.feature.files.model.DirectoryListing
+import com.robotopia.androidstudiolite.feature.files.model.FileNameFieldErrors
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,9 @@ interface FileExplorerService {
     suspend fun delete(root: ProjectRoot, relativePath: String)
     suspend fun readText(root: ProjectRoot, relativePath: String): String
     suspend fun writeText(root: ProjectRoot, relativePath: String, content: String)
+
+    /** Validates a file or folder name. Implementation lives in `:data`. */
+    fun validateFileName(name: String): FileNameFieldErrors
 }
 
 interface FilesScreens {
