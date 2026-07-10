@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.feature.files.presentation.browser
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,22 +49,37 @@ internal fun FileBrowserScreen(
         )
     }
 
-    FileBrowserContent(
-        state = state,
-        onBackClick = {
-            val parent = parentRelativePathOrNull(state.currentRelativePath)
-            if (parent == null) {
-                onNavigateBack()
-            } else {
-                viewModel.uiState.update {
-                    it.copy(
-                        currentRelativePath = parent,
-                        menuItem = null,
-                        addMenuOpen = false,
-                    )
+    fun navigateUp() {
+        val current = viewModel.uiState.value
+        when {
+            current.dialog != null ->
+                viewModel.uiState.update { it.copy(dialog = null) }
+            current.menuItem != null ->
+                viewModel.uiState.update { it.copy(menuItem = null) }
+            current.addMenuOpen ->
+                viewModel.uiState.update { it.copy(addMenuOpen = false) }
+            else -> {
+                val parent = parentRelativePathOrNull(current.currentRelativePath)
+                if (parent == null) {
+                    onNavigateBack()
+                } else {
+                    viewModel.uiState.update {
+                        it.copy(
+                            currentRelativePath = parent,
+                            menuItem = null,
+                            addMenuOpen = false,
+                        )
+                    }
                 }
             }
-        },
+        }
+    }
+
+    BackHandler(onBack = ::navigateUp)
+
+    FileBrowserContent(
+        state = state,
+        onBackClick = ::navigateUp,
         onAddClick = {
             viewModel.uiState.update { it.copy(addMenuOpen = true, menuItem = null) }
         },

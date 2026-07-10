@@ -95,6 +95,16 @@ gh issue comment <N> --body "Moved to In Progress — PR: <url>"
 3. Set Status per the table above.
 4. Comment on the issue with branch/PR URL and what changed.
 
+## Ticket acceptance criteria (UI / navigation)
+
+When filing or refining tickets that ship screens, hierarchy, dialogs, or multi-step flows, acceptance criteria must cover **platform controls**, not only in-app chrome:
+
+- **System Back** (3-button nav and/or gesture back) must match the intended in-app back/up behavior for nested navigation (e.g. folder → parent folder → project root → leave feature).
+- Overlays (dialogs, menus, sheets): system Back dismisses the top overlay before navigating away.
+- Do **not** treat “toolbar back works” as sufficient if system Back exits the app or skips levels while the user is still nested.
+
+Test review (`docs/agents/test-review.md`) verifies these on device; tickets should state them so agents and reviewers know they are in scope.
+
 ## Wayfinding operations
 
 Used by `/wayfinder`. The **map** is a single issue with **child** issues as tickets.

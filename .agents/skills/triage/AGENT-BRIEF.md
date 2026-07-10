@@ -32,6 +32,8 @@ The agent needs to know when it's done. Every agent brief must have concrete, te
 - **Good:** "Running `gh issue list --label needs-triage` returns issues that have been through initial classification"
 - **Bad:** "Triage should work correctly"
 
+For UI / navigation work, include **system chrome** where relevant: Android system Back (button or gesture) must behave like the intended in-app back/up path (nested folders/screens climb one level; overlays dismiss first). Do not accept “toolbar back only.”
+
 ### Explicit scope boundaries
 
 State what is out of scope. This prevents the agent from gold-plating or making assumptions about adjacent features.

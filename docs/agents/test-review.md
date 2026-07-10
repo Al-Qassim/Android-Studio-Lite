@@ -13,6 +13,7 @@ Before touching the device, write down every user-visible capability the PR says
 3. PR **Test plan** manual items (unchecked or checked — still verify on device).
 4. Architecture / API surface newly implemented if the PR exposes it in UI (e.g. create, rename, move, copy, delete, paste).
 5. **Designed primary affordances** — designsystem components and Figma for the flow (e.g. `MoveBar` after Move/Copy, dialogs, path bar). If the kit has a dedicated control for the action, that control is what must appear.
+6. **System chrome / platform controls** — when the PR owns hierarchy, overlays, or multi-step flows, include Android **system Back** (3-button nav and/or gesture back), not only in-app back/chevron. Ticket ACs and the checklist must treat these as first-class paths.
 
 Turn that into a **checklist of concrete actions**, one row per capability. Example shape:
 
@@ -20,7 +21,7 @@ Turn that into a **checklist of concrete actions**, one row per capability. Exam
 | --- | --- | --- | --- |
 | 1 | … | Tap X → expect Y | pass / fail / blocked |
 
-Do **not** collapse multiple capabilities into “happy path works.” If the PR mentions browse, create, rename, move, copy, delete, paste, back, etc., each gets its own row.
+Do **not** collapse multiple capabilities into “happy path works.” If the PR mentions browse, create, rename, move, copy, delete, paste, back, etc., each gets its own row. Prefer **paired rows** for navigation: in-app back **and** system Back when both apply.
 
 Explicitly mark rows **blocked** only when a dependency is documented in the PR (e.g. editor handoff stubbed until #9) — still list them; do not pretend they passed.
 
@@ -36,7 +37,8 @@ Install the debug APK on an emulator or device. Walk the checklist from §1 **in
 
 - Open every screen the PR owns or newly wires.
 - For each checklist row: perform the action and **verify the visible UI state** (list contents, path/title, dialogs, toasts/errors, destination screen).
-- Hierarchical UIs: open at least one child; confirm contents; **back** to parent.
+- Hierarchical UIs: open at least one child; confirm contents; go **back to parent with both** the in-app back control **and** system Back (nav bar button or gesture). Nested depth ≥2: system Back must climb one level at a time — it must **not** leave the app or jump to an unrelated screen while a parent folder/screen still exists.
+- Overlays (dialogs, menus, sheets): system Back dismisses the top overlay first; only then navigates.
 - Mutating actions named in the PR (create / rename / move / copy / delete / paste / save / …): do each at least once; confirm the listing or document updates afterward.
 - **Primary affordance check:** after starting an action, confirm the **designed** control is on screen (e.g. after Move/Copy, the bottom `MoveBar` with Cancel + Move here / Paste here — not only a hidden alternate like Paste buried under `+`). Passing via an undocumented workaround is a **fail**.
 - At least one failure or validation path if the PR/issue implies it (invalid name, conflict, etc.) — no crash; user-visible feedback when specified.
@@ -58,6 +60,7 @@ Post on the PR/issue:
 - Build succeeds for touched modules.
 - Relevant automated tests pass (or gaps are explicitly listed).
 - **Every** non-blocked checklist row from §1 is demonstrated on device/emulator **using the designed primary affordance**.
+- System Back / gesture back verified wherever the PR owns hierarchy or overlays (paired with in-app back when both exist).
 - No crash on those flows.
 - Behavior matches the PR/issue — or the review **fails** with concrete gaps (never soft-pass with “manual QA not fully exercised” or “happy path OK” without the table).
 
@@ -68,5 +71,6 @@ Post on the PR/issue:
 - Create/rename/move/copy/delete/paste claimed in the PR but not exercised on device.
 - Action runs but UI does not update.
 - Action only works through a hidden/alternate control while the designed control (e.g. `MoveBar`) never appears.
+- In-app back works but **system Back** exits the app (or skips levels) while nested in folders / feature sub-navigation.
 - Reviewer only ran assemble + unit tests while the PR ships screens or actions.
 - Reviewer marked pass without publishing the checklist results.
