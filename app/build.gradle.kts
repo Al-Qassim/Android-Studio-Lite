@@ -39,6 +39,11 @@ android {
 
 dependencies {
     implementation(project(":designsystem"))
+    implementation(project(":integration:di"))
+    implementation(project(":integration:navigation"))
+    implementation(project(":integration:database"))
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
