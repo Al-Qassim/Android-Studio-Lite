@@ -49,37 +49,21 @@ internal fun FileBrowserScreen(
         )
     }
 
-    fun navigateUp() {
-        val current = viewModel.uiState.value
-        when {
-            current.dialog != null ->
-                viewModel.uiState.update { it.copy(dialog = null) }
-            current.menuItem != null ->
-                viewModel.uiState.update { it.copy(menuItem = null) }
-            current.addMenuOpen ->
-                viewModel.uiState.update { it.copy(addMenuOpen = false) }
-            else -> {
-                val parent = parentRelativePathOrNull(current.currentRelativePath)
-                if (parent == null) {
-                    onNavigateBack()
-                } else {
-                    viewModel.uiState.update {
-                        it.copy(
-                            currentRelativePath = parent,
-                            menuItem = null,
-                            addMenuOpen = false,
-                        )
-                    }
-                }
-            }
-        }
+    BackHandler {
+        navigateUp(
+            uiState = viewModel.uiState,
+            onNavigateBack = onNavigateBack,
+        )
     }
-
-    BackHandler(onBack = ::navigateUp)
 
     FileBrowserContent(
         state = state,
-        onBackClick = ::navigateUp,
+        onBackClick = {
+            navigateUp(
+                uiState = viewModel.uiState,
+                onNavigateBack = onNavigateBack,
+            )
+        },
         onAddClick = {
             viewModel.uiState.update { it.copy(addMenuOpen = true, menuItem = null) }
         },
@@ -258,6 +242,35 @@ internal fun FileBrowserScreen(
             viewModel.uiState.update { it.copy(actionError = null) }
         },
     )
+}
+
+private fun navigateUp(
+    uiState: MutableStateFlow<FileBrowserUiState>,
+    onNavigateBack: () -> Unit,
+) {
+    val current = uiState.value
+    when {
+        current.dialog != null ->
+            uiState.update { it.copy(dialog = null) }
+        current.menuItem != null ->
+            uiState.update { it.copy(menuItem = null) }
+        current.addMenuOpen ->
+            uiState.update { it.copy(addMenuOpen = false) }
+        else -> {
+            val parent = parentRelativePathOrNull(current.currentRelativePath)
+            if (parent == null) {
+                onNavigateBack()
+            } else {
+                uiState.update {
+                    it.copy(
+                        currentRelativePath = parent,
+                        menuItem = null,
+                        addMenuOpen = false,
+                    )
+                }
+            }
+        }
+    }
 }
 
 private suspend fun collectListing(
