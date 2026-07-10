@@ -1,0 +1,17 @@
+---
+description: Feature navigation — thin IdeNavHost; each feature owns its NavHost
+globs: "**/integration/navigation/**/*.kt,**/feature/**/presentation/**/*.kt,**/feature/**/api/**/*.kt"
+alwaysApply: false
+---
+
+# Feature navigation
+
+- `:integration:navigation` / `IdeNavHost` only wires **cross-feature** exits (inject `*Screens`, call `NavHost(...)`).
+- Each feature owns list↔create (and similar) **sub-navigation** inside its `*Screens` / `*NavHost`.
+- Do not put feature toasts, dialogs, or screen state in `IdeNavHost`.
+
+```kotlin
+// ❌ BAD — IdeNavHost shows projects toast / owns create route
+// ✅ GOOD
+projectsScreens.NavHost(onOpenProject = { id -> /* cross-feature only */ })
+```

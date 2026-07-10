@@ -1,0 +1,18 @@
+---
+description: Domain validation lives in data; API exposes it for presentation
+globs: "**/feature/**/api/**/*.kt,**/feature/**/data/**/*.kt,**/feature/**/presentation/**/*.kt,**/feature/**/model/**/*.kt"
+alwaysApply: false
+---
+
+# Validation placement
+
+- Implement validation **once** in `:data` (e.g. `ProjectValidation`).
+- Expose field/result helpers on the feature `:api` service so presentation can show field errors.
+- Presentation must **not** duplicate package/name/range rules; call the API.
+- Service write paths still re-validate before mutating storage.
+
+```kotlin
+// ❌ BAD — regex / minSdk checks copied in CreateProjectScreen
+// ✅ GOOD
+val errors = projectService.validateCreateProject(name, packageName, minSdk)
+```

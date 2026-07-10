@@ -12,6 +12,10 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
 
+### Feature code structure
+
+When adding or refactoring feature screens / modules, run `/structure-feature-code` (skill: `.agents/skills/structure-feature-code/SKILL.md`). Cursor rules under `.cursor/rules/` encode the same conventions (navigation, errors, validation, Compose screens, incremental PR delivery).
+
 ## Git worktrees
 
 The main checkout (`AndroidStudioLite/`) is reserved for the human. Agents must not casually `git checkout` / switch branches there — **except** the shared-branch case below.

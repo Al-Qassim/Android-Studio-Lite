@@ -1,0 +1,34 @@
+---
+description: Compose screen structure — state-only VMs, content vs wiring, shallow trees, previews
+globs: "**/feature/**/presentation/**/*.kt"
+alwaysApply: false
+---
+
+# Compose screen structure
+
+## Layout per screen
+
+```
+feature/<name>/presentation/<screen>/
+  *ViewModel.kt      # MutableStateFlow UI state only
+  *Screen.kt         # wiring + private service helpers
+  *Content.kt        # drawing + private @Preview(s)
+```
+
+## ViewModel
+
+- Holds in-memory UI state across config changes only.
+- No `ProjectService` calls, validation, or navigation effects.
+
+## Screen vs content
+
+- `*Screen`: collect state, pass callbacks, private helpers (`collect*`, `open*`, `create*`).
+- `*Content` / small children: draw UI only; multi-state private previews in the **content** file.
+
+## Nesting
+
+- Keep composable nesting ≤ **2–3 levels** per function; extract children when deeper.
+
+## Previews
+
+- Many named cases: empty, filled, field errors, loading/creating, menus, dialogs, action errors.
