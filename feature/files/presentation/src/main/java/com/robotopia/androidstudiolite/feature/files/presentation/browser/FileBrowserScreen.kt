@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.MoveBar
 import com.robotopia.androidstudiolite.designsystem.component.PathBar
@@ -76,134 +77,10 @@ internal fun FileBrowserScreenContext.FileBrowserScreen(state: FileBrowserUiStat
 private fun relativePathSegments(relativePath: String): List<String> =
     relativePath.split('/').filter { it.isNotEmpty() }
 
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · empty",
-)
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
 @Composable
-private fun FileBrowserEmptyPreview() {
-    FileBrowserPreviewHost(fileBrowserEmptyPreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · filled",
-)
-@Composable
-private fun FileBrowserFilledPreview() {
-    FileBrowserPreviewHost(fileBrowserFilledPreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · nested path",
-)
-@Composable
-private fun FileBrowserNestedPathPreview() {
-    FileBrowserPreviewHost(fileBrowserNestedPathPreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · create file",
-)
-@Composable
-private fun FileBrowserCreateFilePreview() {
-    FileBrowserPreviewHost(fileBrowserCreateFilePreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · create file field error",
-)
-@Composable
-private fun FileBrowserCreateFileFieldErrorPreview() {
-    FileBrowserPreviewHost(fileBrowserCreateFileFieldErrorPreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · rename field error",
-)
-@Composable
-private fun FileBrowserRenameFieldErrorPreview() {
-    FileBrowserPreviewHost(fileBrowserRenameFieldErrorPreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · menu open",
-)
-@Composable
-private fun FileBrowserMenuPreview() {
-    FileBrowserPreviewHost(fileBrowserMenuPreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · delete confirm",
-)
-@Composable
-private fun FileBrowserDeletePreview() {
-    FileBrowserPreviewHost(fileBrowserDeletePreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · move bar",
-)
-@Composable
-private fun FileBrowserMoveBarPreview() {
-    FileBrowserPreviewHost(fileBrowserMoveBarPreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · copy bar",
-)
-@Composable
-private fun FileBrowserCopyBarPreview() {
-    FileBrowserPreviewHost(fileBrowserCopyBarPreviewState())
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF12171C,
-    widthDp = 360,
-    heightDp = 640,
-    name = "Browser · action error",
-)
-@Composable
-private fun FileBrowserActionErrorPreview() {
-    FileBrowserPreviewHost(fileBrowserActionErrorPreviewState())
+private fun FileBrowserPreview(
+    @PreviewParameter(FileBrowserPreviewProvider::class) case: FileBrowserPreviewCase,
+) {
+    FileBrowserPreviewHost(case.state)
 }
