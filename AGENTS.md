@@ -82,12 +82,31 @@ Confirm the app runs without crashing and does what the ticket/spec requires:
 
 ### 3. Design review
 
-Compare UI/UX to Figma and fix mismatches:
+Run `/design-review` (skill: `.agents/skills/design-review/SKILL.md`). Do not skip to code-only judgment.
 
-- Source of truth: [Figma — Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) (also linked from `project/requierments.md` / `project/architecture.md`).
-- Use Figma MCP / screenshots for the screens touched by the change (Main Screens, file management flows, Run/Build, etc.).
-- Check layout, spacing, typography, colors, icons, empty/error/loading states, and copy against `:designsystem` tokens/components.
-- Fix visual/UX gaps in the same PR when feasible; if blocked (missing asset, ambiguous Figma), comment on the issue with screenshots/notes — do not silently ship obvious drift.
+**Default Figma:** [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)
+
+**Design review — steps**
+
+Pull the source of truth — Figma frames for the feature (screenshots + design context), not code alone.
+Capture the live app — install/run on emulator/device; take real screenshots of each relevant state (empty, filled, dialogs, menus, edge cases).
+Diff visually — for each screen/state: app vs Figma (layout, spacing, colors, typography, copy, icons, system chrome/insets).
+Fix gaps in code — prefer design-system tokens/components; include system bars (enableEdgeToEdge + insets/scrims).
+Re-capture after — same states, same device framing.
+Publish evidence outside the repo — upload before/after (and Figma exports if needed) to a temporary release/gist; do not commit screenshots.
+Post a PR comment — one section per issue; equal-width table: Before | Figma | After; short note of what was wrong and what changed; link Figma frames; note the fix commit.
+Clean up — delete local screenshot dirs; optional: delete the temp release after review.
+
+**Principles**
+
+Device truth over code review — judge pixels from the running app, not Compose previews alone.
+Figma is the contract — match copy, hierarchy, colors, affordances (e.g. ⋮), and dialog button styles.
+System UI counts — status/nav bars and insets are part of the design review.
+Evidence stays out of git — screenshots live on the PR comment (hosted assets), not in the tree.
+Side-by-side layout — equal-width columns so Before / Figma / After are comparable at a glance.
+One issue per section — short diagnosis + fix; don’t dump a wall of images.
+Durable hosting for app shots — GitHub release assets (or similar); avoid relying only on ephemeral Figma MCP URLs when possible.
+Scope the comment to design — architecture/nav notes can be a short “also” list, not mixed into every image row.
 
 ## Keep open branches current with `main`
 
