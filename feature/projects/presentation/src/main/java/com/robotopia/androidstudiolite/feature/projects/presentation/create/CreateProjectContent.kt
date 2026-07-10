@@ -124,14 +124,113 @@ private fun FormField(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Create · empty",
+)
 @Composable
-private fun CreateProjectScreenPreview() {
+private fun CreateProjectEmptyPreview() {
+    CreateProjectContent(
+        state = CreateProjectUiState(),
+        onCancel = {},
+        onNameChange = {},
+        onPackageNameChange = {},
+        onMinSdkChange = {},
+        onCreateClick = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Create · filled",
+)
+@Composable
+private fun CreateProjectFilledPreview() {
     CreateProjectContent(
         state = CreateProjectUiState(
             name = "MyApp",
             packageName = "com.example.myapp",
             minSdk = "26",
+        ),
+        onCancel = {},
+        onNameChange = {},
+        onPackageNameChange = {},
+        onMinSdkChange = {},
+        onCreateClick = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Create · field errors",
+)
+@Composable
+private fun CreateProjectFieldErrorsPreview() {
+    CreateProjectContent(
+        state = CreateProjectUiState(
+            name = "",
+            packageName = "BadPackage",
+            minSdk = "10",
+            nameError = "App name is required",
+            packageError = "Use a valid Java package (e.g. com.example.app)",
+            minSdkError = "Min SDK must be between 21 and 35",
+        ),
+        onCancel = {},
+        onNameChange = {},
+        onPackageNameChange = {},
+        onMinSdkChange = {},
+        onCreateClick = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Create · form error",
+)
+@Composable
+private fun CreateProjectFormErrorPreview() {
+    CreateProjectContent(
+        state = CreateProjectUiState(
+            name = "MyApp",
+            packageName = "com.example.myapp",
+            minSdk = "26",
+            formError = "Something went wrong",
+        ),
+        onCancel = {},
+        onNameChange = {},
+        onPackageNameChange = {},
+        onMinSdkChange = {},
+        onCreateClick = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Create · creating",
+)
+@Composable
+private fun CreateProjectCreatingPreview() {
+    CreateProjectContent(
+        state = CreateProjectUiState(
+            name = "MyApp",
+            packageName = "com.example.myapp",
+            minSdk = "26",
+            isCreating = true,
         ),
         onCancel = {},
         onNameChange = {},

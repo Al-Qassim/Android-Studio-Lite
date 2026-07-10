@@ -151,27 +151,137 @@ internal fun ProjectsListContent(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
+private val previewProjects = listOf(
+    Project(
+        id = ProjectId("1"),
+        name = "MyApp",
+        packageName = "com.example.myapp",
+        rootPath = "/projects/1",
+        lastOpenedAt = System.currentTimeMillis() - 3_600_000,
+    ),
+    Project(
+        id = ProjectId("2"),
+        name = "Demo",
+        packageName = "com.example.demo",
+        rootPath = "/projects/2",
+        lastOpenedAt = null,
+    ),
+    Project(
+        id = ProjectId("3"),
+        name = "Notes",
+        packageName = "com.example.notes",
+        rootPath = "/projects/3",
+        lastOpenedAt = System.currentTimeMillis() - 86_400_000,
+    ),
+)
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "List · empty",
+)
 @Composable
-private fun ProjectsListScreenPreview() {
+private fun ProjectsListEmptyPreview() {
+    ProjectsListContent(
+        state = ProjectsListUiState(),
+        onCreateProject = {},
+        onOpenClick = {},
+        onMenuOpen = {},
+        onMenuDismiss = {},
+        onDeleteMenuClick = {},
+        onDeleteCancel = {},
+        onDeleteConfirm = {},
+        onErrorDismiss = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "List · with projects",
+)
+@Composable
+private fun ProjectsListFilledPreview() {
+    ProjectsListContent(
+        state = ProjectsListUiState(projects = previewProjects),
+        onCreateProject = {},
+        onOpenClick = {},
+        onMenuOpen = {},
+        onMenuDismiss = {},
+        onDeleteMenuClick = {},
+        onDeleteCancel = {},
+        onDeleteConfirm = {},
+        onErrorDismiss = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "List · menu open",
+)
+@Composable
+private fun ProjectsListMenuPreview() {
     ProjectsListContent(
         state = ProjectsListUiState(
-            projects = listOf(
-                Project(
-                    id = ProjectId("1"),
-                    name = "MyApp",
-                    packageName = "com.example.myapp",
-                    rootPath = "/projects/1",
-                    lastOpenedAt = System.currentTimeMillis() - 3_600_000,
-                ),
-                Project(
-                    id = ProjectId("2"),
-                    name = "Demo",
-                    packageName = "com.example.demo",
-                    rootPath = "/projects/2",
-                    lastOpenedAt = null,
-                ),
-            ),
+            projects = previewProjects,
+            menuProject = previewProjects.first(),
+        ),
+        onCreateProject = {},
+        onOpenClick = {},
+        onMenuOpen = {},
+        onMenuDismiss = {},
+        onDeleteMenuClick = {},
+        onDeleteCancel = {},
+        onDeleteConfirm = {},
+        onErrorDismiss = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "List · delete confirm",
+)
+@Composable
+private fun ProjectsListDeleteConfirmPreview() {
+    ProjectsListContent(
+        state = ProjectsListUiState(
+            projects = previewProjects,
+            pendingDelete = previewProjects.first(),
+        ),
+        onCreateProject = {},
+        onOpenClick = {},
+        onMenuOpen = {},
+        onMenuDismiss = {},
+        onDeleteMenuClick = {},
+        onDeleteCancel = {},
+        onDeleteConfirm = {},
+        onErrorDismiss = {},
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "List · action error",
+)
+@Composable
+private fun ProjectsListActionErrorPreview() {
+    ProjectsListContent(
+        state = ProjectsListUiState(
+            projects = previewProjects,
+            actionError = "Project not found",
         ),
         onCreateProject = {},
         onOpenClick = {},
