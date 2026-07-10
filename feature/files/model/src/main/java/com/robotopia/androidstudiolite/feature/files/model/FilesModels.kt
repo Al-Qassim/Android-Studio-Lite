@@ -21,11 +21,3 @@ data class DirectoryListing(
     val currentRelativePath: String,
     val entries: List<FsNode>,
 )
-
-sealed class FileOpError {
-    data object OutsideSandbox : FileOpError()
-    data object NameConflict : FileOpError()
-    data object InvalidName : FileOpError()
-    data object InvalidMove : FileOpError()
-    data class Io(val message: String) : FileOpError()
-}

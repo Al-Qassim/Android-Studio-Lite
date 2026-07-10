@@ -281,26 +281,18 @@ data class DirectoryListing(
     val entries: List<FsNode>,
 )
 
-sealed class FileOpError {
-    data object OutsideSandbox : FileOpError()
-    data object NameConflict : FileOpError()
-    data object InvalidName : FileOpError()
-    data object InvalidMove : FileOpError()   // into self/child
-    data class Io(val message: String) : FileOpError()
-}
-
 interface FileExplorerService {
     fun observeListing(root: ProjectRoot, relativePath: String): Flow<DirectoryListing>
 
-    suspend fun createFile(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.File, FileOpError>
-    suspend fun createFolder(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.Folder, FileOpError>
-    suspend fun rename(root: ProjectRoot, relativePath: String, newName: String): Result<FsNode, FileOpError>
-    suspend fun move(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode, FileOpError>
-    suspend fun copy(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode, FileOpError>
-    suspend fun delete(root: ProjectRoot, relativePath: String): Result<Unit, FileOpError>
+    suspend fun createFile(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.File>
+    suspend fun createFolder(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.Folder>
+    suspend fun rename(root: ProjectRoot, relativePath: String, newName: String): Result<FsNode>
+    suspend fun move(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode>
+    suspend fun copy(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode>
+    suspend fun delete(root: ProjectRoot, relativePath: String): Result<Unit>
 
-    suspend fun readText(root: ProjectRoot, relativePath: String): Result<String, FileOpError>
-    suspend fun writeText(root: ProjectRoot, relativePath: String, content: String): Result<Unit, FileOpError>
+    suspend fun readText(root: ProjectRoot, relativePath: String): Result<String>
+    suspend fun writeText(root: ProjectRoot, relativePath: String, content: String): Result<Unit>
 }
 
 /**
@@ -602,13 +594,13 @@ flowchart TD
 | Rename                         | `rename`                                       |
 | Delete file / non-empty folder | `delete` (+ confirm UI)                        |
 | Move / copy                    | `move` / `copy`                                |
-| Name conflict / invalid name   | `FileOpError`                                  |
+| Name conflict / invalid name   | `Result` failure (message → UI)                |
 | Breadcrumbs / up               | listing `relativePath` changes                 |
 | Open → editor → save           | integration + Editor + `writeText`             |
 | Empty folder                   | empty state UI                                 |
-| Invalid move into self/child   | `InvalidMove`                                  |
+| Invalid move into self/child   | `Result` failure                               |
 | Delete/move while open         | integration closes or prompts EditorSession    |
-| Sandbox guardrails             | `OutsideSandbox`                               |
+| Sandbox guardrails             | `Result` failure                               |
 
 
 ---
