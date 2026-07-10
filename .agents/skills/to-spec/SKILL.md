@@ -40,6 +40,8 @@ A LONG, numbered list of user stories. Each user story should be in the format o
 
 This list of user stories should be extremely extensive and cover all aspects of the feature.
 
+For mobile / Compose UI, also include stories (or explicit out-of-scope notes) for items in `docs/agents/writing-acceptance-criteria.md`: designed primary affordances, system Back vs in-app back, overlay dismiss, empty/error/conflict paths — not only the happy-path toolbar actions.
+
 ## Implementation Decisions
 
 A list of implementation decisions that were made. This can include:
@@ -51,6 +53,7 @@ A list of implementation decisions that were made. This can include:
 - Schema changes
 - API contracts
 - Specific interactions
+- Designsystem / Figma components that are the **primary** UI for a state (so tickets cannot silently substitute a hidden alternate)
 
 Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
 
@@ -63,6 +66,7 @@ A list of testing decisions that were made. Include:
 - A description of what makes a good test (only test external behavior, not implementation details)
 - Which modules will be tested
 - Prior art for the tests (i.e. similar types of tests in the codebase)
+- Device/emulator checks aligned with `docs/agents/test-review.md` and `docs/agents/writing-acceptance-criteria.md` (system Back, designed affordances — not assemble-only)
 
 ## Out of Scope
 

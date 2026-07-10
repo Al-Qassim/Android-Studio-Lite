@@ -55,6 +55,18 @@ Ask the user:
 
 Iterate until the user approves the breakdown.
 
+### 4b. Flesh acceptance criteria (required before publish)
+
+For every ticket that ships UI, navigation, dialogs, or multi-step user actions, write acceptance criteria using `docs/agents/writing-acceptance-criteria.md`.
+
+Before publishing, confirm each such ticket explicitly covers (or marks out of scope):
+
+- Designed **primary** affordances (not only hidden alternates)
+- **System Back** / platform chrome paired with in-app back where hierarchy or overlays exist
+- Nested return paths, empty/error states, and each mutating action named in the ticket
+
+Do not publish a UI ticket whose ACs only say “browse works” or “back works” without those details.
+
 ### 5. Publish the tickets to the configured tracker
 
 Publish the approved tickets. **How** depends on the tracker `/setup-matt-pocock-skills` configured — the tickets are the same either way, only the shape of the blocking edges changes:
@@ -78,8 +90,10 @@ Work the **frontier**: any ticket whose blockers are all done. For a purely line
 
 **Blocked by:** the titles of the tickets that gate this one, or "None — can start immediately".
 
-- [ ] Acceptance criterion 1
-- [ ] Acceptance criterion 2
+Acceptance criteria — for UI/navigation tickets follow `docs/agents/writing-acceptance-criteria.md`:
+
+- [ ] Acceptance criterion 1 (user-visible; name designed primary control when relevant)
+- [ ] Acceptance criterion 2 (system Back / platform chrome when hierarchy or overlays apply)
 
 ## <Ticket title>
 
@@ -99,8 +113,11 @@ The end-to-end behaviour this ticket makes work, from the user's perspective —
 
 ## Acceptance criteria
 
-- [ ] Criterion 1
-- [ ] Criterion 2
+Write criteria with `docs/agents/writing-acceptance-criteria.md` when the ticket includes UI/navigation. Example shape:
+
+- [ ] User-visible behaviour (designed primary control named)
+- [ ] System Back / platform path when hierarchy or overlays apply
+- [ ] Empty / error / conflict path when mutations apply
 
 ## Blocked by
 

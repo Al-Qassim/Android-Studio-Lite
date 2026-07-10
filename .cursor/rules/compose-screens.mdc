@@ -1,34 +1,53 @@
 ---
-description: Compose screen structure — state-only VMs, content vs wiring, shallow trees, previews
+description: Compose screen structure — Screen Context for busy screens, state-only VMs, shallow trees, previews
 globs: "**/feature/**/presentation/**/*.kt"
 alwaysApply: false
 ---
 
 # Compose screen structure
 
-## Layout per screen
+Canonical pattern for busy screens: **Screen Context** — full rules in `docs/agents/screen-context.md`.
+
+## Busy screen (default when many components)
 
 ```
 feature/<name>/presentation/<screen>/
+  *ScreenContext.kt  # service, updateState, exits, scope
   *ViewModel.kt      # MutableStateFlow UI state only
-  *Screen.kt         # wiring + private service helpers
-  *Content.kt        # drawing + private @Preview(s)
+  *Screen.kt         # Ctx.Screen(state) + thin @Preview stub
+  *Previews.kt       # preview host, fakes, cases
+  ui/                # Ctx UI extensions (take state)
+  logic/             # Ctx logic extensions
 ```
+
+- Screen-specific UI/logic = **context extensions**; pass **`state`** into UI composables.
+- Designsystem composables keep normal parameters.
+- Host builds context + ViewModel; screen does not take a concrete VM.
+- **Never nest function declarations.**
+
+## Thin screen (optional)
+
+```
+feature/<name>/presentation/<screen>/
+  *ViewModel.kt
+  *Screen.kt
+  *Content.kt        # optional; avoid mega callback lists
+```
+
+If Content grows past ~6–8 callbacks, switch to Screen Context.
 
 ## ViewModel
 
 - Holds in-memory UI state across config changes only.
-- No `ProjectService` calls, validation, or navigation effects.
-
-## Screen vs content
-
-- `*Screen`: collect state, pass callbacks, private helpers (`collect*`, `open*`, `create*`).
-- `*Content` / small children: draw UI only; multi-state private previews in the **content** file.
+- No feature-service calls, validation, or navigation effects in the VM.
+- Route args may be constructor params (Koin `parametersOf`).
 
 ## Nesting
 
 - Keep composable nesting ≤ **2–3 levels** per function; extract children when deeper.
+- Nested *calls* are fine; nested *function definitions* are not.
 
 ## Previews
 
-- Many named cases: empty, filled, field errors, loading/creating, menus, dialogs, action errors.
+- Cases/fixtures in `*Previews.kt` (`PreviewParameterProvider` is fine).
+- Keep a thin `@Preview` stub on `*Screen.kt` so previews sit next to the screen in the IDE.

@@ -20,6 +20,7 @@ Every comment or issue posted to the issue tracker during triage **must** start 
 
 - [AGENT-BRIEF.md](AGENT-BRIEF.md) — how to write durable agent briefs
 - [OUT-OF-SCOPE.md](OUT-OF-SCOPE.md) — how the `.out-of-scope/` knowledge base works
+- `docs/agents/writing-acceptance-criteria.md` — checklist for UI/navigation acceptance criteria (system Back, designed affordances, etc.)
 
 ## Roles
 
