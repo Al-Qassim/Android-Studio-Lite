@@ -24,6 +24,7 @@ interface EditorScreens {
     @Composable
     fun NavHost(
         documentId: DocumentId,
+        root: ProjectRoot,
         onNavigateBack: () -> Unit,
         onRun: (() -> Unit)?,
     )
@@ -31,6 +32,7 @@ interface EditorScreens {
     @Composable
     fun Editor(
         documentId: DocumentId,
+        root: ProjectRoot,
         onNavigateBack: () -> Unit,
         onRun: (() -> Unit)?,
     )
