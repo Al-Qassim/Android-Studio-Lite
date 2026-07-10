@@ -25,6 +25,7 @@ dependencyResolutionManagement {
 rootProject.name = "Android Studio Lite"
 include(":app")
 include(":designsystem")
+include(":core:error")
 
 include(":feature:projects:model")
 include(":feature:projects:api")

@@ -32,7 +32,7 @@ Known Figma pages (from prior work):
 - **Loading & error states** — loading / failure UI for Projects, Create, Files, Editor, Build ([open](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite?node-id=90-2))
 - **Architecture** — module dependency flowchart + create→edit→run product flow ([open](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite?node-id=59-2))
 
-Existing foundation: `:designsystem` (colors, typography, shared Compose primitives).
+Existing foundation: `:designsystem` (colors, typography, shared Compose primitives); `:core:error` (`AppException` for planned UI messages).
 
 ---
 
@@ -57,6 +57,8 @@ Existing foundation: `:designsystem` (colors, typography, shared Compose primiti
 AndroidStudioLite/
 ├── app                         # shell: start Koin, permissions, install
 ├── designsystem                # tokens + UI primitives
+├── core/
+│   └── error                   # AppException + UI message helper (not domain models)
 ├── feature/
 │   ├── projects/
 │   │   ├── model               # Project, ProjectId, CreateProjectRequest
@@ -682,6 +684,7 @@ flowchart TB
 // settings.gradle.kts
 include(":app")
 include(":designsystem")
+include(":core:error")
 
 include(":feature:projects:model")
 include(":feature:projects:api")
@@ -724,7 +727,8 @@ High-level locks that affect module shape:
 
 - **Koin** — per-feature `:di` modules; `:integration:di` includes them; `:app` starts Koin
 - **App-private** project storage; **Room** assembled in **`:integration:database`**; feature tables/DAOs live in **`:feature:*:data`**
-- **Models per feature** (`:feature:*:model`) — no shared core model module
+- **Models per feature** (`:feature:*:model`) — no shared core *domain* model module
+- **`:core:error`** — shared `AppException(uiMessage)` for planned user-facing failures; unexpected errors are logged and must not show `Throwable.message`
 - **`editor:data` may use `files:api`** for load/save
 - **Fake `BuildService`** for v0.1 (real GitHub Actions later, same API)
 - **IDE nav graph** in `:integration:navigation` (no `IdeCoordinator` in v0.1)
@@ -739,6 +743,7 @@ High-level locks that affect module shape:
 | Module              | Role                   | Public surface                                      |
 | ------------------- | ---------------------- | --------------------------------------------------- |
 | `:designsystem`     | Visual language        | Compose components + tokens                         |
+| `:core:error`       | Planned failures       | `AppException` + `userMessageOrNull`                |
 | `:feature:projects` | Project lifecycle | `model` + `api` + `data` + `presentation` + `di` |
 | `:feature:files` | Tree navigation & CRUD | same five-way split |
 | `:feature:editor` | Edit / dirty / save | same five-way split |
