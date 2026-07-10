@@ -1,7 +1,9 @@
 package com.robotopia.androidstudiolite.feature.projects.data
 
 import android.content.Context
+import com.robotopia.androidstudiolite.core.error.AppException
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
+import com.robotopia.androidstudiolite.feature.projects.model.CreateProjectFieldErrors
 import com.robotopia.androidstudiolite.feature.projects.model.CreateProjectRequest
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
@@ -31,7 +33,7 @@ class DefaultProjectService(
             val id = UUID.randomUUID().toString()
             val rootDir = projectDir(id)
             if (rootDir.exists()) {
-                error("Project directory already exists")
+                throw AppException("Project directory already exists")
             }
 
             try {
@@ -59,18 +61,36 @@ class DefaultProjectService(
 
     override suspend fun deleteProject(id: ProjectId) {
         withContext(Dispatchers.IO) {
-            val entity = projectDao.getById(id.value) ?: return@withContext
+            val entity = projectDao.getById(id.value)
+                ?: throw AppException("Project not found")
+
             projectDao.deleteById(id.value)
-            File(entity.rootPath).deleteRecursively()
+            try {
+                val root = File(entity.rootPath)
+                if (root.exists() && !root.deleteRecursively()) {
+                    throw AppException("Could not delete project files")
+                }
+            } catch (t: Throwable) {
+                projectDao.upsert(entity)
+                throw t
+            }
         }
     }
 
     override suspend fun markOpened(id: ProjectId) {
         withContext(Dispatchers.IO) {
-            val entity = projectDao.getById(id.value) ?: return@withContext
+            val entity = projectDao.getById(id.value)
+                ?: throw AppException("Project not found")
             projectDao.upsert(entity.copy(lastOpenedAt = System.currentTimeMillis()))
         }
     }
+
+    override fun validateCreateProject(
+        name: String,
+        packageName: String,
+        minSdk: Int?,
+    ): CreateProjectFieldErrors =
+        ProjectValidation.fieldErrors(name = name, packageName = packageName, minSdk = minSdk)
 
     private fun projectDir(id: String): File =
         File(File(context.filesDir, PROJECTS_DIR), id)
