@@ -1,35 +1,69 @@
 # Test review
 
-Confirm the app runs without crashing **and is functionally usable** for the ticket/spec. Run this as part of Finish reviews before asking the human to merge.
+Confirm the app runs without crashing **and is functionally usable** for everything the PR claims to deliver. Run this as part of Finish reviews before asking the human to merge.
 
-Unit tests and a clean assemble are necessary but **not sufficient** when the change includes UI or navigation. Device/emulator truth decides pass/fail for those flows.
+Unit tests and a clean assemble are necessary but **not sufficient** when the change includes UI, navigation, or user-visible behavior. Device/emulator truth decides pass/fail for those flows.
 
-## Steps
+## 1. Build a functional checklist from the PR (required)
 
-1. **Build** the affected modules (e.g. `./gradlew :app:assembleDebug` and any module compile/test tasks touched by the change).
-2. **Unit / instrumentation tests** — run relevant tests if they exist; add or extend them when behavior is non-trivial and untested. Note: green unit tests do **not** replace step 3.
-3. **Functional device check (required when UI or nav is in scope)** — install the debug APK on an emulator or device and exercise the ticket’s acceptance criteria as a user would:
-   - Open every screen the ticket owns (or newly wires).
-   - For each **primary action** (open item, navigate into a folder/child, create, rename, delete, save, back, etc.): perform it and **verify the visible UI state changed as expected** (new list contents, path/title update, dialog appeared, destination screen shown).
-   - For hierarchical UIs (file tree, nested lists): open at least one **child** and confirm its contents are shown; use **back** and confirm the parent listing returns.
-   - Exercise one obvious failure / empty path if the ticket defines one (still no crash; user-visible feedback if specified).
-   - Do **not** mark this step done after “app launched” or “list appeared once.” Navigation and content updates must be observed.
-4. **Record evidence** in the PR/issue comment:
-   - Commands run + results (build, unit tests).
-   - Device/emulator steps performed and **what was observed** (pass or fail per acceptance criterion).
-   - If the environment cannot run the app, say so explicitly and still do everything possible offline — then **fail** the functional part of the review (do not claim the feature works).
+Before touching the device, write down every user-visible capability the PR says it ships. Sources (use all that apply):
+
+1. Linked issue acceptance criteria (`Fixes #N` / `Closes #N`).
+2. PR **Summary** / description (features, screens, actions named there).
+3. PR **Test plan** manual items (unchecked or checked — still verify on device).
+4. Architecture / API surface newly implemented if the PR exposes it in UI (e.g. create, rename, move, copy, delete, paste).
+
+Turn that into a **checklist of concrete actions**, one row per capability. Example shape:
+
+| # | Capability (from PR/issue) | How to verify on device | Result |
+| --- | --- | --- | --- |
+| 1 | … | Tap X → expect Y | pass / fail / blocked |
+
+Do **not** collapse multiple capabilities into “happy path works.” If the PR mentions browse, create, rename, move, copy, delete, paste, back, etc., each gets its own row.
+
+Explicitly mark rows **blocked** only when a dependency is documented in the PR (e.g. editor handoff stubbed until #9) — still list them; do not pretend they passed.
+
+## 2. Build and automated tests
+
+1. Build the affected modules (e.g. `./gradlew :app:assembleDebug` and compile tasks for touched modules).
+2. Run relevant unit/instrumentation tests if they exist; add or extend them when behavior is non-trivial and untested.
+3. Green unit tests do **not** replace the device checklist in §3.
+
+## 3. Functional device check (required when UI/nav/actions are in scope)
+
+Install the debug APK on an emulator or device. Walk the checklist from §1 **in full**:
+
+- Open every screen the PR owns or newly wires.
+- For each checklist row: perform the action and **verify the visible UI state** (list contents, path/title, dialogs, toasts/errors, destination screen).
+- Hierarchical UIs: open at least one child; confirm contents; **back** to parent.
+- Mutating actions named in the PR (create / rename / move / copy / delete / paste / save / …): do each at least once; confirm the listing or document updates afterward.
+- At least one failure or validation path if the PR/issue implies it (invalid name, conflict, etc.) — no crash; user-visible feedback when specified.
+- Do **not** stop after “app launched” or “root list appeared once.”
+
+If a checklist item cannot be reached because of a bug earlier in the flow, mark later items **blocked by prior fail** — the review still **fails**.
+
+## 4. Record evidence
+
+Post on the PR/issue:
+
+- Commands + results (build, unit tests).
+- The **full checklist table** with pass / fail / blocked per row (quote the PR/issue wording where helpful).
+- Short notes on what was observed for failures.
+- If the environment cannot run the app: say so, do offline work, and **fail** the functional section (do not claim the feature works).
 
 ## Pass criteria
 
 - Build succeeds for touched modules.
-- Relevant unit/instrumentation tests pass (or gaps are explicitly listed).
-- **On device/emulator:** every acceptance criterion that is user-visible is demonstrated, including navigation into children and back when the feature is hierarchical.
+- Relevant automated tests pass (or gaps are explicitly listed).
+- **Every** non-blocked checklist row from §1 is demonstrated on device/emulator.
 - No crash on those flows.
-- Behavior matches the issue/spec — or the review **fails** and lists concrete gaps (do not soft-pass with “manual QA not fully exercised”).
+- Behavior matches the PR/issue — or the review **fails** with concrete gaps (never soft-pass with “manual QA not fully exercised” or “happy path OK” without the table).
 
 ## Fail criteria (examples)
 
-- App opens and shows a root list, but tapping a folder/row does not show that child’s content.
-- Primary create/rename/delete/save action appears to run but the UI does not update.
-- Reviewer only ran assemble + unit tests while the PR ships new screens or nav wiring.
-- Reviewer notes “happy path works” without having performed the ticket’s main navigation steps.
+- Any checklist capability from the PR/issue was skipped or only unit-tested.
+- Root list works but folder/child navigation does not update content.
+- Create/rename/move/copy/delete/paste claimed in the PR but not exercised on device.
+- Action runs but UI does not update.
+- Reviewer only ran assemble + unit tests while the PR ships screens or actions.
+- Reviewer marked pass without publishing the checklist results.
