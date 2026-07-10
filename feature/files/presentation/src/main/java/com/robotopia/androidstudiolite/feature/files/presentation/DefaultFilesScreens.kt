@@ -1,10 +1,18 @@
 package com.robotopia.androidstudiolite.feature.files.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import com.robotopia.androidstudiolite.feature.files.api.FileExplorerService
 import com.robotopia.androidstudiolite.feature.files.api.FilesScreens
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreen
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreenContext
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserViewModel
+import kotlinx.coroutines.flow.update
+import org.koin.compose.viewmodel.koinViewModel
 
 class DefaultFilesScreens(
     private val fileExplorerService: FileExplorerService,
@@ -35,13 +43,26 @@ class DefaultFilesScreens(
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
     ) {
-        FileBrowserScreen(
-            root = root,
-            projectName = projectName,
-            initialRelativePath = initialRelativePath,
+        val viewModel: FileBrowserViewModel = koinViewModel()
+        val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+        LaunchedEffect(root, projectName, initialRelativePath) {
+            viewModel.uiState.update {
+                it.copy(
+                    root = root,
+                    projectName = projectName,
+                    currentRelativePath = initialRelativePath,
+                )
+            }
+        }
+
+        val screenContext = FileBrowserScreenContext(
+            updateState = { updater -> viewModel.uiState.update { updater(it) } },
             fileExplorerService = fileExplorerService,
             onOpenFile = onOpenFile,
             onNavigateBack = onNavigateBack,
+            scope = viewModel.viewModelScope,
         )
+        screenContext.FileBrowserScreen(state)
     }
 }

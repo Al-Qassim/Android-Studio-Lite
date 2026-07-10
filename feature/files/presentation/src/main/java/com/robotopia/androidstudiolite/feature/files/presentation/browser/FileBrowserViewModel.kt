@@ -1,7 +1,9 @@
 package com.robotopia.androidstudiolite.feature.files.presentation.browser
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
+import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import kotlinx.coroutines.flow.MutableStateFlow
 
 enum class ClipboardMode {
@@ -38,6 +40,7 @@ sealed interface FileBrowserDialog {
 }
 
 data class FileBrowserUiState(
+    val root: ProjectRoot = ProjectRoot(""),
     val projectName: String = "",
     val currentRelativePath: String = "",
     val entries: List<FsNode> = emptyList(),

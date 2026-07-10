@@ -1,375 +1,364 @@
 package com.robotopia.androidstudiolite.feature.files.presentation.browser
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.robotopia.androidstudiolite.core.error.userMessageOrNull
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.component.MoveBar
+import com.robotopia.androidstudiolite.designsystem.component.PathBar
+import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitleAdd
+import com.robotopia.androidstudiolite.designsystem.component.TransferBarMode
 import com.robotopia.androidstudiolite.feature.files.api.FileExplorerService
+import com.robotopia.androidstudiolite.feature.files.model.DirectoryListing
+import com.robotopia.androidstudiolite.feature.files.model.FileNameFieldErrors
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
-import com.robotopia.androidstudiolite.feature.files.model.parentRelativePathOrNull
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.collectListing
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.clearClipboard
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.navigateUp
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.openAddMenu
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.pasteClipboard
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.ui.FileBrowserAddMenu
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.ui.FileBrowserBody
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.ui.FileBrowserDialogs
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
-internal fun FileBrowserScreen(
-    root: ProjectRoot,
-    projectName: String,
-    initialRelativePath: String,
-    fileExplorerService: FileExplorerService,
-    onOpenFile: (relativePath: String) -> Unit,
-    onNavigateBack: () -> Unit,
-    viewModel: FileBrowserViewModel = koinViewModel(),
-) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
+internal fun FileBrowserScreenContext.FileBrowserScreen(state: FileBrowserUiState) {
+    LaunchedEffect(state.root, state.currentRelativePath) {
+        collectListing(
+            root = state.root,
+            relativePath = state.currentRelativePath,
+        )
+    }
 
-    LaunchedEffect(root, projectName, initialRelativePath) {
-        viewModel.uiState.update {
-            it.copy(
-                projectName = projectName,
-                currentRelativePath = initialRelativePath,
+    BackHandler { navigateUp(state) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Colors.Bg),
+    ) {
+        TopBarBackTitleAdd(
+            title = state.projectName,
+            onBackClick = { navigateUp(state) },
+            onAddClick = { openAddMenu() },
+        )
+        val pathSegments = relativePathSegments(state.currentRelativePath)
+        if (pathSegments.isNotEmpty()) {
+            PathBar(segments = pathSegments)
+        }
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        ) {
+            FileBrowserBody(state)
+        }
+        state.clipboard?.let { clipboard ->
+            MoveBar(
+                name = clipboard.node.name,
+                mode = when (clipboard.mode) {
+                    ClipboardMode.Cut -> TransferBarMode.Move
+                    ClipboardMode.Copy -> TransferBarMode.Copy
+                },
+                onCancel = { clearClipboard() },
+                onMoveHere = { pasteClipboard(state) },
             )
         }
     }
 
-    LaunchedEffect(root, state.currentRelativePath) {
-        collectListing(
-            fileExplorerService = fileExplorerService,
-            root = root,
-            relativePath = state.currentRelativePath,
-            uiState = viewModel.uiState,
+    FileBrowserAddMenu(state)
+    FileBrowserDialogs(state)
+}
+
+private fun relativePathSegments(relativePath: String): List<String> =
+    relativePath.split('/').filter { it.isNotEmpty() }
+
+private val previewEntries = listOf(
+    FsNode.Folder(name = "app", relativePath = "app"),
+    FsNode.Folder(name = "gradle", relativePath = "gradle"),
+    FsNode.File(name = "build.gradle.kts", relativePath = "build.gradle.kts"),
+    FsNode.File(name = "settings.gradle.kts", relativePath = "settings.gradle.kts"),
+)
+
+@Composable
+private fun FileBrowserPreviewHost(state: FileBrowserUiState) {
+    val scope = rememberCoroutineScope()
+    val context = remember(scope) {
+        FileBrowserScreenContext(
+            updateState = {},
+            fileExplorerService = PreviewFileExplorerService,
+            onOpenFile = {},
+            onNavigateBack = {},
+            scope = scope,
         )
     }
+    context.FileBrowserScreen(state)
+}
 
-    BackHandler {
-        navigateUp(
-            uiState = viewModel.uiState,
-            onNavigateBack = onNavigateBack,
-        )
-    }
+private object PreviewFileExplorerService : FileExplorerService {
+    override fun observeListing(root: ProjectRoot, relativePath: String): Flow<DirectoryListing> =
+        emptyFlow()
 
-    FileBrowserContent(
-        state = state,
-        onBackClick = {
-            navigateUp(
-                uiState = viewModel.uiState,
-                onNavigateBack = onNavigateBack,
-            )
-        },
-        onAddClick = {
-            viewModel.uiState.update { it.copy(addMenuOpen = true, menuItem = null) }
-        },
-        onAddMenuDismiss = {
-            viewModel.uiState.update { it.copy(addMenuOpen = false) }
-        },
-        onNewFileClick = {
-            viewModel.uiState.update {
-                it.copy(
-                    addMenuOpen = false,
-                    dialog = FileBrowserDialog.CreateFile(),
-                )
-            }
-        },
-        onNewFolderClick = {
-            viewModel.uiState.update {
-                it.copy(
-                    addMenuOpen = false,
-                    dialog = FileBrowserDialog.CreateFolder(),
-                )
-            }
-        },
-        onPasteClick = {
-            val clipboard = viewModel.uiState.value.clipboard ?: return@FileBrowserContent
-            viewModel.uiState.update { it.copy(addMenuOpen = false) }
-            scope.launch {
-                pasteClipboard(
-                    fileExplorerService = fileExplorerService,
-                    root = root,
-                    uiState = viewModel.uiState,
-                    clipboard = clipboard,
-                )
-            }
-        },
-        onClipboardCancel = {
-            viewModel.uiState.update { it.copy(clipboard = null) }
-        },
-        onFolderClick = { folder ->
-            viewModel.uiState.update {
-                it.copy(
-                    currentRelativePath = folder.relativePath,
-                    menuItem = null,
-                    addMenuOpen = false,
-                )
-            }
-        },
-        onFileClick = { file ->
-            viewModel.uiState.update { it.copy(menuItem = null) }
-            onOpenFile(file.relativePath)
-        },
-        onItemLongClick = { item ->
-            viewModel.uiState.update { it.copy(menuItem = item, addMenuOpen = false) }
-        },
-        onMenuDismiss = {
-            viewModel.uiState.update { it.copy(menuItem = null) }
-        },
-        onRenameMenuClick = { item ->
-            viewModel.uiState.update {
-                it.copy(
-                    menuItem = null,
-                    dialog = FileBrowserDialog.Rename(item = item, name = item.name),
-                )
-            }
-        },
-        onCopyMenuClick = { item ->
-            viewModel.uiState.update {
-                it.copy(
-                    menuItem = null,
-                    clipboard = ClipboardState(
-                        mode = ClipboardMode.Copy,
-                        relativePath = item.relativePath,
-                        node = item,
-                    ),
-                )
-            }
-        },
-        onMoveMenuClick = { item ->
-            viewModel.uiState.update {
-                it.copy(
-                    menuItem = null,
-                    clipboard = ClipboardState(
-                        mode = ClipboardMode.Cut,
-                        relativePath = item.relativePath,
-                        node = item,
-                    ),
-                )
-            }
-        },
-        onDeleteMenuClick = { item ->
-            viewModel.uiState.update {
-                it.copy(
-                    menuItem = null,
-                    dialog = FileBrowserDialog.DeleteConfirm(item),
-                )
-            }
-        },
-        onDialogCancel = {
-            viewModel.uiState.update { it.copy(dialog = null) }
-        },
-        onCreateFileNameChange = { name ->
-            val nameError = fileExplorerService.validateFileName(name).name
-            updateCreateFileDialog(viewModel.uiState, name, nameError)
-        },
-        onCreateFileConfirm = {
-            val dialog = viewModel.uiState.value.dialog as? FileBrowserDialog.CreateFile
-                ?: return@FileBrowserContent
-            val parentPath = viewModel.uiState.value.currentRelativePath
-            confirmNamedMutation(
-                name = dialog.name,
-                fileExplorerService = fileExplorerService,
-                uiState = viewModel.uiState,
-                scope = scope,
-                onInvalid = { nameError ->
-                    updateCreateFileDialog(viewModel.uiState, dialog.name, nameError)
-                },
-            ) {
-                fileExplorerService.createFile(root, parentPath, dialog.name)
-            }
-        },
-        onCreateFolderNameChange = { name ->
-            val nameError = fileExplorerService.validateFileName(name).name
-            updateCreateFolderDialog(viewModel.uiState, name, nameError)
-        },
-        onCreateFolderConfirm = {
-            val dialog = viewModel.uiState.value.dialog as? FileBrowserDialog.CreateFolder
-                ?: return@FileBrowserContent
-            val parentPath = viewModel.uiState.value.currentRelativePath
-            confirmNamedMutation(
-                name = dialog.name,
-                fileExplorerService = fileExplorerService,
-                uiState = viewModel.uiState,
-                scope = scope,
-                onInvalid = { nameError ->
-                    updateCreateFolderDialog(viewModel.uiState, dialog.name, nameError)
-                },
-            ) {
-                fileExplorerService.createFolder(root, parentPath, dialog.name)
-            }
-        },
-        onRenameNameChange = { name ->
-            val dialog = viewModel.uiState.value.dialog as? FileBrowserDialog.Rename
-                ?: return@FileBrowserContent
-            val nameError = fileExplorerService.validateFileName(name).name
-            viewModel.uiState.update {
-                it.copy(dialog = dialog.copy(name = name, nameError = nameError))
-            }
-        },
-        onRenameConfirm = {
-            val dialog = viewModel.uiState.value.dialog as? FileBrowserDialog.Rename
-                ?: return@FileBrowserContent
-            confirmNamedMutation(
-                name = dialog.name,
-                fileExplorerService = fileExplorerService,
-                uiState = viewModel.uiState,
-                scope = scope,
-                onInvalid = { nameError ->
-                    viewModel.uiState.update {
-                        it.copy(dialog = dialog.copy(nameError = nameError))
-                    }
-                },
-            ) {
-                fileExplorerService.rename(root, dialog.item.relativePath, dialog.name)
-            }
-        },
-        onDeleteConfirm = {
-            val dialog = viewModel.uiState.value.dialog as? FileBrowserDialog.DeleteConfirm
-                ?: return@FileBrowserContent
-            viewModel.uiState.update { it.copy(dialog = null) }
-            scope.launch {
-                runMutation(uiState = viewModel.uiState) {
-                    fileExplorerService.delete(root, dialog.item.relativePath)
-                }
-            }
-        },
-        onErrorDismiss = {
-            viewModel.uiState.update { it.copy(actionError = null) }
-        },
+    override suspend fun createFile(
+        root: ProjectRoot,
+        parentRelative: String,
+        name: String,
+    ): FsNode.File = error("Preview")
+
+    override suspend fun createFolder(
+        root: ProjectRoot,
+        parentRelative: String,
+        name: String,
+    ): FsNode.Folder = error("Preview")
+
+    override suspend fun rename(
+        root: ProjectRoot,
+        relativePath: String,
+        newName: String,
+    ): FsNode = error("Preview")
+
+    override suspend fun move(
+        root: ProjectRoot,
+        fromRelative: String,
+        toParentRelative: String,
+    ): FsNode = error("Preview")
+
+    override suspend fun copy(
+        root: ProjectRoot,
+        fromRelative: String,
+        toParentRelative: String,
+    ): FsNode = error("Preview")
+
+    override suspend fun delete(root: ProjectRoot, relativePath: String) = error("Preview")
+
+    override suspend fun readText(root: ProjectRoot, relativePath: String): String = error("Preview")
+
+    override suspend fun writeText(
+        root: ProjectRoot,
+        relativePath: String,
+        content: String,
+    ) = error("Preview")
+
+    override fun validateFileName(name: String): FileNameFieldErrors = FileNameFieldErrors()
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · empty",
+)
+@Composable
+private fun FileBrowserEmptyPreview() {
+    FileBrowserPreviewHost(state = FileBrowserUiState(projectName = "MyApp"))
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · filled",
+)
+@Composable
+private fun FileBrowserFilledPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+        ),
     )
 }
 
-private fun navigateUp(
-    uiState: MutableStateFlow<FileBrowserUiState>,
-    onNavigateBack: () -> Unit,
-) {
-    val current = uiState.value
-    when {
-        current.dialog != null ->
-            uiState.update { it.copy(dialog = null) }
-        current.menuItem != null ->
-            uiState.update { it.copy(menuItem = null) }
-        current.addMenuOpen ->
-            uiState.update { it.copy(addMenuOpen = false) }
-        else -> {
-            val parent = parentRelativePathOrNull(current.currentRelativePath)
-            if (parent == null) {
-                onNavigateBack()
-            } else {
-                uiState.update {
-                    it.copy(
-                        currentRelativePath = parent,
-                        menuItem = null,
-                        addMenuOpen = false,
-                    )
-                }
-            }
-        }
-    }
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · nested path",
+)
+@Composable
+private fun FileBrowserNestedPathPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            currentRelativePath = "app/src/main",
+            entries = listOf(
+                FsNode.Folder(name = "java", relativePath = "app/src/main/java"),
+                FsNode.Folder(name = "res", relativePath = "app/src/main/res"),
+            ),
+        ),
+    )
 }
 
-private suspend fun collectListing(
-    fileExplorerService: FileExplorerService,
-    root: ProjectRoot,
-    relativePath: String,
-    uiState: MutableStateFlow<FileBrowserUiState>,
-) {
-    fileExplorerService.observeListing(root, relativePath)
-        .catch { error ->
-            uiState.update {
-                it.copy(
-                    entries = emptyList(),
-                    menuItem = null,
-                    actionError = error.userMessageOrNull(TAG) ?: GENERIC_ERROR_MESSAGE,
-                )
-            }
-        }
-        .collect { listing ->
-            uiState.update { state ->
-                state.copy(
-                    currentRelativePath = listing.currentRelativePath,
-                    entries = listing.entries,
-                    menuItem = state.menuItem?.takeIf { menu ->
-                        listing.entries.any { it.relativePath == menu.relativePath }
-                    },
-                )
-            }
-        }
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · create file",
+)
+@Composable
+private fun FileBrowserCreateFilePreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            dialog = FileBrowserDialog.CreateFile(name = "MainActivity.kt"),
+        ),
+    )
 }
 
-private suspend fun pasteClipboard(
-    fileExplorerService: FileExplorerService,
-    root: ProjectRoot,
-    uiState: MutableStateFlow<FileBrowserUiState>,
-    clipboard: ClipboardState,
-) {
-    val destination = uiState.value.currentRelativePath
-    val succeeded = runMutation(uiState = uiState) {
-        when (clipboard.mode) {
-            ClipboardMode.Copy ->
-                fileExplorerService.copy(root, clipboard.relativePath, destination)
-            ClipboardMode.Cut ->
-                fileExplorerService.move(root, clipboard.relativePath, destination)
-        }
-    }
-    if (succeeded) {
-        uiState.update { it.copy(clipboard = null) }
-    }
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · create file field error",
+)
+@Composable
+private fun FileBrowserCreateFileFieldErrorPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            dialog = FileBrowserDialog.CreateFile(
+                name = "bad/name",
+                nameError = "Name contains invalid characters",
+            ),
+        ),
+    )
 }
 
-private fun confirmNamedMutation(
-    name: String,
-    fileExplorerService: FileExplorerService,
-    uiState: MutableStateFlow<FileBrowserUiState>,
-    scope: CoroutineScope,
-    onInvalid: (nameError: String) -> Unit,
-    block: suspend () -> Unit,
-) {
-    val nameError = fileExplorerService.validateFileName(name).name
-    if (nameError != null) {
-        onInvalid(nameError)
-        return
-    }
-    uiState.update { it.copy(dialog = null) }
-    scope.launch {
-        runMutation(uiState = uiState, block = block)
-    }
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · rename field error",
+)
+@Composable
+private fun FileBrowserRenameFieldErrorPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            dialog = FileBrowserDialog.Rename(
+                item = previewEntries.last(),
+                name = "",
+                nameError = "Name is required",
+            ),
+        ),
+    )
 }
 
-private suspend fun runMutation(
-    uiState: MutableStateFlow<FileBrowserUiState>,
-    block: suspend () -> Unit,
-): Boolean =
-    runCatching { block() }
-        .onFailure { error ->
-            uiState.update {
-                it.copy(actionError = error.userMessageOrNull(TAG) ?: GENERIC_ERROR_MESSAGE)
-            }
-        }
-        .isSuccess
-
-private fun updateCreateFileDialog(
-    uiState: MutableStateFlow<FileBrowserUiState>,
-    name: String,
-    nameError: String?,
-) {
-    val dialog = uiState.value.dialog as? FileBrowserDialog.CreateFile ?: return
-    uiState.update { it.copy(dialog = dialog.copy(name = name, nameError = nameError)) }
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · menu open",
+)
+@Composable
+private fun FileBrowserMenuPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            menuItem = previewEntries.first(),
+        ),
+    )
 }
 
-private fun updateCreateFolderDialog(
-    uiState: MutableStateFlow<FileBrowserUiState>,
-    name: String,
-    nameError: String?,
-) {
-    val dialog = uiState.value.dialog as? FileBrowserDialog.CreateFolder ?: return
-    uiState.update { it.copy(dialog = dialog.copy(name = name, nameError = nameError)) }
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · delete confirm",
+)
+@Composable
+private fun FileBrowserDeletePreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            dialog = FileBrowserDialog.DeleteConfirm(previewEntries.last()),
+        ),
+    )
 }
 
-private const val TAG = "FileBrowser"
-private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · move bar",
+)
+@Composable
+private fun FileBrowserMoveBarPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            clipboard = ClipboardState(
+                mode = ClipboardMode.Cut,
+                relativePath = "build.gradle.kts",
+                node = previewEntries[2],
+            ),
+        ),
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · copy bar",
+)
+@Composable
+private fun FileBrowserCopyBarPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            clipboard = ClipboardState(
+                mode = ClipboardMode.Copy,
+                relativePath = "settings.gradle.kts",
+                node = previewEntries[3],
+            ),
+        ),
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · action error",
+)
+@Composable
+private fun FileBrowserActionErrorPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            actionError = "A file or folder with that name already exists",
+        ),
+    )
+}
