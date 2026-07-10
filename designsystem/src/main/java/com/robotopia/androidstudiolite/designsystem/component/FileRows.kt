@@ -1,6 +1,8 @@
 package com.robotopia.androidstudiolite.designsystem.component
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +25,7 @@ import com.robotopia.androidstudiolite.designsystem.icon.IconFile
 import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FileRow(
     name: String,
@@ -30,13 +33,14 @@ fun FileRow(
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     showChevron: Boolean = true,
+    onLongClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(44.dp)
             .background(if (selected) Colors.Selection else Colors.Bg)
-            .clickable(onClick = onClick)
+            .rowClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -55,19 +59,21 @@ fun FileRow(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FolderRow(
     name: String,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     selected: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(44.dp)
             .background(if (selected) Colors.Selection else Colors.Bg)
-            .clickable(onClick = onClick)
+            .rowClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -82,6 +88,17 @@ fun FolderRow(
         )
     }
 }
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun Modifier.rowClickable(
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)?,
+): Modifier =
+    if (onLongClick != null) {
+        combinedClickable(onClick = onClick, onLongClick = onLongClick)
+    } else {
+        clickable(onClick = onClick)
+    }
 
 @Preview(showBackground = true, backgroundColor = 0xFF12171C)
 @Composable

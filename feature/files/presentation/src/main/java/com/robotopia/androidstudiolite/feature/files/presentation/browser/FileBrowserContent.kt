@@ -1,8 +1,6 @@
 package com.robotopia.androidstudiolite.feature.files.presentation.browser
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -225,7 +223,6 @@ private fun FileBrowserList(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FileBrowserListItem(
     entry: FsNode,
@@ -245,10 +242,8 @@ private fun FileBrowserListItem(
                 FolderRow(
                     name = entry.name,
                     selected = menuOpen,
-                    modifier = Modifier.combinedClickable(
-                        onClick = { onFolderClick(entry) },
-                        onLongClick = { onItemLongClick(entry) },
-                    ),
+                    onClick = { onFolderClick(entry) },
+                    onLongClick = { onItemLongClick(entry) },
                 )
             }
 
@@ -257,10 +252,8 @@ private fun FileBrowserListItem(
                     name = entry.name,
                     selected = menuOpen,
                     showChevron = false,
-                    modifier = Modifier.combinedClickable(
-                        onClick = { onFileClick(entry) },
-                        onLongClick = { onItemLongClick(entry) },
-                    ),
+                    onClick = { onFileClick(entry) },
+                    onLongClick = { onItemLongClick(entry) },
                 )
             }
         }
