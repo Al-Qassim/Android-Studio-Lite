@@ -2,11 +2,10 @@
 name: structure-feature-code
 description: >-
   Structures feature UI and domain code: thin app navigation, state-only
-  ViewModels, Screen vs Content split, shallow UI trees, multi-state previews,
-  validation in the data layer exposed via API, and user-safe errors. Use when
-  adding or refactoring a feature screen, placing validation, wiring app
-  errors, splitting drawing from wiring, or when the user asks to structure
-  feature code for reuse across projects.
+  ViewModels, Screen Context for busy screens, shallow UI trees, multi-state
+  previews, validation in the data layer exposed via API, and user-safe errors.
+  Use when adding or refactoring a feature screen, placing validation, wiring
+  app errors, or when the user asks to structure feature code for reuse.
 ---
 
 # Structure feature code
@@ -35,33 +34,45 @@ Reusable conventions for feature modules (mobile or similar layered apps). Adapt
 
 ## 4. Screen package layout
 
-Per screen:
+### Prefer Screen Context for busy screens
+
+When a screen has many components (list, menus, dialogs, bars), use **Screen Context** — see [`docs/agents/screen-context.md`](../../../docs/agents/screen-context.md).
 
 ```text
 presentation/<screen>/
-  <Screen>ViewModel   # in-memory UI state only (survive lifecycle)
-  <Screen>Screen      # wiring + private data helpers
-  <Screen>Content     # drawing + previews
+  <Name>ScreenContext.kt   # service, updateState, exits, scope
+  <Name>ViewModel.kt       # state-only + UiState types
+  <Name>Screen.kt          # Ctx.Screen(state) + thin @Preview stub
+  <Name>Previews.kt        # host, fakes, preview cases
+  ui/                      # Ctx UI extensions (state param)
+  logic/                   # Ctx logic extensions
 ```
+
+Summary:
+
+- Context holds **resources**; UI state is passed as **`state`**.
+- Screen-specific UI/logic = context **extensions**; designsystem stays parameterized.
+- Host builds context + ViewModel; screen does not depend on a concrete VM.
+- **Never nest function declarations.**
+
+### Thin screens (optional simpler shape)
+
+Short forms / simple lists may stay smaller without a context type:
+
+```text
+presentation/<screen>/
+  <Screen>ViewModel
+  <Screen>Screen      # wiring + private helpers
+  <Screen>Content     # optional pure drawing + previews
+```
+
+Do not grow a Content callback list past ~6–8 parameters — switch to Screen Context instead.
 
 ### ViewModel / state holder
 
 - Holds UI state across configuration changes only.
 - No service calls, validation, or navigation side effects unless the human explicitly asks otherwise.
-
-### Screen (wiring)
-
-- Depends on the feature service/API + navigation callbacks.
-- Private helpers for load/mutate; update state holder.
-- Renders by calling Content with state + event lambdas.
-- **Never nest function declarations** (no `fun` / local function defined inside another function or composable). Put helpers at file/private top level (or in a sibling type) so call sites stay flat and testable.
-
-### Content (drawing)
-
-- Pure UI from state + callbacks.
-- Nesting **≤ 2–3 levels** per composable/function; extract children when deeper.
-- Many named previews: empty, filled, field errors, loading, menus, dialogs, action errors.
-- Same rule: **no nested function declarations** inside composables — extract private `@Composable`s or file-level helpers instead.
+- May take route/args in the constructor (host passes them via DI) so the screen does not need a `LaunchedEffect` to seed state.
 
 ## 5. Incremental delivery (when on a PR)
 
@@ -77,11 +88,11 @@ presentation/<screen>/
 - [ ] Validation only in data/domain; API exposed for UI
 - [ ] User-safe errors (UI message vs log-only unexpected)
 - [ ] State holder is state-only
-- [ ] Screen vs Content split; shallow UI trees
+- [ ] Busy screen → Screen Context (`docs/agents/screen-context.md`); thin screen → small Screen/Content OK
 - [ ] No nested function declarations (helpers at file / private top level)
-- [ ] Multi-state previews on Content
+- [ ] Multi-state previews (fixtures in `*Previews.kt`, thin stub on screen)
 - [ ] Focused commit → push → PR comment (if on a PR)
 
 ## Portability
 
-Copy this skill into another repo’s `.agents/skills/structure-feature-code/` or `~/.cursor/skills/structure-feature-code/`. Pair with project-local Cursor rules for stack-specific names (package paths, DI, design system).
+Copy this skill into another repo’s `.agents/skills/structure-feature-code/` or `~/.cursor/skills/structure-feature-code/`. Pair with project-local Cursor rules for stack-specific names (package paths, DI, design system). Ship `docs/agents/screen-context.md` with it when using Screen Context.
