@@ -247,7 +247,7 @@ interface ProjectsScreens {
     @Composable
     fun ProjectsList(
         onOpenProject: (projectId: ProjectId) -> Unit,
-        onCreateProject: () -> Unit = {},
+        onCreateProject: () -> Unit,
     )
 
     @Composable

@@ -29,7 +29,8 @@ private sealed interface IdeRoute {
  * IDE navigation root. Temporary host for Projects (#7); full NavHost graph lands in #11.
  */
 @Composable
-fun IdeNavHost(projectsScreens: ProjectsScreens = koinInject()) {
+fun IdeNavHost() {
+    val projectsScreens: ProjectsScreens = koinInject()
     var route by remember { mutableStateOf<IdeRoute>(IdeRoute.ProjectsList) }
     var openedToast by remember { mutableStateOf<ProjectId?>(null) }
 
