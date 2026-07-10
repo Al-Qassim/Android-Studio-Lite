@@ -52,102 +52,197 @@ internal fun ProjectsListContent(
             actionLabel = "+ New",
             onActionClick = onCreateProject,
         )
-
-        when {
-            state.projects.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    EmptyState(
-                        title = "No projects yet",
-                        hint = "Tap + New to create your first project.",
-                    )
-                }
-            }
-
-            else -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    items(state.projects, key = { it.id.value }) { project ->
-                        Box {
-                            ProjectCard(
-                                name = project.name,
-                                packageName = project.packageName,
-                                meta = formatOpenedMeta(project.lastOpenedAt),
-                                onClick = { onOpenClick(project) },
-                                onLongClick = { onMenuOpen(project) },
-                                onMenuClick = { onMenuOpen(project) },
-                            )
-                            if (state.menuProject?.id == project.id) {
-                                Popup(
-                                    alignment = Alignment.TopEnd,
-                                    onDismissRequest = onMenuDismiss,
-                                    properties = PopupProperties(focusable = true),
-                                ) {
-                                    ProjectMenu(
-                                        onOpen = { onOpenClick(project) },
-                                        onDelete = { onDeleteMenuClick(project) },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp, bottom = 16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            BasicText(
-                                text = "Tap a project to open",
-                                style = Typography.Caption.copy(
-                                    color = Colors.Muted2,
-                                    textAlign = TextAlign.Center,
-                                ),
-                            )
-                            BasicText(
-                                text = "or + New to create one",
-                                style = Typography.Caption.copy(
-                                    color = Colors.Muted2,
-                                    textAlign = TextAlign.Center,
-                                ),
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        ProjectsListBody(
+            state = state,
+            onOpenClick = onOpenClick,
+            onMenuOpen = onMenuOpen,
+            onMenuDismiss = onMenuDismiss,
+            onDeleteMenuClick = onDeleteMenuClick,
+        )
     }
 
     state.pendingDelete?.let { project ->
-        Dialog(onDismissRequest = onDeleteCancel) {
-            DialogMessageAction(
-                title = "Delete project?",
-                message = "${project.name} and its files will be removed from this device. This cannot be undone.",
-                actionLabel = "Delete",
-                dangerAction = true,
-                onCancel = onDeleteCancel,
-                onAction = onDeleteConfirm,
-            )
-        }
+        DeleteProjectDialog(
+            projectName = project.name,
+            onCancel = onDeleteCancel,
+            onConfirm = onDeleteConfirm,
+        )
     }
 
     state.actionError?.let { message ->
-        Dialog(onDismissRequest = onErrorDismiss) {
-            DialogMessageAction(
-                title = "Something went wrong",
-                message = message,
-                actionLabel = "OK",
-                onCancel = onErrorDismiss,
-                onAction = onErrorDismiss,
+        ActionErrorDialog(
+            message = message,
+            onDismiss = onErrorDismiss,
+        )
+    }
+}
+
+@Composable
+private fun ProjectsListBody(
+    state: ProjectsListUiState,
+    onOpenClick: (Project) -> Unit,
+    onMenuOpen: (Project) -> Unit,
+    onMenuDismiss: () -> Unit,
+    onDeleteMenuClick: (Project) -> Unit,
+) {
+    if (state.projects.isEmpty()) {
+        ProjectsListEmpty()
+    } else {
+        ProjectsList(
+            projects = state.projects,
+            menuProjectId = state.menuProject?.id,
+            onOpenClick = onOpenClick,
+            onMenuOpen = onMenuOpen,
+            onMenuDismiss = onMenuDismiss,
+            onDeleteMenuClick = onDeleteMenuClick,
+        )
+    }
+}
+
+@Composable
+private fun ProjectsListEmpty() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        EmptyState(
+            title = "No projects yet",
+            hint = "Tap + New to create your first project.",
+        )
+    }
+}
+
+@Composable
+private fun ProjectsList(
+    projects: List<Project>,
+    menuProjectId: ProjectId?,
+    onOpenClick: (Project) -> Unit,
+    onMenuOpen: (Project) -> Unit,
+    onMenuDismiss: () -> Unit,
+    onDeleteMenuClick: (Project) -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        items(projects, key = { it.id.value }) { project ->
+            ProjectListItem(
+                project = project,
+                menuOpen = menuProjectId == project.id,
+                onOpenClick = onOpenClick,
+                onMenuOpen = onMenuOpen,
+                onMenuDismiss = onMenuDismiss,
+                onDeleteMenuClick = onDeleteMenuClick,
             )
         }
+        item { ProjectsListFooterHint() }
+    }
+}
+
+@Composable
+private fun ProjectListItem(
+    project: Project,
+    menuOpen: Boolean,
+    onOpenClick: (Project) -> Unit,
+    onMenuOpen: (Project) -> Unit,
+    onMenuDismiss: () -> Unit,
+    onDeleteMenuClick: (Project) -> Unit,
+) {
+    Box {
+        ProjectCard(
+            name = project.name,
+            packageName = project.packageName,
+            meta = formatOpenedMeta(project.lastOpenedAt),
+            onClick = { onOpenClick(project) },
+            onLongClick = { onMenuOpen(project) },
+            onMenuClick = { onMenuOpen(project) },
+        )
+        if (menuOpen) {
+            ProjectOverflowMenu(
+                onOpen = { onOpenClick(project) },
+                onDelete = { onDeleteMenuClick(project) },
+                onDismiss = onMenuDismiss,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProjectOverflowMenu(
+    onOpen: () -> Unit,
+    onDelete: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Popup(
+        alignment = Alignment.TopEnd,
+        onDismissRequest = onDismiss,
+        properties = PopupProperties(focusable = true),
+    ) {
+        ProjectMenu(
+            onOpen = onOpen,
+            onDelete = onDelete,
+        )
+    }
+}
+
+@Composable
+private fun ProjectsListFooterHint() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, bottom = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        BasicText(
+            text = "Tap a project to open",
+            style = Typography.Caption.copy(
+                color = Colors.Muted2,
+                textAlign = TextAlign.Center,
+            ),
+        )
+        BasicText(
+            text = "or + New to create one",
+            style = Typography.Caption.copy(
+                color = Colors.Muted2,
+                textAlign = TextAlign.Center,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun DeleteProjectDialog(
+    projectName: String,
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    Dialog(onDismissRequest = onCancel) {
+        DialogMessageAction(
+            title = "Delete project?",
+            message = "$projectName and its files will be removed from this device. This cannot be undone.",
+            actionLabel = "Delete",
+            dangerAction = true,
+            onCancel = onCancel,
+            onAction = onConfirm,
+        )
+    }
+}
+
+@Composable
+private fun ActionErrorDialog(
+    message: String,
+    onDismiss: () -> Unit,
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        DialogMessageAction(
+            title = "Something went wrong",
+            message = message,
+            actionLabel = "OK",
+            onCancel = onDismiss,
+            onAction = onDismiss,
+        )
     }
 }
 
