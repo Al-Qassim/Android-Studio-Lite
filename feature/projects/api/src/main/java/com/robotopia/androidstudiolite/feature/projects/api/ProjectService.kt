@@ -14,7 +14,14 @@ interface ProjectService {
     suspend fun markOpened(id: ProjectId)
 }
 
+/**
+ * Feature UI surface. Integration calls [NavHost] only; list ↔ create is owned here.
+ * Individual screens stay available for previews / tests.
+ */
 interface ProjectsScreens {
+    @Composable
+    fun NavHost(onOpenProject: (projectId: ProjectId) -> Unit)
+
     @Composable
     fun ProjectsList(
         onOpenProject: (projectId: ProjectId) -> Unit,

@@ -45,6 +45,14 @@ class DefaultProjectsScreens(
 ) : ProjectsScreens {
 
     @Composable
+    override fun NavHost(onOpenProject: (projectId: ProjectId) -> Unit) {
+        ProjectsNavHost(
+            projectService = projectService,
+            onOpenProject = onOpenProject,
+        )
+    }
+
+    @Composable
     override fun ProjectsList(
         onOpenProject: (projectId: ProjectId) -> Unit,
         onCreateProject: () -> Unit,
@@ -66,6 +74,41 @@ class DefaultProjectsScreens(
             onCreated = onCreated,
             onCancel = onCancel,
         )
+    }
+}
+
+private sealed interface ProjectsRoute {
+    data object List : ProjectsRoute
+    data object Create : ProjectsRoute
+}
+
+/**
+ * Projects-owned sub-navigation: list ↔ create.
+ * Cross-feature exit is [onOpenProject] only.
+ */
+@Composable
+private fun ProjectsNavHost(
+    projectService: ProjectService,
+    onOpenProject: (projectId: ProjectId) -> Unit,
+) {
+    var route by remember { mutableStateOf<ProjectsRoute>(ProjectsRoute.List) }
+
+    when (route) {
+        ProjectsRoute.List -> {
+            ProjectsListScreen(
+                projectService = projectService,
+                onOpenProject = onOpenProject,
+                onCreateProject = { route = ProjectsRoute.Create },
+            )
+        }
+
+        ProjectsRoute.Create -> {
+            CreateProjectScreen(
+                projectService = projectService,
+                onCreated = { route = ProjectsRoute.List },
+                onCancel = { route = ProjectsRoute.List },
+            )
+        }
     }
 }
 
@@ -116,62 +159,62 @@ private fun ProjectsListScreen(
             }
 
             else -> {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        items(projects, key = { it.id.value }) { project ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(projects, key = { it.id.value }) { project ->
+                        Box {
                             ProjectCard(
                                 name = project.name,
                                 packageName = project.packageName,
                                 meta = formatOpenedMeta(project.lastOpenedAt),
                                 onClick = { openProject(project) },
                                 onLongClick = { menuProject = project },
+                                onMenuClick = { menuProject = project },
                             )
-                        }
-                        item {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp, bottom = 16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                BasicText(
-                                    text = "Tap a project to open",
-                                    style = Typography.Caption.copy(
-                                        color = Colors.Muted2,
-                                        textAlign = TextAlign.Center,
-                                    ),
-                                )
-                                BasicText(
-                                    text = "or + New to create one",
-                                    style = Typography.Caption.copy(
-                                        color = Colors.Muted2,
-                                        textAlign = TextAlign.Center,
-                                    ),
-                                )
+                            if (menuProject?.id == project.id) {
+                                Popup(
+                                    alignment = Alignment.TopEnd,
+                                    onDismissRequest = { menuProject = null },
+                                    properties = PopupProperties(focusable = true),
+                                ) {
+                                    ProjectMenu(
+                                        onOpen = {
+                                            menuProject = null
+                                            openProject(project)
+                                        },
+                                        onDelete = {
+                                            menuProject = null
+                                            pendingDelete = project
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
-
-                    menuProject?.let { project ->
-                        Popup(
-                            alignment = Alignment.Center,
-                            onDismissRequest = { menuProject = null },
-                            properties = PopupProperties(focusable = true),
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp, bottom = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
-                            ProjectMenu(
-                                onOpen = {
-                                    menuProject = null
-                                    openProject(project)
-                                },
-                                onDelete = {
-                                    menuProject = null
-                                    pendingDelete = project
-                                },
+                            BasicText(
+                                text = "Tap a project to open",
+                                style = Typography.Caption.copy(
+                                    color = Colors.Muted2,
+                                    textAlign = TextAlign.Center,
+                                ),
+                            )
+                            BasicText(
+                                text = "or + New to create one",
+                                style = Typography.Caption.copy(
+                                    color = Colors.Muted2,
+                                    textAlign = TextAlign.Center,
+                                ),
                             )
                         }
                     }
@@ -184,7 +227,7 @@ private fun ProjectsListScreen(
         Dialog(onDismissRequest = { pendingDelete = null }) {
             DialogMessageAction(
                 title = "Delete project?",
-                message = "“${project.name}” and all of its files will be permanently deleted.",
+                message = "${project.name} and its files will be removed from this device. This cannot be undone.",
                 actionLabel = "Delete",
                 dangerAction = true,
                 onCancel = { pendingDelete = null },

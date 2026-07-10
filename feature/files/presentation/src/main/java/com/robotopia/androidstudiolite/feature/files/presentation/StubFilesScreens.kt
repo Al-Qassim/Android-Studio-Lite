@@ -7,6 +7,23 @@ import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 
 class StubFilesScreens : FilesScreens {
     @Composable
+    override fun NavHost(
+        root: ProjectRoot,
+        projectName: String,
+        initialRelativePath: String,
+        onOpenFile: (relativePath: String) -> Unit,
+        onNavigateBack: () -> Unit,
+    ) {
+        FileBrowser(
+            root = root,
+            projectName = projectName,
+            initialRelativePath = initialRelativePath,
+            onOpenFile = onOpenFile,
+            onNavigateBack = onNavigateBack,
+        )
+    }
+
+    @Composable
     override fun FileBrowser(
         root: ProjectRoot,
         projectName: String,

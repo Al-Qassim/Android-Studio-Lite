@@ -125,14 +125,18 @@ fun DialogMessageAction(
             Button(
                 label = "Cancel",
                 onClick = onCancel,
-                variant = ButtonVariant.TextAction,
+                variant = if (dangerAction) {
+                    ButtonVariant.Neutral
+                } else {
+                    ButtonVariant.TextAction
+                },
             )
             Spacer(modifier = Modifier.width(8.dp))
             Button(
                 label = actionLabel,
                 onClick = onAction,
                 variant = if (dangerAction) {
-                    ButtonVariant.DangerText
+                    ButtonVariant.Danger
                 } else {
                     ButtonVariant.Primary
                 },

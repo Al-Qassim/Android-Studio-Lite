@@ -7,6 +7,19 @@ import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
 
 class StubEditorScreens : EditorScreens {
     @Composable
+    override fun NavHost(
+        documentId: DocumentId,
+        onNavigateBack: () -> Unit,
+        onRun: (() -> Unit)?,
+    ) {
+        Editor(
+            documentId = documentId,
+            onNavigateBack = onNavigateBack,
+            onRun = onRun,
+        )
+    }
+
+    @Composable
     override fun Editor(
         documentId: DocumentId,
         onNavigateBack: () -> Unit,

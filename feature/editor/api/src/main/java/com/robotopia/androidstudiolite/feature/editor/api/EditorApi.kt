@@ -20,10 +20,18 @@ interface DocumentStore {
 }
 
 interface EditorScreens {
+    /** Feature-owned entry; integration calls this rather than individual screens. */
+    @Composable
+    fun NavHost(
+        documentId: DocumentId,
+        onNavigateBack: () -> Unit,
+        onRun: (() -> Unit)?,
+    )
+
     @Composable
     fun Editor(
         documentId: DocumentId,
         onNavigateBack: () -> Unit,
-        onRun: (() -> Unit)? = null,
+        onRun: (() -> Unit)?,
     )
 }

@@ -63,7 +63,7 @@ internal fun CreateProjectScreen(
         ) {
             BasicText(
                 text = "Single Activity + Compose",
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(color = Colors.Primary),
             )
 
             FormField(

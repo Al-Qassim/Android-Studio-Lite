@@ -16,11 +16,20 @@ interface ApkInstaller {
 }
 
 interface BuildScreens {
+    /** Feature-owned entry; integration calls this rather than individual screens. */
+    @Composable
+    fun NavHost(
+        jobId: String,
+        onReadyToInstall: (apkLocalPath: String) -> Unit,
+        onDismiss: () -> Unit,
+        onRetry: (() -> Unit)?,
+    )
+
     @Composable
     fun BuildProgress(
         jobId: String,
         onReadyToInstall: (apkLocalPath: String) -> Unit,
         onDismiss: () -> Unit,
-        onRetry: (() -> Unit)? = null,
+        onRetry: (() -> Unit)?,
     )
 }

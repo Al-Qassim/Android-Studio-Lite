@@ -30,7 +30,9 @@ import com.robotopia.androidstudiolite.designsystem.typography.Typography
 enum class ButtonVariant {
     Primary,
     Secondary,
+    Neutral,
     Disabled,
+    Danger,
     DangerText,
     TextAction,
 }
@@ -57,13 +59,16 @@ fun Button(
     val background = when (variant) {
         ButtonVariant.Primary -> Colors.Primary
         ButtonVariant.Secondary -> Color.Transparent
+        ButtonVariant.Neutral -> Colors.Bg
         ButtonVariant.Disabled -> Colors.Disabled
+        ButtonVariant.Danger -> Colors.Danger
         ButtonVariant.DangerText, ButtonVariant.TextAction -> Color.Transparent
     }
     val contentColor = when (variant) {
         ButtonVariant.Primary -> Colors.OnPrimary
-        ButtonVariant.Secondary -> Colors.Text
+        ButtonVariant.Secondary, ButtonVariant.Neutral -> Colors.Text
         ButtonVariant.Disabled -> Colors.Muted
+        ButtonVariant.Danger -> Colors.Text
         ButtonVariant.DangerText -> Colors.Danger
         ButtonVariant.TextAction -> Colors.Primary
     }
@@ -158,8 +163,10 @@ private fun ButtonPreview() {
     ) {
         Button(label = "Create", onClick = {}, variant = ButtonVariant.Primary)
         Button(label = "Cancel", onClick = {}, variant = ButtonVariant.Secondary)
+        Button(label = "Neutral", onClick = {}, variant = ButtonVariant.Neutral)
         Button(label = "Disabled", onClick = {}, variant = ButtonVariant.Disabled)
-        Button(label = "Delete", onClick = {}, variant = ButtonVariant.DangerText)
+        Button(label = "Delete", onClick = {}, variant = ButtonVariant.Danger)
+        Button(label = "Delete text", onClick = {}, variant = ButtonVariant.DangerText)
         Button(label = "New", onClick = {}, variant = ButtonVariant.TextAction)
     }
 }
