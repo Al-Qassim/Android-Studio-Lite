@@ -17,8 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -57,6 +55,7 @@ internal fun BuildProgressContent(
         )
         BuildProgressBody(
             state = state,
+            onDismiss = onDismiss,
             onCancel = onCancel,
             onInstall = onInstall,
             onRetry = onRetry,
@@ -67,6 +66,7 @@ internal fun BuildProgressContent(
 @Composable
 private fun BuildProgressBody(
     state: BuildProgressUiState,
+    onDismiss: () -> Unit,
     onCancel: () -> Unit,
     onInstall: (apkLocalPath: String) -> Unit,
     onRetry: (() -> Unit)?,
@@ -84,9 +84,9 @@ private fun BuildProgressBody(
             state.error != null -> BuildErrorState(
                 message = state.error,
                 onRetry = onRetry,
-                onDismiss = onCancel,
+                onDismiss = onDismiss,
             )
-            state.phase == BuildPhase.Cancelled -> BuildCancelledState(onDismiss = onCancel)
+            state.phase == BuildPhase.Cancelled -> BuildCancelledState(onDismiss = onDismiss)
             else -> BuildActiveState(
                 state = state,
                 onCancel = onCancel,
@@ -332,80 +332,4 @@ private fun phaseStatus(phase: BuildPhase, current: BuildPhase): PhaseRowStatus 
         phaseIndex == currentIndex -> PhaseRowStatus.Current
         else -> PhaseRowStatus.Upcoming
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640, name = "Build · queued")
-@Composable
-private fun BuildProgressQueuedPreview() {
-    BuildProgressContent(
-        state = BuildProgressUiState(
-            phase = BuildPhase.Queued,
-            message = "Waiting for a build slot…",
-            progressFraction = 0.05f,
-        ),
-        onDismiss = {},
-        onCancel = {},
-        onInstall = {},
-        onRetry = null,
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640, name = "Build · building")
-@Composable
-private fun BuildProgressBuildingPreview() {
-    BuildProgressContent(
-        state = BuildProgressUiState(
-            phase = BuildPhase.Building,
-            message = "Building on remote workers…",
-            progressFraction = 0.55f,
-        ),
-        onDismiss = {},
-        onCancel = {},
-        onInstall = {},
-        onRetry = null,
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640, name = "Build · ready")
-@Composable
-private fun BuildProgressReadyPreview() {
-    BuildProgressContent(
-        state = BuildProgressUiState(
-            phase = BuildPhase.ReadyToInstall,
-            message = "Demo APK ready to install",
-            progressFraction = 1f,
-            apkLocalPath = "/cache/demo.apk",
-        ),
-        onDismiss = {},
-        onCancel = {},
-        onInstall = {},
-        onRetry = null,
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640, name = "Build · failed")
-@Composable
-private fun BuildProgressFailedPreview() {
-    BuildProgressContent(
-        state = BuildProgressUiState(
-            phase = BuildPhase.Failed,
-            error = "Could not prepare demo APK",
-        ),
-        onDismiss = {},
-        onCancel = {},
-        onInstall = {},
-        onRetry = {},
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640, name = "Build · cancelled")
-@Composable
-private fun BuildProgressCancelledPreview() {
-    BuildProgressContent(
-        state = BuildProgressUiState(phase = BuildPhase.Cancelled),
-        onDismiss = {},
-        onCancel = {},
-        onInstall = {},
-        onRetry = null,
-    )
 }

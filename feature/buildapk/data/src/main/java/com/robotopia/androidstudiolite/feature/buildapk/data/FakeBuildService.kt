@@ -1,6 +1,7 @@
 package com.robotopia.androidstudiolite.feature.buildapk.data
 
 import android.content.Context
+import com.robotopia.androidstudiolite.core.error.AppException
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildProgress
@@ -58,7 +59,8 @@ class FakeBuildService(
     }
 
     override suspend fun cancelBuild(jobId: String) {
-        val job = jobs.remove(jobId) ?: return
+        val job = jobs.remove(jobId)
+            ?: throw AppException("Build not found")
         job.runner.cancel()
         job.progress.update {
             it.copy(
