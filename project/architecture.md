@@ -284,15 +284,15 @@ data class DirectoryListing(
 interface FileExplorerService {
     fun observeListing(root: ProjectRoot, relativePath: String): Flow<DirectoryListing>
 
-    suspend fun createFile(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.File>
-    suspend fun createFolder(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.Folder>
-    suspend fun rename(root: ProjectRoot, relativePath: String, newName: String): Result<FsNode>
-    suspend fun move(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode>
-    suspend fun copy(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode>
-    suspend fun delete(root: ProjectRoot, relativePath: String): Result<Unit>
+    suspend fun createFile(root: ProjectRoot, parentRelative: String, name: String): FsNode.File
+    suspend fun createFolder(root: ProjectRoot, parentRelative: String, name: String): FsNode.Folder
+    suspend fun rename(root: ProjectRoot, relativePath: String, newName: String): FsNode
+    suspend fun move(root: ProjectRoot, fromRelative: String, toParentRelative: String): FsNode
+    suspend fun copy(root: ProjectRoot, fromRelative: String, toParentRelative: String): FsNode
+    suspend fun delete(root: ProjectRoot, relativePath: String)
 
-    suspend fun readText(root: ProjectRoot, relativePath: String): Result<String>
-    suspend fun writeText(root: ProjectRoot, relativePath: String, content: String): Result<Unit>
+    suspend fun readText(root: ProjectRoot, relativePath: String): String
+    suspend fun writeText(root: ProjectRoot, relativePath: String, content: String)
 }
 
 /**
@@ -594,13 +594,13 @@ flowchart TD
 | Rename                         | `rename`                                       |
 | Delete file / non-empty folder | `delete` (+ confirm UI)                        |
 | Move / copy                    | `move` / `copy`                                |
-| Name conflict / invalid name   | `Result` failure (message → UI)                |
+| Name conflict / invalid name   | throw / catch → UI message                     |
 | Breadcrumbs / up               | listing `relativePath` changes                 |
 | Open → editor → save           | integration + Editor + `writeText`             |
 | Empty folder                   | empty state UI                                 |
-| Invalid move into self/child   | `Result` failure                               |
+| Invalid move into self/child   | throw / catch → UI message                     |
 | Delete/move while open         | integration closes or prompts EditorSession    |
-| Sandbox guardrails             | `Result` failure                               |
+| Sandbox guardrails             | throw / catch → UI message                     |
 
 
 ---

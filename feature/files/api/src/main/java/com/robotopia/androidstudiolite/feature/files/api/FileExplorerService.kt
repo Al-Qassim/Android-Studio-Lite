@@ -8,14 +8,14 @@ import kotlinx.coroutines.flow.Flow
 
 interface FileExplorerService {
     fun observeListing(root: ProjectRoot, relativePath: String): Flow<DirectoryListing>
-    suspend fun createFile(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.File>
-    suspend fun createFolder(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.Folder>
-    suspend fun rename(root: ProjectRoot, relativePath: String, newName: String): Result<FsNode>
-    suspend fun move(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode>
-    suspend fun copy(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode>
-    suspend fun delete(root: ProjectRoot, relativePath: String): Result<Unit>
-    suspend fun readText(root: ProjectRoot, relativePath: String): Result<String>
-    suspend fun writeText(root: ProjectRoot, relativePath: String, content: String): Result<Unit>
+    suspend fun createFile(root: ProjectRoot, parentRelative: String, name: String): FsNode.File
+    suspend fun createFolder(root: ProjectRoot, parentRelative: String, name: String): FsNode.Folder
+    suspend fun rename(root: ProjectRoot, relativePath: String, newName: String): FsNode
+    suspend fun move(root: ProjectRoot, fromRelative: String, toParentRelative: String): FsNode
+    suspend fun copy(root: ProjectRoot, fromRelative: String, toParentRelative: String): FsNode
+    suspend fun delete(root: ProjectRoot, relativePath: String)
+    suspend fun readText(root: ProjectRoot, relativePath: String): String
+    suspend fun writeText(root: ProjectRoot, relativePath: String, content: String)
 }
 
 interface FilesScreens {

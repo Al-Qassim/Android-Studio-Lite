@@ -11,27 +11,27 @@ class StubFileExplorerService : FileExplorerService {
     override fun observeListing(root: ProjectRoot, relativePath: String): Flow<DirectoryListing> =
         flowOf(DirectoryListing(relativePath, emptyList()))
 
-    override suspend fun createFile(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.File> =
-        Result.failure(IllegalStateException("Not implemented — see #8"))
+    override suspend fun createFile(root: ProjectRoot, parentRelative: String, name: String): FsNode.File =
+        error("Not implemented — see #8")
 
-    override suspend fun createFolder(root: ProjectRoot, parentRelative: String, name: String): Result<FsNode.Folder> =
-        Result.failure(IllegalStateException("Not implemented — see #8"))
+    override suspend fun createFolder(root: ProjectRoot, parentRelative: String, name: String): FsNode.Folder =
+        error("Not implemented — see #8")
 
-    override suspend fun rename(root: ProjectRoot, relativePath: String, newName: String): Result<FsNode> =
-        Result.failure(IllegalStateException("Not implemented — see #8"))
+    override suspend fun rename(root: ProjectRoot, relativePath: String, newName: String): FsNode =
+        error("Not implemented — see #8")
 
-    override suspend fun move(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode> =
-        Result.failure(IllegalStateException("Not implemented — see #8"))
+    override suspend fun move(root: ProjectRoot, fromRelative: String, toParentRelative: String): FsNode =
+        error("Not implemented — see #8")
 
-    override suspend fun copy(root: ProjectRoot, fromRelative: String, toParentRelative: String): Result<FsNode> =
-        Result.failure(IllegalStateException("Not implemented — see #8"))
+    override suspend fun copy(root: ProjectRoot, fromRelative: String, toParentRelative: String): FsNode =
+        error("Not implemented — see #8")
 
-    override suspend fun delete(root: ProjectRoot, relativePath: String): Result<Unit> =
-        Result.failure(IllegalStateException("Not implemented — see #8"))
+    override suspend fun delete(root: ProjectRoot, relativePath: String) =
+        error("Not implemented — see #8")
 
-    override suspend fun readText(root: ProjectRoot, relativePath: String): Result<String> =
-        Result.failure(IllegalStateException("Not implemented — see #8"))
+    override suspend fun readText(root: ProjectRoot, relativePath: String): String =
+        error("Not implemented — see #8")
 
-    override suspend fun writeText(root: ProjectRoot, relativePath: String, content: String): Result<Unit> =
-        Result.failure(IllegalStateException("Not implemented — see #8"))
+    override suspend fun writeText(root: ProjectRoot, relativePath: String, content: String) =
+        error("Not implemented — see #8")
 }
