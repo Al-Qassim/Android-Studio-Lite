@@ -1,7 +1,6 @@
 package com.robotopia.androidstudiolite.feature.files.presentation.browser
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +51,16 @@ data class FileBrowserUiState(
 )
 
 /** Holds file-browser UI state across configuration changes. No business/UI logic. */
-class FileBrowserViewModel : ViewModel() {
-    val uiState = MutableStateFlow(FileBrowserUiState())
+class FileBrowserViewModel(
+    root: ProjectRoot,
+    projectName: String,
+    initialRelativePath: String,
+) : ViewModel() {
+    val uiState = MutableStateFlow(
+        FileBrowserUiState(
+            root = root,
+            projectName = projectName,
+            currentRelativePath = initialRelativePath,
+        )
+    )
 }

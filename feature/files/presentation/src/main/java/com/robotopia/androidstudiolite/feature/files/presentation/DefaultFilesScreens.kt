@@ -1,7 +1,6 @@
 package com.robotopia.androidstudiolite.feature.files.presentation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -13,6 +12,7 @@ import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBr
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserViewModel
 import kotlinx.coroutines.flow.update
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 class DefaultFilesScreens(
     private val fileExplorerService: FileExplorerService,
@@ -43,18 +43,10 @@ class DefaultFilesScreens(
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
     ) {
-        val viewModel: FileBrowserViewModel = koinViewModel()
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
-
-        LaunchedEffect(root, projectName, initialRelativePath) {
-            viewModel.uiState.update {
-                it.copy(
-                    root = root,
-                    projectName = projectName,
-                    currentRelativePath = initialRelativePath,
-                )
-            }
+        val viewModel: FileBrowserViewModel = koinViewModel {
+            parametersOf(root, projectName, initialRelativePath)
         }
+        val state by viewModel.uiState.collectAsStateWithLifecycle()
 
         val screenContext = FileBrowserScreenContext(
             updateState = { updater -> viewModel.uiState.update { updater(it) } },

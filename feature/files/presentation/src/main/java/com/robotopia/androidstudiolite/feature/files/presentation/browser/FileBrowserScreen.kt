@@ -47,9 +47,7 @@ internal fun FileBrowserScreenContext.FileBrowserScreen(state: FileBrowserUiStat
             onAddClick = { openAddMenu() },
         )
         val pathSegments = relativePathSegments(state.currentRelativePath)
-        if (pathSegments.isNotEmpty()) {
-            PathBar(segments = pathSegments)
-        }
+        PathBar(segments = pathSegments)
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -74,8 +72,10 @@ internal fun FileBrowserScreenContext.FileBrowserScreen(state: FileBrowserUiStat
     FileBrowserDialogs(state)
 }
 
-private fun relativePathSegments(relativePath: String): List<String> =
-    relativePath.split('/').filter { it.isNotEmpty() }
+private fun relativePathSegments(relativePath: String): List<String> {
+    val parts = relativePath.split('/').filter { it.isNotEmpty() }
+    return listOf("/") + parts
+}
 
 @Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
 @Composable

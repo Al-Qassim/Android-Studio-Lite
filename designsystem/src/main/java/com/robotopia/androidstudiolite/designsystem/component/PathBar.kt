@@ -38,6 +38,20 @@ internal fun collapsePathSegments(
 ): List<String> {
     if (segments.isEmpty() || segments.size == 1 || availableWidthPx <= 0) return segments
 
+    // Keep a leading root "/" marker; collapse only the path under it.
+    if (segments.first() == "/") {
+        val rest = segments.drop(1)
+        if (rest.isEmpty()) return segments
+        val rootWidth = measureWidth("/") + measureWidth(" ")
+        val collapsedRest = collapsePathSegments(
+            segments = rest,
+            availableWidthPx = (availableWidthPx - rootWidth).coerceAtLeast(0),
+            measureWidth = measureWidth,
+            separator = separator,
+        )
+        return listOf("/") + collapsedRest
+    }
+
     val sepWidth = measureWidth(separator)
     val current = segments.last()
     val parents = segments.dropLast(1)
@@ -142,7 +156,9 @@ internal fun PathTrail(
                             maxLines = 1,
                         )
                         BasicText(
-                            text = PathSeparator,
+                            // Leading "/" is the root marker; use a space before the next segment
+                            // so the trail reads "/ app / src" instead of "/ / app / src".
+                            text = if (segment == "/") " " else PathSeparator,
                             style = separatorStyle,
                             maxLines = 1,
                         )
@@ -191,7 +207,7 @@ fun CodeSample(
 @Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 360, name = "PathBar · root")
 @Composable
 private fun PathBarRootPreview() {
-    PathBar(segments = listOf("MyApp"))
+    PathBar(segments = listOf("/"))
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 360, name = "PathBar · short")

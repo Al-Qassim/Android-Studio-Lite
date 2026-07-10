@@ -20,6 +20,9 @@ internal data class FileBrowserPreviewCase(
 }
 
 internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowserPreviewCase> {
+    override fun getDisplayName(index: Int): String {
+        return values.toList()[index].toString()
+    }
     override val values = sequenceOf(
         FileBrowserPreviewCase("empty", FileBrowserUiState(projectName = "MyApp")),
         FileBrowserPreviewCase(
