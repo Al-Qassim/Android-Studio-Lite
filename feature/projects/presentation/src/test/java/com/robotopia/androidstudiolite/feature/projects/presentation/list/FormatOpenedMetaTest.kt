@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.projects.presentation
+package com.robotopia.androidstudiolite.feature.projects.presentation.list
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
