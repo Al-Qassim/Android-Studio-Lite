@@ -6,18 +6,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.robotopia.androidstudiolite.core.database.databaseModule
-import com.robotopia.androidstudiolite.feature.buildapk.impl.buildModule
-import com.robotopia.androidstudiolite.feature.editor.impl.editorModule
-import com.robotopia.androidstudiolite.feature.files.impl.filesModule
-import com.robotopia.androidstudiolite.feature.projects.impl.projectsModule
+import com.robotopia.androidstudiolite.feature.buildapk.di.buildApkDiModule
+import com.robotopia.androidstudiolite.feature.editor.di.editorDiModule
+import com.robotopia.androidstudiolite.feature.files.di.filesDiModule
+import com.robotopia.androidstudiolite.feature.projects.di.projectsDiModule
+import com.robotopia.androidstudiolite.integration.database.databaseDiModule
 import org.koin.dsl.module
 
 /**
- * Wires feature Koin modules. NavHost graph lands in #11.
+ * Product wiring: feature DI modules + database assembly.
+ * NavHost graph lands in #11.
  */
 val ideModule = module {
-    includes(databaseModule, projectsModule, filesModule, editorModule, buildModule)
+    includes(
+        databaseDiModule,
+        projectsDiModule,
+        filesDiModule,
+        editorDiModule,
+        buildApkDiModule,
+    )
 }
 
 @Composable

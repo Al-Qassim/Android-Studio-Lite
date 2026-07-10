@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import com.robotopia.androidstudiolite.core.database.AslDatabase
+import com.robotopia.androidstudiolite.integration.database.AslDatabase
 import com.robotopia.androidstudiolite.integration.ide.IdeRootPlaceholder
 import com.robotopia.androidstudiolite.ui.theme.AndroidStudioLiteTheme
 import org.koin.android.ext.android.get

@@ -54,36 +54,44 @@ Existing foundation: `:designsystem` (colors, typography, shared Compose primiti
 
 ```text
 AndroidStudioLite/
-├── app                         # shell: DI, nav host, permissions
-├── designsystem                # tokens + UI primitives (exists)
-├── core/
-│   └── model                   # tiny shared types (Path, Result, Ids) — optional but recommended
+├── app                         # shell: start Koin, permissions, install
+├── designsystem                # tokens + UI primitives
 ├── feature/
 │   ├── projects/
-│   │   ├── api                 # ProjectService + ProjectsScreens + models
-│   │   └── impl                # data + UI for projects
-│   ├── files/
-│   │   ├── api                 # FileExplorerService + FilesScreens + models
-│   │   └── impl                # data + UI for file management
-│   ├── editor/
-│   │   ├── api                 # EditorSession / DocumentStore + EditorScreens
-│   │   └── impl                # editor screen + dirty/save
-│   └── buildapk/
-│       ├── api                 # BuildService + BuildScreens + models
-│       └── impl                # upload → remote build → download → install
+│   │   ├── model               # Project, ProjectId, CreateProjectRequest
+│   │   ├── api                 # ProjectService + ProjectsScreens
+│   │   ├── data                # Room entities/DAOs + service impl
+│   │   ├── presentation        # Compose screens
+│   │   └── di                  # feature Koin module
+│   ├── files/                  # model / api / data / presentation / di
+│   ├── editor/                 # model / api / data / presentation / di
+│   └── buildapk/               # model / api / data / presentation / di
 └── integration/
-    └── ide                     # wires Projects → Files → Editor → Build into one graph
+    ├── database                # RoomDatabase assembly (wires feature entities/DAOs)
+    └── ide                     # product nav + includes feature DI modules
 ```
 
 
 
-### Why `api` / `impl` pairs?
+### Why split `model` / `api` / `data` / `presentation` / `di`?
 
-Gradle consumers depend on `:feature:X:api`. Implementations live in `:feature:X:impl` and are only pulled by `:app` / `:integration:ide`. That enforces “interfaces and types only” at the module boundary.
+| Module | Owns |
+| --- | --- |
+| `:model` | Feature data classes / value types |
+| `:api` | Interfaces only (`*Service`, `*Screens`) — depends on `:model` |
+| `:data` | Persistence & domain impl (entities, DAOs, FS, repositories) |
+| `:presentation` | Compose UI implementing screen launchers |
+| `:di` | Feature Koin module binding api ← data/presentation |
+
+Outside a feature, consumers depend on **`:api` (+ `:model` as needed)**. `:integration:ide` pulls `:di` modules; `:integration:database` assembles Room from feature `:data` entities/DAOs — it does not own feature schemas.
 
 ```text
-:feature:projects:api   →  interfaces + data classes
-:feature:projects:impl  →  Room/FS, ViewModels, Composables  (depends on :api + :designsystem)
+:feature:projects:model         →  Project, ProjectId, …
+:feature:projects:api           →  ProjectService, ProjectsScreens
+:feature:projects:data          →  ProjectEntity, ProjectDao, ProjectService impl
+:feature:projects:presentation  →  ProjectsScreens impl
+:feature:projects:di            →  projectsDiModule
+:integration:database           →  AslDatabase (entities from feature data modules)
 ```
 
 ---
@@ -101,16 +109,16 @@ flowchart TB
   app[":app"]
   ide[":integration:ide"]
   ds[":designsystem"]
-  core[":core:model"]
+  core["(removed — per-feature :model)"]
 
   pApi[":feature:projects:api"]
-  pImpl[":feature:projects:impl"]
+  pImpl[":feature:projects:di"]
   fApi[":feature:files:api"]
-  fImpl[":feature:files:impl"]
+  fImpl[":feature:files:di"]
   eApi[":feature:editor:api"]
-  eImpl[":feature:editor:impl"]
+  eImpl[":feature:editor:di"]
   bApi[":feature:buildapk:api"]
-  bImpl[":feature:buildapk:impl"]
+  bImpl[":feature:buildapk:di"]
 
   app --> ide
   app --> pImpl
@@ -403,7 +411,7 @@ interface BuildService {
     suspend fun cancelBuild(jobId: String)
 }
 
-/** Side-effect at the Android boundary — usually implemented in :app or buildapk:impl */
+/** Side-effect at the Android boundary — usually implemented in :app or buildapk:data / :integration:database */
 interface ApkInstaller {
     fun requestInstall(apkLocalPath: String)
 }
@@ -625,7 +633,7 @@ flowchart TB
   P --> fs
   F[files:impl] --> fs
   E[editor:impl] --> fs
-  B[buildapk:impl] --> fs
+  B[buildapk:data / :integration:database] --> fs
   B --> apkCache
   B --> ci
 ```
@@ -643,20 +651,18 @@ flowchart TB
 ## 12. Gradle include sketch
 
 ```kotlin
-// settings.gradle.kts (future)
+// settings.gradle.kts
 include(":app")
 include(":designsystem")
-include(":core:model")
 
+include(":feature:projects:model")
 include(":feature:projects:api")
-include(":feature:projects:impl")
-include(":feature:files:api")
-include(":feature:files:impl")
-include(":feature:editor:api")
-include(":feature:editor:impl")
-include(":feature:buildapk:api")
-include(":feature:buildapk:impl")
+include(":feature:projects:data")
+include(":feature:projects:presentation")
+include(":feature:projects:di")
+// … same five modules for files, editor, buildapk
 
+include(":integration:database")
 include(":integration:ide")
 ```
 
@@ -687,10 +693,10 @@ Do **not** expand this architecture doc with ephemeral impl details (timings, as
 
 High-level locks that affect module shape:
 
-- **Koin** (modules in `:impl` + `:integration:ide`; `:app` starts Koin)
-- **App-private** project storage; **Room** in **`:core:database`**
-- **`:core:model`** now
-- **`editor:impl` → `files:api`**
+- **Koin** — per-feature `:di` modules; `:integration:ide` includes them; `:app` starts Koin
+- **App-private** project storage; **Room** assembled in **`:integration:database`**; feature tables/DAOs live in **`:feature:*:data`**
+- **Models per feature** (`:feature:*:model`) — no shared `(removed — per-feature :model)`
+- **`editor:data` may use `files:api`** for load/save
 - **Fake `BuildService`** for v0.1 (real GitHub Actions later, same API)
 - **IDE nav graph** in `:integration:ide` (no `IdeCoordinator` in v0.1)
 
@@ -704,12 +710,13 @@ High-level locks that affect module shape:
 | Module              | Role                   | Public surface                                      |
 | ------------------- | ---------------------- | --------------------------------------------------- |
 | `:designsystem`     | Visual language        | Compose components + tokens                         |
-| `:feature:projects` | Project lifecycle      | `ProjectService` + `ProjectsScreens` + models       |
-| `:feature:files`    | Tree navigation & CRUD | `FileExplorerService` + `FilesScreens` + models     |
-| `:feature:editor`   | Edit / dirty / save    | `EditorSession` + `EditorScreens` + models          |
-| `:feature:buildapk`    | Remote APK pipeline    | `BuildService` + `BuildScreens` + models            |
-| `:integration:ide`  | Product wiring & nav   | IDE nav graph + screen-launcher wiring              |
-| `:app`              | Host                   | Bindings + permissions                              |
+| `:feature:projects` | Project lifecycle | `model` + `api` + `data` + `presentation` + `di` |
+| `:feature:files` | Tree navigation & CRUD | same five-way split |
+| `:feature:editor` | Edit / dirty / save | same five-way split |
+| `:feature:buildapk` | Remote APK pipeline | same five-way split |
+| `:integration:database` | Room assembly | Wires feature entities/DAOs into `AslDatabase` |
+| `:integration:ide` | Product wiring & nav | Includes feature DI + IDE nav graph |
+| `:app` | Host | Start Koin + permissions/install |
 
 
 This matches the intended shape: **specialist capability modules** with clean interfaces, plus **integration modules** that assemble them into Android Studio Lite — without leaking implementations across boundaries.

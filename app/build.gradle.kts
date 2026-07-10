@@ -40,7 +40,7 @@ android {
 dependencies {
     implementation(project(":designsystem"))
     implementation(project(":integration:ide"))
-    implementation(project(":core:database"))
+    implementation(project(":integration:database"))
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(platform(libs.androidx.compose.bom))

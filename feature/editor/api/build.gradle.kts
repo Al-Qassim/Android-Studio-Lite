@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
-
 }
 
 android {
@@ -25,7 +24,8 @@ android {
 }
 
 dependencies {
-    api(project(":core:model"))
+    api(project(":feature:editor:model"))
+    api(project(":feature:files:model"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.runtime)
     api(libs.kotlinx.coroutines.core)

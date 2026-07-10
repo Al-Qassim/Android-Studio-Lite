@@ -1,9 +1,9 @@
 package com.robotopia.androidstudiolite.feature.projects.api
 
 import androidx.compose.runtime.Composable
-import com.robotopia.androidstudiolite.core.model.CreateProjectRequest
-import com.robotopia.androidstudiolite.core.model.Project
-import com.robotopia.androidstudiolite.core.model.ProjectId
+import com.robotopia.androidstudiolite.feature.projects.model.CreateProjectRequest
+import com.robotopia.androidstudiolite.feature.projects.model.Project
+import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import kotlinx.coroutines.flow.Flow
 
 interface ProjectService {

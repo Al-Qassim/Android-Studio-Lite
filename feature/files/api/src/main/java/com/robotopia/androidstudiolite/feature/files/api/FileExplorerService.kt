@@ -1,36 +1,10 @@
 package com.robotopia.androidstudiolite.feature.files.api
 
 import androidx.compose.runtime.Composable
-import com.robotopia.androidstudiolite.core.model.ProjectRoot
+import com.robotopia.androidstudiolite.feature.files.model.DirectoryListing
+import com.robotopia.androidstudiolite.feature.files.model.FsNode
+import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import kotlinx.coroutines.flow.Flow
-
-sealed class FsNode {
-    abstract val name: String
-    abstract val relativePath: String
-
-    data class File(
-        override val name: String,
-        override val relativePath: String,
-    ) : FsNode()
-
-    data class Folder(
-        override val name: String,
-        override val relativePath: String,
-    ) : FsNode()
-}
-
-data class DirectoryListing(
-    val currentRelativePath: String,
-    val entries: List<FsNode>,
-)
-
-sealed class FileOpError {
-    data object OutsideSandbox : FileOpError()
-    data object NameConflict : FileOpError()
-    data object InvalidName : FileOpError()
-    data object InvalidMove : FileOpError()
-    data class Io(val message: String) : FileOpError()
-}
 
 interface FileExplorerService {
     fun observeListing(root: ProjectRoot, relativePath: String): Flow<DirectoryListing>

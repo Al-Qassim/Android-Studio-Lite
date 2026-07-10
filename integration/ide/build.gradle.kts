@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
-
 }
 
 android {
@@ -29,11 +28,11 @@ dependencies {
     api(project(":feature:files:api"))
     api(project(":feature:editor:api"))
     api(project(":feature:buildapk:api"))
-    implementation(project(":feature:projects:impl"))
-    implementation(project(":feature:files:impl"))
-    implementation(project(":feature:editor:impl"))
-    implementation(project(":feature:buildapk:impl"))
-    implementation(project(":core:database"))
+    implementation(project(":feature:projects:di"))
+    implementation(project(":feature:files:di"))
+    implementation(project(":feature:editor:di"))
+    implementation(project(":feature:buildapk:di"))
+    implementation(project(":integration:database"))
     implementation(project(":designsystem"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

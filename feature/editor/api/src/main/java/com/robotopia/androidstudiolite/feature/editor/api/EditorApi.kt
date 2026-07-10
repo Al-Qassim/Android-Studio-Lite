@@ -1,20 +1,10 @@
 package com.robotopia.androidstudiolite.feature.editor.api
 
 import androidx.compose.runtime.Composable
-import com.robotopia.androidstudiolite.core.model.ProjectId
-import com.robotopia.androidstudiolite.core.model.ProjectRoot
+import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
+import com.robotopia.androidstudiolite.feature.editor.model.OpenDocument
+import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import kotlinx.coroutines.flow.StateFlow
-
-data class DocumentId(
-    val projectId: ProjectId,
-    val relativePath: String,
-)
-
-data class OpenDocument(
-    val id: DocumentId,
-    val content: String,
-    val isDirty: Boolean,
-)
 
 interface EditorSession {
     val document: StateFlow<OpenDocument?>
