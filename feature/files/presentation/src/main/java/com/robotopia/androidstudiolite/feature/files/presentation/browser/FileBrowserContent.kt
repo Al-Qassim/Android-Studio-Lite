@@ -1,17 +1,11 @@
 package com.robotopia.androidstudiolite.feature.files.presentation.browser
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicText
@@ -32,8 +26,10 @@ import com.robotopia.androidstudiolite.designsystem.component.DialogMessageActio
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.FileRow
 import com.robotopia.androidstudiolite.designsystem.component.FolderRow
+import com.robotopia.androidstudiolite.designsystem.component.MoveBar
 import com.robotopia.androidstudiolite.designsystem.component.PathBar
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitleAdd
+import com.robotopia.androidstudiolite.designsystem.component.TransferBarMode
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 
@@ -46,6 +42,7 @@ internal fun FileBrowserContent(
     onNewFileClick: () -> Unit,
     onNewFolderClick: () -> Unit,
     onPasteClick: () -> Unit,
+    onClipboardCancel: () -> Unit,
     onFolderClick: (FsNode.Folder) -> Unit,
     onFileClick: (FsNode.File) -> Unit,
     onItemLongClick: (FsNode) -> Unit,
@@ -78,27 +75,42 @@ internal fun FileBrowserContent(
         if (pathSegments.isNotEmpty()) {
             PathBar(segments = pathSegments)
         }
-        FileBrowserBody(
-            entries = state.entries,
-            menuItem = state.menuItem,
-            onFolderClick = onFolderClick,
-            onFileClick = onFileClick,
-            onItemLongClick = onItemLongClick,
-            onMenuDismiss = onMenuDismiss,
-            onRenameMenuClick = onRenameMenuClick,
-            onCopyMenuClick = onCopyMenuClick,
-            onMoveMenuClick = onMoveMenuClick,
-            onDeleteMenuClick = onDeleteMenuClick,
-        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        ) {
+            FileBrowserBody(
+                entries = state.entries,
+                menuItem = state.menuItem,
+                onFolderClick = onFolderClick,
+                onFileClick = onFileClick,
+                onItemLongClick = onItemLongClick,
+                onMenuDismiss = onMenuDismiss,
+                onRenameMenuClick = onRenameMenuClick,
+                onCopyMenuClick = onCopyMenuClick,
+                onMoveMenuClick = onMoveMenuClick,
+                onDeleteMenuClick = onDeleteMenuClick,
+            )
+        }
+        state.clipboard?.let { clipboard ->
+            MoveBar(
+                name = clipboard.node.name,
+                mode = when (clipboard.mode) {
+                    ClipboardMode.Cut -> TransferBarMode.Move
+                    ClipboardMode.Copy -> TransferBarMode.Copy
+                },
+                onCancel = onClipboardCancel,
+                onMoveHere = onPasteClick,
+            )
+        }
     }
 
     if (state.addMenuOpen) {
         AddMenuPopup(
-            hasClipboard = state.clipboard != null,
             onDismiss = onAddMenuDismiss,
             onNewFileClick = onNewFileClick,
             onNewFolderClick = onNewFolderClick,
-            onPasteClick = onPasteClick,
         )
     }
 
@@ -271,48 +283,21 @@ private fun FileBrowserListItem(
 
 @Composable
 private fun AddMenuPopup(
-    hasClipboard: Boolean,
     onDismiss: () -> Unit,
     onNewFileClick: () -> Unit,
     onNewFolderClick: () -> Unit,
-    onPasteClick: () -> Unit,
 ) {
     Popup(
         alignment = Alignment.TopEnd,
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
-        Column(
+        CreateMenu(
+            onNewFile = onNewFileClick,
+            onNewFolder = onNewFolderClick,
             modifier = Modifier.padding(top = 48.dp, end = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            CreateMenu(
-                onNewFile = onNewFileClick,
-                onNewFolder = onNewFolderClick,
-            )
-            if (hasClipboard) {
-                PasteMenu(onPaste = onPasteClick)
-            }
-        }
+        )
     }
-}
-
-@Composable
-private fun PasteMenu(
-    onPaste: () -> Unit,
-) {
-    val shape = RoundedCornerShape(10.dp)
-    BasicText(
-        text = "Paste",
-        style = Typography.Menu.copy(color = Colors.Text),
-        modifier = Modifier
-            .width(180.dp)
-            .shadow(8.dp, shape)
-            .clip(shape)
-            .background(Colors.Menu)
-            .clickable(onClick = onPaste)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-    )
 }
 
 @Composable
@@ -493,6 +478,7 @@ private fun FileBrowserPreviewHost(state: FileBrowserUiState) {
         onNewFileClick = {},
         onNewFolderClick = {},
         onPasteClick = {},
+        onClipboardCancel = {},
         onFolderClick = {},
         onFileClick = {},
         onItemLongClick = {},
@@ -657,6 +643,50 @@ private fun FileBrowserDeletePreview() {
             projectName = "MyApp",
             entries = previewEntries,
             dialog = FileBrowserDialog.DeleteConfirm(previewEntries.last()),
+        ),
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · move bar",
+)
+@Composable
+private fun FileBrowserMoveBarPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            clipboard = ClipboardState(
+                mode = ClipboardMode.Cut,
+                relativePath = "build.gradle.kts",
+                node = previewEntries[2],
+            ),
+        ),
+    )
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF12171C,
+    widthDp = 360,
+    heightDp = 640,
+    name = "Browser · copy bar",
+)
+@Composable
+private fun FileBrowserCopyBarPreview() {
+    FileBrowserPreviewHost(
+        state = FileBrowserUiState(
+            projectName = "MyApp",
+            entries = previewEntries,
+            clipboard = ClipboardState(
+                mode = ClipboardMode.Copy,
+                relativePath = "settings.gradle.kts",
+                node = previewEntries[3],
+            ),
         ),
     )
 }

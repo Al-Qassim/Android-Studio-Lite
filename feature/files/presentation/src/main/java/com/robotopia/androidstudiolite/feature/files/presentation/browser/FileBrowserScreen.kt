@@ -98,6 +98,9 @@ internal fun FileBrowserScreen(
                 )
             }
         },
+        onClipboardCancel = {
+            viewModel.uiState.update { it.copy(clipboard = null) }
+        },
         onFolderClick = { folder ->
             viewModel.uiState.update {
                 it.copy(

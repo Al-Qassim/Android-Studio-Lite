@@ -12,6 +12,7 @@ Before touching the device, write down every user-visible capability the PR says
 2. PR **Summary** / description (features, screens, actions named there).
 3. PR **Test plan** manual items (unchecked or checked — still verify on device).
 4. Architecture / API surface newly implemented if the PR exposes it in UI (e.g. create, rename, move, copy, delete, paste).
+5. **Designed primary affordances** — designsystem components and Figma for the flow (e.g. `MoveBar` after Move/Copy, dialogs, path bar). If the kit has a dedicated control for the action, that control is what must appear.
 
 Turn that into a **checklist of concrete actions**, one row per capability. Example shape:
 
@@ -37,6 +38,7 @@ Install the debug APK on an emulator or device. Walk the checklist from §1 **in
 - For each checklist row: perform the action and **verify the visible UI state** (list contents, path/title, dialogs, toasts/errors, destination screen).
 - Hierarchical UIs: open at least one child; confirm contents; **back** to parent.
 - Mutating actions named in the PR (create / rename / move / copy / delete / paste / save / …): do each at least once; confirm the listing or document updates afterward.
+- **Primary affordance check:** after starting an action, confirm the **designed** control is on screen (e.g. after Move/Copy, the bottom `MoveBar` with Cancel + Move here / Paste here — not only a hidden alternate like Paste buried under `+`). Passing via an undocumented workaround is a **fail**.
 - At least one failure or validation path if the PR/issue implies it (invalid name, conflict, etc.) — no crash; user-visible feedback when specified.
 - Do **not** stop after “app launched” or “root list appeared once.”
 
@@ -55,7 +57,7 @@ Post on the PR/issue:
 
 - Build succeeds for touched modules.
 - Relevant automated tests pass (or gaps are explicitly listed).
-- **Every** non-blocked checklist row from §1 is demonstrated on device/emulator.
+- **Every** non-blocked checklist row from §1 is demonstrated on device/emulator **using the designed primary affordance**.
 - No crash on those flows.
 - Behavior matches the PR/issue — or the review **fails** with concrete gaps (never soft-pass with “manual QA not fully exercised” or “happy path OK” without the table).
 
@@ -65,5 +67,6 @@ Post on the PR/issue:
 - Root list works but folder/child navigation does not update content.
 - Create/rename/move/copy/delete/paste claimed in the PR but not exercised on device.
 - Action runs but UI does not update.
+- Action only works through a hidden/alternate control while the designed control (e.g. `MoveBar`) never appears.
 - Reviewer only ran assemble + unit tests while the PR ships screens or actions.
 - Reviewer marked pass without publishing the checklist results.
