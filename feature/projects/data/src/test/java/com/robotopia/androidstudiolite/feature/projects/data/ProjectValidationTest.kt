@@ -9,7 +9,7 @@ class ProjectValidationTest {
     @Test
     fun acceptsValidRequest() {
         ProjectValidation.validate(
-            CreateProjectRequest(name = "MyApp", packageName = "com.example.myapp"),
+            CreateProjectRequest(name = "MyApp", packageName = "com.example.myapp", minSdk = 26),
         )
     }
 
@@ -45,6 +45,15 @@ class ProjectValidationTest {
         assertThrows(IllegalArgumentException::class.java) {
             ProjectValidation.validate(
                 CreateProjectRequest(name = "MyApp", packageName = "example"),
+            )
+        }
+    }
+
+    @Test
+    fun rejectsOutOfRangeMinSdk() {
+        assertThrows(IllegalArgumentException::class.java) {
+            ProjectValidation.validate(
+                CreateProjectRequest(name = "MyApp", packageName = "com.example.app", minSdk = 14),
             )
         }
     }

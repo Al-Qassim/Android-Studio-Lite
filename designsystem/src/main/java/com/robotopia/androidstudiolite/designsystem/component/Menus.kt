@@ -46,6 +46,25 @@ fun ContextMenu(
 }
 
 @Composable
+fun ProjectMenu(
+    onOpen: () -> Unit = {},
+    onDelete: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(10.dp)
+    Column(
+        modifier = modifier
+            .width(180.dp)
+            .shadow(8.dp, shape)
+            .clip(shape)
+            .background(Colors.Menu),
+    ) {
+        MenuItem(label = "Open", onClick = onOpen)
+        MenuItem(label = "Delete", onClick = onDelete, danger = true)
+    }
+}
+
+@Composable
 fun CreateMenu(
     onNewFile: () -> Unit = {},
     onNewFolder: () -> Unit = {},
@@ -155,6 +174,12 @@ private fun InsetMenuItem(
             .background(Color.Transparent)
             .padding(horizontal = 12.dp, vertical = 10.dp),
     )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Composable
+private fun ProjectMenuPreview() {
+    ProjectMenu(modifier = Modifier.padding(16.dp))
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF12171C)

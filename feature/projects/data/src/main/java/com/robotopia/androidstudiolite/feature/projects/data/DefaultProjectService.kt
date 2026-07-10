@@ -35,13 +35,19 @@ class DefaultProjectService(
             }
 
             try {
-                EmptyComposeProjectTemplate.write(rootDir, name, packageName)
+                EmptyComposeProjectTemplate.write(
+                    projectRoot = rootDir,
+                    projectName = name,
+                    packageName = packageName,
+                    minSdk = request.minSdk,
+                )
+                val now = System.currentTimeMillis()
                 val entity = ProjectEntity(
                     id = id,
                     name = name,
                     packageName = packageName,
                     rootPath = rootDir.absolutePath,
-                    lastOpenedAt = null,
+                    lastOpenedAt = now,
                 )
                 projectDao.upsert(entity)
                 entity.toDomain()

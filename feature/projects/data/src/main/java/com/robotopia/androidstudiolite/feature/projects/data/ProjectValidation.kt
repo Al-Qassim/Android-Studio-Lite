@@ -19,5 +19,9 @@ internal object ProjectValidation {
         require(packageNameRegex.matches(packageName)) {
             "Package name must be a valid Java package (e.g. com.example.app)"
         }
+
+        require(request.minSdk in 21..35) {
+            "Min SDK must be between 21 and 35"
+        }
     }
 }

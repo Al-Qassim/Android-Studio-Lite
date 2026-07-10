@@ -13,4 +13,5 @@ data class Project(
 data class CreateProjectRequest(
     val name: String,
     val packageName: String,
+    val minSdk: Int = 26,
 )

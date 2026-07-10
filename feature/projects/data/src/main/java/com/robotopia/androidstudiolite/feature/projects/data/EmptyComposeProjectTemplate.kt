@@ -9,7 +9,7 @@ import java.io.File
  */
 internal object EmptyComposeProjectTemplate {
 
-    fun write(projectRoot: File, projectName: String, packageName: String) {
+    fun write(projectRoot: File, projectName: String, packageName: String, minSdk: Int = 26) {
         projectRoot.mkdirs()
 
         writeText(projectRoot, ".gitignore", GITIGNORE)
@@ -22,7 +22,7 @@ internal object EmptyComposeProjectTemplate {
             GRADLE_WRAPPER_PROPERTIES,
         )
 
-        writeText(projectRoot, "app/build.gradle.kts", appBuildGradle(packageName))
+        writeText(projectRoot, "app/build.gradle.kts", appBuildGradle(packageName, minSdk))
         writeText(projectRoot, "app/src/main/AndroidManifest.xml", ANDROID_MANIFEST)
 
         val packagePath = packageName.replace('.', '/')
@@ -137,7 +137,7 @@ internal object EmptyComposeProjectTemplate {
         zipStorePath=wrapper/dists
     """
 
-    private fun appBuildGradle(packageName: String): String = """
+    private fun appBuildGradle(packageName: String, minSdk: Int): String = """
         plugins {
             id("com.android.application")
             id("org.jetbrains.kotlin.android")
@@ -150,7 +150,7 @@ internal object EmptyComposeProjectTemplate {
 
             defaultConfig {
                 applicationId = "$packageName"
-                minSdk = 26
+                minSdk = $minSdk
                 targetSdk = 35
                 versionCode = 1
                 versionName = "1.0"

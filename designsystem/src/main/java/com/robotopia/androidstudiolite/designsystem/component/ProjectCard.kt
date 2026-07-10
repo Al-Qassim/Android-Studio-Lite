@@ -2,7 +2,7 @@ package com.robotopia.androidstudiolite.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +26,7 @@ fun ProjectCard(
     packageName: String,
     meta: String,
     onClick: () -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(12.dp)
@@ -35,7 +36,10 @@ fun ProjectCard(
             .clip(shape)
             .background(Colors.Surface)
             .border(1.dp, Colors.Border, shape)
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            )
             .padding(16.dp),
     ) {
         BasicText(
