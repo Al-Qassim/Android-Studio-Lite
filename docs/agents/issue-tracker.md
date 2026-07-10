@@ -95,6 +95,18 @@ gh issue comment <N> --body "Moved to In Progress — PR: <url>"
 3. Set Status per the table above.
 4. Comment on the issue with branch/PR URL and what changed.
 
+## Ticket acceptance criteria
+
+When filing, refining, or generating tickets (`/to-tickets`, `/to-spec`, triage briefs, hand-written issues), follow **`docs/agents/writing-acceptance-criteria.md`**.
+
+That checklist is the requirements-generation contract for UI/navigation work. In short:
+
+- Name **designed primary affordances** (not hidden workarounds).
+- Include **system / platform chrome** (especially system Back) paired with in-app controls for hierarchy and overlays.
+- Cover nested return paths, empty/error/conflict states, and each mutating action claimed by the ticket.
+
+Test review (`docs/agents/test-review.md`) verifies the same items on device; tickets must state them so agents know they are in scope.
+
 ## Wayfinding operations
 
 Used by `/wayfinder`. The **map** is a single issue with **child** issues as tickets.

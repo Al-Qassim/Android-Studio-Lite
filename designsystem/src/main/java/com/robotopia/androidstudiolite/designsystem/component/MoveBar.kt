@@ -1,7 +1,6 @@
 package com.robotopia.androidstudiolite.designsystem.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,13 +17,27 @@ import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
+enum class TransferBarMode {
+    Move,
+    Copy,
+}
+
 @Composable
 fun MoveBar(
     name: String,
     onCancel: () -> Unit = {},
     onMoveHere: () -> Unit = {},
     modifier: Modifier = Modifier,
+    mode: TransferBarMode = TransferBarMode.Move,
 ) {
+    val prefix = when (mode) {
+        TransferBarMode.Move -> "Moving: "
+        TransferBarMode.Copy -> "Copying: "
+    }
+    val confirmLabel = when (mode) {
+        TransferBarMode.Move -> "Move here"
+        TransferBarMode.Copy -> "Paste here"
+    }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -34,7 +47,7 @@ fun MoveBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BasicText(
-            text = "Moving: ",
+            text = prefix,
             style = Typography.BodyMedium.copy(color = Colors.Muted),
         )
         BasicText(
@@ -52,15 +65,21 @@ fun MoveBar(
         )
         Spacer(modifier = Modifier.width(4.dp))
         Button(
-            label = "Move here",
+            label = confirmLabel,
             onClick = onMoveHere,
             variant = ButtonVariant.Primary,
         )
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "MoveBar · move")
 @Composable
 private fun MoveBarPreview() {
     MoveBar(name = "MainActivity.kt")
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "MoveBar · copy")
+@Composable
+private fun MoveBarCopyPreview() {
+    MoveBar(name = "Theme.kt", mode = TransferBarMode.Copy)
 }

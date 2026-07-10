@@ -32,6 +32,14 @@ The agent needs to know when it's done. Every agent brief must have concrete, te
 - **Good:** "Running `gh issue list --label needs-triage` returns issues that have been through initial classification"
 - **Bad:** "Triage should work correctly"
 
+For UI / navigation / multi-step work, **run the checklist in `docs/agents/writing-acceptance-criteria.md` before posting the brief.** At minimum, when applicable:
+
+- Designed **primary** affordance named (not only a hidden alternate)
+- **System Back** (and other platform chrome) paired with in-app back for hierarchy/overlays
+- Empty / error / conflict paths for mutations
+
+Do not mark `ready-for-agent` with ACs that only cover toolbar happy paths.
+
 ### Explicit scope boundaries
 
 State what is out of scope. This prevents the agent from gold-plating or making assumptions about adjacent features.
@@ -61,11 +69,14 @@ Be specific about edge cases and error conditions.
 - [ ] Specific, testable criterion 1
 - [ ] Specific, testable criterion 2
 - [ ] Specific, testable criterion 3
+- [ ] (UI) Designed primary control / system Back / empty-error — per `docs/agents/writing-acceptance-criteria.md` when applicable
 
 **Out of scope:**
 - Thing that should NOT be changed or addressed in this issue
 - Adjacent feature that might seem related but is separate
 ```
+
+Before posting a UI brief, confirm the acceptance list against `docs/agents/writing-acceptance-criteria.md`.
 
 ## Examples
 

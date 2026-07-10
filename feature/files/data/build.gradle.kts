@@ -22,5 +22,7 @@ android {
 dependencies {
     api(project(":feature:files:api"))
     api(project(":feature:files:model"))
+    api(project(":core:error"))
     implementation(libs.kotlinx.coroutines.core)
+    testImplementation(libs.junit)
 }
