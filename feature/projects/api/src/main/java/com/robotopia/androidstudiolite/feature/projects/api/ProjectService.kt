@@ -17,13 +17,13 @@ interface ProjectService {
 interface ProjectsScreens {
     @Composable
     fun ProjectsList(
-        onOpenProject: (projectId: String) -> Unit,
+        onOpenProject: (projectId: ProjectId) -> Unit,
         onCreateProject: () -> Unit = {},
     )
 
     @Composable
     fun CreateProject(
-        onCreated: (projectId: String) -> Unit,
+        onCreated: (projectId: ProjectId) -> Unit,
         onCancel: () -> Unit,
     )
 }
