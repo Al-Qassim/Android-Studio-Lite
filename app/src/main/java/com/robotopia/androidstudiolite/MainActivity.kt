@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.robotopia.androidstudiolite.integration.database.AslDatabase
-import com.robotopia.androidstudiolite.integration.ide.IdeRootPlaceholder
+import com.robotopia.androidstudiolite.integration.navigation.IdeNavHost
 import com.robotopia.androidstudiolite.ui.theme.AndroidStudioLiteTheme
 import org.koin.android.ext.android.get
 
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                     database.openHelper.writableDatabase
                 }
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    IdeRootPlaceholder()
+                    IdeNavHost()
                 }
             }
         }

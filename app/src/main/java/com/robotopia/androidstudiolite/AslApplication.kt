@@ -1,7 +1,7 @@
 package com.robotopia.androidstudiolite
 
 import android.app.Application
-import com.robotopia.androidstudiolite.integration.ide.ideModule
+import com.robotopia.androidstudiolite.integration.di.integrationDiModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -10,7 +10,7 @@ class AslApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@AslApplication)
-            modules(ideModule)
+            modules(integrationDiModule)
         }
     }
 }

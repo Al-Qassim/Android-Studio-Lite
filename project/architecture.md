@@ -68,7 +68,8 @@ AndroidStudioLite/
 │   └── buildapk/               # model / api / data / presentation / di
 └── integration/
     ├── database                # RoomDatabase assembly (wires feature entities/DAOs)
-    └── ide                     # product nav + includes feature DI modules
+    ├── di                      # aggregates feature + database Koin modules
+    └── navigation              # IDE NavHost / product navigation graph
 ```
 
 
@@ -83,7 +84,7 @@ AndroidStudioLite/
 | `:presentation` | Compose UI implementing screen launchers |
 | `:di` | Feature Koin module binding api ← data/presentation |
 
-Outside a feature, consumers depend on **`:api` (+ `:model` as needed)**. `:integration:ide` pulls `:di` modules; `:integration:database` assembles Room from feature `:data` entities/DAOs — it does not own feature schemas.
+Outside a feature, consumers depend on **`:api` (+ `:model` as needed)**. `:integration:di` pulls feature `:di` modules; `:integration:navigation` composes screen launchers; `:integration:database` assembles Room from feature `:data` entities/DAOs — it does not own feature schemas.
 
 ```text
 :feature:projects:model         →  Project, ProjectId, …
@@ -107,52 +108,38 @@ Outside a feature, consumers depend on **`:api` (+ `:model` as needed)**. `:inte
 ```mermaid
 flowchart TB
   app[":app"]
-  ide[":integration:ide"]
+  di[":integration:di"]
+  nav[":integration:navigation"]
   ds[":designsystem"]
-  core["(removed — per-feature :model)"]
 
   pApi[":feature:projects:api"]
-  pImpl[":feature:projects:di"]
+  pDi[":feature:projects:di"]
   fApi[":feature:files:api"]
-  fImpl[":feature:files:di"]
+  fDi[":feature:files:di"]
   eApi[":feature:editor:api"]
-  eImpl[":feature:editor:di"]
+  eDi[":feature:editor:di"]
   bApi[":feature:buildapk:api"]
-  bImpl[":feature:buildapk:di"]
+  bDi[":feature:buildapk:di"]
 
-  app --> ide
-  app --> pImpl
-  app --> fImpl
-  app --> eImpl
-  app --> bImpl
+  app --> di
+  app --> nav
   app --> ds
 
-  ide --> pApi
-  ide --> fApi
-  ide --> eApi
-  ide --> bApi
-  ide --> ds
+  di --> pDi
+  di --> fDi
+  di --> eDi
+  di --> bDi
 
-  pImpl --> pApi
-  pImpl --> ds
-  pImpl --> core
+  nav --> pApi
+  nav --> fApi
+  nav --> eApi
+  nav --> bApi
+  nav --> ds
 
-  fImpl --> fApi
-  fImpl --> ds
-  fImpl --> core
-
-  eImpl --> eApi
-  eImpl --> ds
-  eImpl --> core
-
-  bImpl --> bApi
-  bImpl --> ds
-  bImpl --> core
-
-  pApi --> core
-  fApi --> core
-  eApi --> core
-  bApi --> core
+  pDi --> pApi
+  fDi --> fApi
+  eDi --> eApi
+  bDi --> bApi
 ```
 
 
@@ -167,7 +154,7 @@ flowchart TB
 | `*:api` must not depend on `*:impl`                                          | Keeps public surface pure                                 |
 | Feature `impl`s must not depend on other feature `impl`s                     | Avoid spaghetti; talk via APIs or integration             |
 | Feature `impl`s should not depend on other feature `api`s unless unavoidable | Prefer integration module for cross-feature orchestration |
-| Only `:app` / `:integration:ide` compose multiple features                   | Clear ownership of product flows                          |
+| Only `:app` / `:integration:navigation` compose multiple features            | Clear ownership of product flows                          |
 | `:designsystem` depends on nothing in `feature/`                             | UI kit stays reusable                                     |
 
 
@@ -236,7 +223,7 @@ interface ProjectService {
 
 /**
  * Screen launcher — public UI entry points for this feature.
- * Implemented in :impl; consumed by :integration:ide / :app.
+ * Implemented in :data / :presentation; consumed by :integration:navigation / :app.
  * Never expose ViewModels or internal Composables through this API.
  */
 interface ProjectsScreens {
@@ -365,9 +352,9 @@ interface EditorScreens {
 }
 ```
 
-`DocumentStore` may be implemented by adapting `FileExplorerService.readText/writeText` inside `editor:impl` or via a binding in `:integration:ide`. Prefer **adapter in integration** so `editor` does not hard-depend on `files:api` if we want maximum isolation — or allow a soft `editor:impl → files:api` dependency for pragmatism in v0.1.
+`DocumentStore` may be implemented by adapting `FileExplorerService.readText/writeText` inside `editor:data` or via a binding in `:integration:di`. Prefer **adapter in integration** so `editor` does not hard-depend on `files:api` if we want maximum isolation — or allow a soft `editor:data → files:api` dependency for pragmatism in v0.1.
 
-**Recommendation for v0.1:** `editor:impl` may depend on `files:api` for load/save. Integration still owns navigation and calls `EditorScreens` / `FilesScreens` / `BuildScreens` — never feature `impl` types.
+**Recommendation for v0.1:** `editor:data` may depend on `files:api` for load/save. Integration still owns navigation and calls `EditorScreens` / `FilesScreens` / `BuildScreens` — never feature presentation types.
 
 ---
 
@@ -443,20 +430,25 @@ Every capability `:api` exposes **two** public surfaces:
 1. Launchers live in `:api` and are implemented in `:impl`.
 2. Launchers accept **callbacks** for exits that leave the feature (open project → files, open file → editor, run → build). Integration wires those callbacks.
 3. Launchers must not return or expose ViewModels, repositories, or other `impl` types.
-4. `:integration:ide` / `:app` depend on launcher interfaces from `:api` only — never on feature screen classes in `:impl`.
+4. `:integration:navigation` / `:app` depend on launcher interfaces from `:api` only — never on feature screen classes in `:presentation`.
 
 ---
 
 
 
-## 7. Integration module — `:integration:ide`
+## 7. Integration modules — `:integration:di` + `:integration:navigation`
 
-This is the module you described: **not a domain specialist**, but the place that **connects** specialists into product behavior.
+These are **not domain specialists** — they **connect** specialists into product behavior.
 
-### Responsibilities
+### `:integration:di`
 
-- Navigation graph for the IDE experience
-- Calling feature **screen launchers** (`ProjectsScreens`, `FilesScreens`, …) — never `impl` screen types
+- Aggregates per-feature Koin modules + `:integration:database`
+- `:app` starts Koin with `integrationDiModule` only
+
+### `:integration:navigation`
+
+- Navigation graph for the IDE experience (`IdeNavHost`)
+- Calling feature **screen launchers** (`ProjectsScreens`, `FilesScreens`, …) — never presentation screen types
 - Mapping: open project → hand `ProjectRoot` to `FilesScreens.FileBrowser`
 - Mapping: open file → hand path to `EditorScreens.Editor`
 - Mapping: Run → `BuildService.startBuild` + `BuildScreens.BuildProgress`
@@ -475,7 +467,7 @@ This is the module you described: **not a domain specialist**, but the place tha
 ```mermaid
 sequenceDiagram
   actor User
-  participant IDE as integration:ide
+  participant Nav as integration:navigation
   participant PS as ProjectsScreens
   participant P as ProjectService
   participant FS as FilesScreens
@@ -486,24 +478,24 @@ sequenceDiagram
   participant B as BuildService
   participant I as ApkInstaller
 
-  User->>IDE: Open Projects
-  IDE->>PS: ProjectsList(...)
-  User->>IDE: Create project
-  IDE->>PS: CreateProject(...)
-  IDE->>P: createProject(...)
-  User->>IDE: Open project
-  IDE->>P: markOpened(id)
-  IDE->>FS: FileBrowser(root, ...)
-  User->>IDE: Open file
-  IDE->>ES: Editor(documentId, ...)
-  User->>IDE: Save
-  IDE->>E: (dirty content via session)
-  IDE->>F: writeText(...)
-  User->>IDE: Run
-  IDE->>B: startBuild(request)
-  IDE->>BS: BuildProgress(jobId, ...)
-  B-->>IDE: ReadyToInstall + apk path
-  IDE->>I: requestInstall(apk)
+  User->>Nav: Open Projects
+  Nav->>PS: ProjectsList(...)
+  User->>Nav: Create project
+  Nav->>PS: CreateProject(...)
+  Nav->>P: createProject(...)
+  User->>Nav: Open project
+  Nav->>P: markOpened(id)
+  Nav->>FS: FileBrowser(root, ...)
+  User->>Nav: Open file
+  Nav->>ES: Editor(documentId, ...)
+  User->>Nav: Save
+  Nav->>E: (dirty content via session)
+  Nav->>F: writeText(...)
+  User->>Nav: Run
+  Nav->>B: startBuild(request)
+  Nav->>BS: BuildProgress(jobId, ...)
+  B-->>Nav: ReadyToInstall + apk path
+  Nav->>I: requestInstall(apk)
 ```
 
 
@@ -534,17 +526,17 @@ interface IdeCoordinator {
 
 | Concern                                               | Owner                          |
 | ----------------------------------------------------- | ------------------------------ |
-| Start Koin; aggregate feature + integration modules   | `:app`                         |
-| Per-feature Koin modules (`api` → `impl` bindings)    | each `:feature:*:impl`         |
-| Integration wiring Koin module                        | `:integration:ide`             |
-| IDE `NavHost` / nav graph                             | `:integration:ide`             |
+| Start Koin with `integrationDiModule`                 | `:app`                         |
+| Per-feature Koin modules (`api` ← data/presentation)  | each `:feature:*:di`           |
+| Aggregate feature + database Koin modules             | `:integration:di`              |
+| IDE `NavHost` / nav graph                             | `:integration:navigation`      |
 | Host Activity that embeds the IDE graph               | `:app`                         |
 | `REQUEST_INSTALL_PACKAGES` / install activity result  | `:app` (+ `ApkInstaller` impl) |
 | Application / MainActivity                            | `:app`                         |
 | Theme wrapper using `:designsystem`                   | `:app`                         |
 
 
-`:app` depends on `impl` modules to start Koin with their modules; UI composition goes through `:integration:ide` routes and screen launchers.
+`:app` starts Koin via `:integration:di`; UI composition goes through `:integration:navigation` routes and screen launchers.
 
 ---
 
@@ -655,7 +647,8 @@ include(":feature:projects:di")
 // … same five modules for files, editor, buildapk
 
 include(":integration:database")
-include(":integration:ide")
+include(":integration:di")
+include(":integration:navigation")
 ```
 
 ---
@@ -685,12 +678,12 @@ Do **not** expand this architecture doc with ephemeral impl details (timings, as
 
 High-level locks that affect module shape:
 
-- **Koin** — per-feature `:di` modules; `:integration:ide` includes them; `:app` starts Koin
+- **Koin** — per-feature `:di` modules; `:integration:di` includes them; `:app` starts Koin
 - **App-private** project storage; **Room** assembled in **`:integration:database`**; feature tables/DAOs live in **`:feature:*:data`**
-- **Models per feature** (`:feature:*:model`) — no shared `(removed — per-feature :model)`
+- **Models per feature** (`:feature:*:model`) — no shared core model module
 - **`editor:data` may use `files:api`** for load/save
 - **Fake `BuildService`** for v0.1 (real GitHub Actions later, same API)
-- **IDE nav graph** in `:integration:ide` (no `IdeCoordinator` in v0.1)
+- **IDE nav graph** in `:integration:navigation` (no `IdeCoordinator` in v0.1)
 
 ---
 
@@ -707,7 +700,8 @@ High-level locks that affect module shape:
 | `:feature:editor` | Edit / dirty / save | same five-way split |
 | `:feature:buildapk` | Remote APK pipeline | same five-way split |
 | `:integration:database` | Room assembly | Wires feature entities/DAOs into `AslDatabase` |
-| `:integration:ide` | Product wiring & nav | Includes feature DI + IDE nav graph |
+| `:integration:di` | DI aggregation | Includes feature + database Koin modules |
+| `:integration:navigation` | Product nav | IDE `NavHost` + screen-launcher wiring |
 | `:app` | Host | Start Koin + permissions/install |
 
 

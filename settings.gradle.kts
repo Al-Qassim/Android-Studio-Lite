@@ -51,4 +51,5 @@ include(":feature:buildapk:presentation")
 include(":feature:buildapk:di")
 
 include(":integration:database")
-include(":integration:ide")
+include(":integration:di")
+include(":integration:navigation")
