@@ -10,6 +10,7 @@ Short router only. For details, open the linked file or skill — do not duplica
 | Keep open PR branches current after `main` updates | `docs/agents/git-workflow.md` → *Keep open branches current with `main`* |
 | PR merged — delete remote + local branch, board Done | `docs/agents/git-workflow.md` → *After a PR is merged* |
 | Issue tracker / Project board Status | `docs/agents/issue-tracker.md` |
+| Writing / generating ticket ACs (UI, system Back, affordances) | `docs/agents/writing-acceptance-criteria.md` (+ `/to-tickets`, `/to-spec`, triage) |
 | Triage labels | `docs/agents/triage-labels.md` |
 | Domain docs layout (`CONTEXT.md`, ADRs) | `docs/agents/domain.md` |
 | Feature screens / modules structure | `.agents/skills/structure-feature-code/SKILL.md` (also `.cursor/rules/`) |

@@ -4,6 +4,8 @@ Confirm the app runs without crashing **and is functionally usable** for everyth
 
 Unit tests and a clean assemble are necessary but **not sufficient** when the change includes UI, navigation, or user-visible behavior. Device/emulator truth decides pass/fail for those flows.
 
+Requirements for what belongs in ticket ACs (upstream of this review) live in `docs/agents/writing-acceptance-criteria.md`. If a PR’s linked issue omitted system Back or designed affordances but the PR ships that UI, still add those rows to the checklist here and fail if they break.
+
 ## 1. Build a functional checklist from the PR (required)
 
 Before touching the device, write down every user-visible capability the PR says it ships. Sources (use all that apply):
