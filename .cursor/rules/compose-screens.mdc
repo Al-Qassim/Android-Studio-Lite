@@ -24,10 +24,12 @@ feature/<name>/presentation/<screen>/
 
 - `*Screen`: collect state, pass callbacks, private helpers (`collect*`, `open*`, `create*`).
 - `*Content` / small children: draw UI only; multi-state private previews in the **content** file.
+- **Never nest function declarations** inside another function/composable. Use file-private top-level helpers (or sibling composables) instead.
 
 ## Nesting
 
 - Keep composable nesting ≤ **2–3 levels** per function; extract children when deeper.
+- Nested *calls* are fine; nested *function definitions* are not.
 
 ## Previews
 

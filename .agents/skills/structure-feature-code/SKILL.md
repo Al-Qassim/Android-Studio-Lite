@@ -54,12 +54,14 @@ presentation/<screen>/
 - Depends on the feature service/API + navigation callbacks.
 - Private helpers for load/mutate; update state holder.
 - Renders by calling Content with state + event lambdas.
+- **Never nest function declarations** (no `fun` / local function defined inside another function or composable). Put helpers at file/private top level (or in a sibling type) so call sites stay flat and testable.
 
 ### Content (drawing)
 
 - Pure UI from state + callbacks.
 - Nesting **≤ 2–3 levels** per composable/function; extract children when deeper.
 - Many named previews: empty, filled, field errors, loading, menus, dialogs, action errors.
+- Same rule: **no nested function declarations** inside composables — extract private `@Composable`s or file-level helpers instead.
 
 ## 5. Incremental delivery (when on a PR)
 
@@ -76,6 +78,7 @@ presentation/<screen>/
 - [ ] User-safe errors (UI message vs log-only unexpected)
 - [ ] State holder is state-only
 - [ ] Screen vs Content split; shallow UI trees
+- [ ] No nested function declarations (helpers at file / private top level)
 - [ ] Multi-state previews on Content
 - [ ] Focused commit → push → PR comment (if on a PR)
 
