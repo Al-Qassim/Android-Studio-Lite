@@ -22,5 +22,7 @@ android {
 dependencies {
     api(project(":feature:buildapk:api"))
     api(project(":feature:buildapk:model"))
+    implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.core)
+    testImplementation(libs.junit)
 }

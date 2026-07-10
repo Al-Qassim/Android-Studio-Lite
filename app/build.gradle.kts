@@ -39,6 +39,7 @@ android {
 
 dependencies {
     implementation(project(":designsystem"))
+    implementation(project(":feature:buildapk:api"))
     implementation(project(":integration:di"))
     implementation(project(":integration:navigation"))
     implementation(libs.koin.android)

@@ -1,10 +1,14 @@
 package com.robotopia.androidstudiolite.feature.buildapk.presentation
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
+import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.BuildProgressScreen
 
-class StubBuildScreens : BuildScreens {
+class DefaultBuildScreens(
+    private val buildService: BuildService,
+) : BuildScreens {
+
     @Composable
     override fun NavHost(
         jobId: String,
@@ -27,6 +31,12 @@ class StubBuildScreens : BuildScreens {
         onDismiss: () -> Unit,
         onRetry: (() -> Unit)?,
     ) {
-        Text("Build (stub)")
+        BuildProgressScreen(
+            jobId = jobId,
+            buildService = buildService,
+            onReadyToInstall = onReadyToInstall,
+            onDismiss = onDismiss,
+            onRetry = onRetry,
+        )
     }
 }
