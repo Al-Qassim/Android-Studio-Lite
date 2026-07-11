@@ -25,5 +25,6 @@ dependencies {
     implementation(project(":core:error"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.okhttp)
     testImplementation(libs.junit)
 }

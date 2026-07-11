@@ -12,6 +12,7 @@ koin = "4.1.1"
 room = "2.8.4"
 ksp = "2.2.10-2.0.2"
 coroutines = "1.10.2"
+okhttp = "4.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,6 +39,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

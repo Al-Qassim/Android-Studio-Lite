@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
+import com.robotopia.androidstudiolite.feature.buildapk.api.GitHubTokenAuth
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildRequest
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.BuildProgressScreen
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.start.BuildStartScreen
@@ -20,6 +21,7 @@ private sealed interface BuildRoute {
 
 class DefaultBuildScreens(
     private val buildService: BuildService,
+    private val tokenAuth: GitHubTokenAuth,
 ) : BuildScreens {
 
     @Composable
@@ -36,6 +38,7 @@ class DefaultBuildScreens(
                 BuildStartScreen(
                     projectName = request.projectName,
                     packageName = request.packageName,
+                    tokenAuth = tokenAuth,
                     onBackClick = onDismiss,
                     onStartBuild = {
                         val jobId = buildService.startBuild(request)
