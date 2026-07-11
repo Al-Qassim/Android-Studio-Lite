@@ -7,6 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
+import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
+import com.robotopia.androidstudiolite.feature.buildapk.model.BuildRequest
 import com.robotopia.androidstudiolite.feature.editor.api.EditorScreens
 import com.robotopia.androidstudiolite.feature.editor.api.EditorSession
 import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
@@ -15,6 +18,7 @@ import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
 import com.robotopia.androidstudiolite.feature.projects.model.Project
+import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -27,6 +31,8 @@ fun IdeNavHost() {
     val projectsScreens: ProjectsScreens = koinInject()
     val filesScreens: FilesScreens = koinInject()
     val editorScreens: EditorScreens = koinInject()
+    val buildScreens: BuildScreens = koinInject()
+    val apkInstaller: ApkInstaller = koinInject()
     val editorSession: EditorSession = koinInject()
     val projectService: ProjectService = koinInject()
     var route by remember { mutableStateOf<IdeRoute>(IdeRoute.Projects) }
@@ -56,6 +62,16 @@ fun IdeNavHost() {
                         }
                     }
                 },
+                onRunProject = { projectId ->
+                    scope.launch {
+                        openBuildForProjectId(
+                            projectService = projectService,
+                            projectId = projectId,
+                            returnTo = IdeRoute.Projects,
+                            setRoute = { route = it },
+                        )
+                    }
+                },
             )
         }
 
@@ -71,6 +87,12 @@ fun IdeNavHost() {
                     )
                 },
                 onNavigateBack = { route = IdeRoute.Projects },
+                onRun = {
+                    route = IdeRoute.Build(
+                        project = current.project,
+                        returnTo = current,
+                    )
+                },
             )
         }
 
@@ -79,10 +101,45 @@ fun IdeNavHost() {
                 documentId = current.documentId,
                 root = ProjectRoot(current.project.rootPath),
                 onNavigateBack = { route = IdeRoute.Files(current.project) },
-                onRun = null,
+                onRun = {
+                    route = IdeRoute.Build(
+                        project = current.project,
+                        returnTo = current,
+                    )
+                },
+            )
+        }
+
+        is IdeRoute.Build -> {
+            buildScreens.NavHost(
+                request = BuildRequest(
+                    projectId = current.project.id,
+                    projectRoot = ProjectRoot(current.project.rootPath),
+                    projectName = current.project.name,
+                    packageName = current.project.packageName,
+                ),
+                onReadyToInstall = { apkPath ->
+                    apkInstaller.requestInstall(apkPath)
+                },
+                onDismiss = { route = current.returnTo },
             )
         }
     }
+}
+
+private suspend fun openBuildForProjectId(
+    projectService: ProjectService,
+    projectId: ProjectId,
+    returnTo: IdeRoute,
+    setRoute: (IdeRoute) -> Unit,
+) {
+    val project = projectService.getProject(projectId) ?: return
+    setRoute(
+        IdeRoute.Build(
+            project = project,
+            returnTo = returnTo,
+        ),
+    )
 }
 
 private sealed interface IdeRoute {
@@ -91,5 +148,9 @@ private sealed interface IdeRoute {
     data class Editor(
         val project: Project,
         val documentId: DocumentId,
+    ) : IdeRoute
+    data class Build(
+        val project: Project,
+        val returnTo: IdeRoute,
     ) : IdeRoute
 }

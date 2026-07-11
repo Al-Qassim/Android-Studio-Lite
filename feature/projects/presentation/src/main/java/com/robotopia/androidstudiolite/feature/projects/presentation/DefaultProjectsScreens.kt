@@ -16,21 +16,27 @@ class DefaultProjectsScreens(
 ) : ProjectsScreens {
 
     @Composable
-    override fun NavHost(onOpenProject: (projectId: ProjectId) -> Unit) {
+    override fun NavHost(
+        onOpenProject: (projectId: ProjectId) -> Unit,
+        onRunProject: (projectId: ProjectId) -> Unit,
+    ) {
         ProjectsNavHost(
             projectService = projectService,
             onOpenProject = onOpenProject,
+            onRunProject = onRunProject,
         )
     }
 
     @Composable
     override fun ProjectsList(
         onOpenProject: (projectId: ProjectId) -> Unit,
+        onRunProject: (projectId: ProjectId) -> Unit,
         onCreateProject: () -> Unit,
     ) {
         ProjectsListScreen(
             projectService = projectService,
             onOpenProject = onOpenProject,
+            onRunProject = onRunProject,
             onCreateProject = onCreateProject,
         )
     }
@@ -55,12 +61,13 @@ private sealed interface ProjectsRoute {
 
 /**
  * Projects-owned sub-navigation: list ↔ create.
- * Cross-feature exit is [onOpenProject] only.
+ * Cross-feature exits: [onOpenProject], [onRunProject].
  */
 @Composable
 private fun ProjectsNavHost(
     projectService: ProjectService,
     onOpenProject: (projectId: ProjectId) -> Unit,
+    onRunProject: (projectId: ProjectId) -> Unit,
 ) {
     var route by remember { mutableStateOf<ProjectsRoute>(ProjectsRoute.List) }
 
@@ -69,6 +76,7 @@ private fun ProjectsNavHost(
             ProjectsListScreen(
                 projectService = projectService,
                 onOpenProject = onOpenProject,
+                onRunProject = onRunProject,
                 onCreateProject = { route = ProjectsRoute.Create },
             )
         }

@@ -37,6 +37,7 @@ internal fun ProjectsListContent(
     onOpenClick: (Project) -> Unit,
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
+    onRunMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
     onDeleteCancel: () -> Unit,
     onDeleteConfirm: () -> Unit,
@@ -57,6 +58,7 @@ internal fun ProjectsListContent(
             onOpenClick = onOpenClick,
             onMenuOpen = onMenuOpen,
             onMenuDismiss = onMenuDismiss,
+            onRunMenuClick = onRunMenuClick,
             onDeleteMenuClick = onDeleteMenuClick,
         )
     }
@@ -83,6 +85,7 @@ private fun ProjectsListBody(
     onOpenClick: (Project) -> Unit,
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
+    onRunMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
     if (state.projects.isEmpty()) {
@@ -94,6 +97,7 @@ private fun ProjectsListBody(
             onOpenClick = onOpenClick,
             onMenuOpen = onMenuOpen,
             onMenuDismiss = onMenuDismiss,
+            onRunMenuClick = onRunMenuClick,
             onDeleteMenuClick = onDeleteMenuClick,
         )
     }
@@ -119,6 +123,7 @@ private fun ProjectsList(
     onOpenClick: (Project) -> Unit,
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
+    onRunMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
     LazyColumn(
@@ -133,6 +138,7 @@ private fun ProjectsList(
                 onOpenClick = onOpenClick,
                 onMenuOpen = onMenuOpen,
                 onMenuDismiss = onMenuDismiss,
+                onRunMenuClick = onRunMenuClick,
                 onDeleteMenuClick = onDeleteMenuClick,
             )
         }
@@ -147,6 +153,7 @@ private fun ProjectListItem(
     onOpenClick: (Project) -> Unit,
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
+    onRunMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
     Box {
@@ -161,6 +168,7 @@ private fun ProjectListItem(
         if (menuOpen) {
             ProjectOverflowMenu(
                 onOpen = { onOpenClick(project) },
+                onRun = { onRunMenuClick(project) },
                 onDelete = { onDeleteMenuClick(project) },
                 onDismiss = onMenuDismiss,
             )
@@ -171,6 +179,7 @@ private fun ProjectListItem(
 @Composable
 private fun ProjectOverflowMenu(
     onOpen: () -> Unit,
+    onRun: () -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -181,6 +190,7 @@ private fun ProjectOverflowMenu(
     ) {
         ProjectMenu(
             onOpen = onOpen,
+            onRun = onRun,
             onDelete = onDelete,
         )
     }
@@ -285,6 +295,7 @@ private fun ProjectsListEmptyPreview() {
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
+        onRunMenuClick = {},
         onDeleteMenuClick = {},
         onDeleteCancel = {},
         onDeleteConfirm = {},
@@ -307,6 +318,7 @@ private fun ProjectsListFilledPreview() {
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
+        onRunMenuClick = {},
         onDeleteMenuClick = {},
         onDeleteCancel = {},
         onDeleteConfirm = {},
@@ -332,6 +344,7 @@ private fun ProjectsListMenuPreview() {
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
+        onRunMenuClick = {},
         onDeleteMenuClick = {},
         onDeleteCancel = {},
         onDeleteConfirm = {},
@@ -357,6 +370,7 @@ private fun ProjectsListDeleteConfirmPreview() {
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
+        onRunMenuClick = {},
         onDeleteMenuClick = {},
         onDeleteCancel = {},
         onDeleteConfirm = {},
@@ -382,6 +396,7 @@ private fun ProjectsListActionErrorPreview() {
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
+        onRunMenuClick = {},
         onDeleteMenuClick = {},
         onDeleteCancel = {},
         onDeleteConfirm = {},

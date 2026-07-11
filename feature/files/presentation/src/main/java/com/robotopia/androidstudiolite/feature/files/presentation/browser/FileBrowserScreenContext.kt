@@ -8,5 +8,6 @@ class FileBrowserScreenContext(
     val fileExplorerService: FileExplorerService,
     val onOpenFile: (relativePath: String) -> Unit,
     val onNavigateBack: () -> Unit,
+    val onRun: (() -> Unit)?,
     val scope: CoroutineScope,
 )

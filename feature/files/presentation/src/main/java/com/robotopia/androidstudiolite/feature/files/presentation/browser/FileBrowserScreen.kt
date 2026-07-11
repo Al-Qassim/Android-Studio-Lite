@@ -44,6 +44,7 @@ internal fun FileBrowserScreenContext.FileBrowserScreen(state: FileBrowserUiStat
         TopBarBackTitleAdd(
             title = state.projectName,
             onBackClick = { navigateUp(state) },
+            onRunClick = onRun,
             onAddClick = { openAddMenu() },
         )
         val pathSegments = relativePathSegments(state.currentRelativePath)

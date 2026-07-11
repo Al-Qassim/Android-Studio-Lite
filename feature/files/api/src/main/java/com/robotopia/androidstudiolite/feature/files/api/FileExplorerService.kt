@@ -31,6 +31,7 @@ interface FilesScreens {
         initialRelativePath: String,
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
+        onRun: (() -> Unit)?,
     )
 
     @Composable
@@ -40,5 +41,6 @@ interface FilesScreens {
         initialRelativePath: String,
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
+        onRun: (() -> Unit)?,
     )
 }

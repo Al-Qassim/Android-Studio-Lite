@@ -48,6 +48,7 @@ fun ContextMenu(
 @Composable
 fun ProjectMenu(
     onOpen: () -> Unit = {},
+    onRun: () -> Unit = {},
     onDelete: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -60,6 +61,7 @@ fun ProjectMenu(
             .background(Colors.Menu),
     ) {
         MenuItem(label = "Open", onClick = onOpen)
+        MenuItem(label = "Run", onClick = onRun)
         MenuItem(label = "Delete", onClick = onDelete, danger = true)
     }
 }

@@ -20,6 +20,7 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.icon.IconAdd
 import com.robotopia.androidstudiolite.designsystem.icon.IconBack
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
+import com.robotopia.androidstudiolite.designsystem.icon.IconRun
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 @Composable
@@ -83,11 +84,12 @@ fun TopBarBackTitle(
     }
 }
 
-/** Back + title + add — file browser chrome (path lives in [PathBar] below). */
+/** Back + title + run + add — file browser chrome (path lives in [PathBar] below). */
 @Composable
 fun TopBarBackTitleAdd(
     title: String,
     onBackClick: () -> Unit = {},
+    onRunClick: (() -> Unit)? = null,
     onAddClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -111,6 +113,12 @@ fun TopBarBackTitleAdd(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (onRunClick != null) {
+            IconButton(
+                onClick = onRunClick,
+                icon = { _, size -> IconRun(tint = Colors.Primary, size = size) },
+            )
+        }
         IconButton(
             onClick = onAddClick,
             icon = { _, size -> IconAdd(tint = Colors.Primary, size = size) },
@@ -161,6 +169,7 @@ fun TopBarEditorMore(
     fileName: String,
     isDirty: Boolean = false,
     onBackClick: () -> Unit = {},
+    onRunClick: (() -> Unit)? = null,
     onMoreClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -184,6 +193,12 @@ fun TopBarEditorMore(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (onRunClick != null) {
+            IconButton(
+                onClick = onRunClick,
+                icon = { _, size -> IconRun(tint = Colors.Primary, size = size) },
+            )
+        }
         IconButton(
             onClick = onMoreClick,
             icon = { tint, size -> IconMore(tint = tint, size = size) },
@@ -221,7 +236,10 @@ private fun TopBarBackTitleLongPreview() {
 @Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "BackTitleAdd · normal")
 @Composable
 private fun TopBarBackTitleAddPreview() {
-    TopBarBackTitleAdd(title = "MyApp")
+    TopBarBackTitleAdd(
+        title = "MyApp",
+        onRunClick = {},
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "PathAdd · normal")
