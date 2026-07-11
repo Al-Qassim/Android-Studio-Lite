@@ -39,7 +39,6 @@ android {
 
 dependencies {
     implementation(project(":designsystem"))
-    implementation(project(":core:error"))
     implementation(project(":integration:di"))
     implementation(project(":integration:navigation"))
     implementation(libs.koin.android)
