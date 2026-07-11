@@ -23,5 +23,7 @@ dependencies {
     api(project(":feature:editor:api"))
     implementation(project(":feature:editor:data"))
     implementation(project(":feature:editor:presentation"))
+    implementation(project(":feature:files:api"))
     implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
 }

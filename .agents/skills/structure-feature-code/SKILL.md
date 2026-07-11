@@ -52,7 +52,7 @@ Summary:
 
 - Context holds **resources**; UI state is passed as **`state`**.
 - Screen-specific UI/logic = context **extensions**; designsystem stays parameterized.
-- Host builds context + ViewModel; screen does not depend on a concrete VM.
+- Host builds context with **`remember(…keys)`** + ViewModel; screen does not depend on a concrete VM.
 - **Never nest function declarations.**
 
 ### Thin screens (optional simpler shape)
@@ -88,7 +88,7 @@ Do not grow a Content callback list past ~6–8 parameters — switch to Screen 
 - [ ] Validation only in data/domain; API exposed for UI
 - [ ] User-safe errors (UI message vs log-only unexpected)
 - [ ] State holder is state-only
-- [ ] Busy screen → Screen Context (`docs/agents/screen-context.md`); thin screen → small Screen/Content OK
+- [ ] Host builds context with `remember(…keys)` + VM; busy screen → Screen Context (`docs/agents/screen-context.md`); thin screen → small Screen/Content OK
 - [ ] No nested function declarations (helpers at file / private top level)
 - [ ] Multi-state previews (fixtures in `*Previews.kt`, thin stub on screen)
 - [ ] Focused commit → push → PR comment (if on a PR)

@@ -23,5 +23,8 @@ dependencies {
     api(project(":feature:editor:api"))
     api(project(":feature:editor:model"))
     api(project(":feature:files:model"))
+    implementation(project(":feature:files:api"))
     implementation(libs.kotlinx.coroutines.core)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.core)
 }

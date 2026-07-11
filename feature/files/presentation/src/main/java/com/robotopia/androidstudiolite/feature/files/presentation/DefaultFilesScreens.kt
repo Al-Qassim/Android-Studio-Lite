@@ -2,6 +2,7 @@ package com.robotopia.androidstudiolite.feature.files.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.robotopia.androidstudiolite.feature.files.api.FileExplorerService
@@ -48,13 +49,20 @@ class DefaultFilesScreens(
         }
         val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-        val screenContext = FileBrowserScreenContext(
-            updateState = { updater -> viewModel.uiState.update { updater(it) } },
-            fileExplorerService = fileExplorerService,
-            onOpenFile = onOpenFile,
-            onNavigateBack = onNavigateBack,
-            scope = viewModel.viewModelScope,
-        )
+        val screenContext = remember(
+            viewModel,
+            fileExplorerService,
+            onOpenFile,
+            onNavigateBack,
+        ) {
+            FileBrowserScreenContext(
+                updateState = { updater -> viewModel.uiState.update { updater(it) } },
+                fileExplorerService = fileExplorerService,
+                onOpenFile = onOpenFile,
+                onNavigateBack = onNavigateBack,
+                scope = viewModel.viewModelScope,
+            )
+        }
         screenContext.FileBrowserScreen(state)
     }
 }
