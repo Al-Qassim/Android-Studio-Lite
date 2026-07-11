@@ -18,6 +18,7 @@ Short router only. For details, open the linked file or skill — do not duplica
 | Architecture / code review (before merge) | `/code-review` + `.agents/skills/structure-feature-code/SKILL.md` + `project/architecture.md` |
 | Test review (before merge) | `docs/agents/test-review.md` |
 | Design review (before merge) | `.agents/skills/design-review/SKILL.md` |
+| Creating / updating Figma flow pages (any “make a design” ask) | **Required:** `docs/figma-design.md` + `.cursor/rules/figma-design.mdc` |
 
 ## Finish reviews (required before merge / Done)
 
@@ -31,4 +32,4 @@ Run all three; fix findings; re-push via `docs/agents/git-workflow.md`. Do not m
 
 - Issues: GitHub via `gh`; external PRs are not a triage surface.
 - Domain: single-context (`CONTEXT.md` + `docs/adr/`).
-- Figma: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)
+- Figma: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) — how to design in it: `docs/figma-design.md`

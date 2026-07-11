@@ -1,0 +1,26 @@
+---
+description: >-
+  Mandatory Figma / UI mockup design workflow. Apply whenever the user asks to
+  make, create, update, polish, or fix a design, screen, flow, mockup, or Figma
+  page — including Run & build, Projects, Editor, Loading states, or any new
+  feature UI in Figma.
+alwaysApply: true
+---
+
+# Figma design (mandatory)
+
+**Applies when** the user asks to make, create, update, polish, or fix a **design** (Figma screens, flows, mockups, cases, UI states, menus, icons in Figma, etc.). Ignore this rule for pure code/git work with no design ask.
+
+1. **Read and follow** [`docs/figma-design.md`](docs/figma-design.md) **before** any Figma MCP / `use_figma` work.
+2. Treat that doc as the project contract — do not invent alternate layout, button, or icon patterns.
+3. After edits, run the checklist at the end of `docs/figma-design.md` (DS instances, no demo banners, phone size, note boxes, no frame-title clutter / white fills).
+
+## Non-negotiables (summary)
+
+- Reuse **Design System** components/icons (instance buttons, `Icon / run`, top bars) — never homemade `▶` or freehand buttons.
+- Match **Projects management** / **Files editor** density; flow phones **240×420**.
+- Design **real product** UI — no v0.1/demo banners on phones.
+- In-progress = **•••** dots; complete = check; failed step = ✕ + clear error.
+- Blank phone frame names; prefer rectangles + DS instances inside; notes in **boxes**.
+
+Figma file: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)
