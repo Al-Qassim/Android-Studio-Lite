@@ -75,10 +75,20 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             onRetry = null,
         ),
         BuildProgressPreviewCase(
-            label = "failed · retry",
+            label = "failed · building",
+            state = BuildProgressUiState(
+                phase = BuildPhase.Failed,
+                error = "Building failed: Task :app:compileDebugKotlin failed with 2 errors.",
+                failedAtPhase = BuildPhase.Building,
+            ),
+            onRetry = {},
+        ),
+        BuildProgressPreviewCase(
+            label = "failed · downloading",
             state = BuildProgressUiState(
                 phase = BuildPhase.Failed,
                 error = "Could not prepare demo APK",
+                failedAtPhase = BuildPhase.Downloading,
             ),
             onRetry = {},
         ),
@@ -87,23 +97,15 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.Failed,
                 error = "Build not found",
+                failedAtPhase = BuildPhase.Queued,
             ),
             onRetry = null,
-        ),
-        BuildProgressPreviewCase(
-            label = "failed · long error",
-            state = BuildProgressUiState(
-                phase = BuildPhase.Failed,
-                error = "Remote build failed after uploading sources: Gradle task :app:assembleDebug " +
-                    "exited with code 1. Check the project configuration and try again.",
-            ),
-            onRetry = {},
         ),
         BuildProgressPreviewCase(
             label = "cancelled",
             state = BuildProgressUiState(
                 phase = BuildPhase.Cancelled,
-                message = "Build cancelled",
+                message = "No APK was produced. You can start a new build when you're ready.",
             ),
             onRetry = null,
         ),

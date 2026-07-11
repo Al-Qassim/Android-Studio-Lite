@@ -15,6 +15,8 @@ data class BuildProgressUiState(
     val progressFraction: Float = 0f,
     val apkLocalPath: String? = null,
     val error: String? = null,
+    /** Which checklist step failed; only used when [phase] is Failed / [error] is set. */
+    val failedAtPhase: BuildPhase? = null,
 )
 
 /** Holds build progress UI state across configuration changes. No service calls. */
@@ -22,7 +24,13 @@ class BuildProgressViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(BuildProgressUiState())
     val uiState: StateFlow<BuildProgressUiState> = _uiState.asStateFlow()
 
+    private var lastActivePhase: BuildPhase = BuildPhase.Queued
+
     fun applyProgress(progress: BuildProgress) {
+        if (progress.phase !in setOf(BuildPhase.Failed, BuildPhase.Cancelled)) {
+            lastActivePhase = progress.phase
+        }
+        val isFailed = progress.phase == BuildPhase.Failed || progress.error != null
         _uiState.update {
             BuildProgressUiState(
                 jobId = progress.jobId,
@@ -31,6 +39,7 @@ class BuildProgressViewModel : ViewModel() {
                 progressFraction = progress.displayProgressFraction(),
                 apkLocalPath = progress.apkLocalPath,
                 error = progress.error,
+                failedAtPhase = if (isFailed) lastActivePhase else null,
             )
         }
     }

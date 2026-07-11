@@ -64,7 +64,7 @@ class FakeBuildService(
         job.progress.update {
             it.copy(
                 phase = BuildPhase.Cancelled,
-                message = "Build cancelled",
+                message = "No APK was produced. You can start a new build when you're ready.",
             )
         }
     }

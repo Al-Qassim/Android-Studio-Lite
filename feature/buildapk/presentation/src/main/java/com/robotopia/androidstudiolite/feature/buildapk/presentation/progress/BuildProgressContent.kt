@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -75,12 +77,14 @@ private fun BuildProgressBody(
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         when {
-            state.error != null -> BuildErrorState(
-                message = state.error,
+            state.error != null || state.phase == BuildPhase.Failed -> BuildFailedState(
+                state = state,
                 onRetry = onRetry,
                 onDismiss = onDismiss,
             )
-            state.phase == BuildPhase.Cancelled -> BuildCancelledState(onDismiss = onDismiss)
+            state.phase == BuildPhase.Cancelled -> BuildCancelledState(
+                message = state.message,
+            )
             else -> BuildActiveState(
                 state = state,
                 onCancel = onCancel,
@@ -99,30 +103,110 @@ private fun BuildActiveState(
     Column(modifier = Modifier.fillMaxSize()) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             BuildProgressHeader(
-                phase = state.phase,
+                title = phaseLabel(state.phase),
+                titleColor = Colors.Text,
                 message = state.message,
             )
             BuildProgressBar(fraction = state.progressFraction)
-            BuildPhaseList(currentPhase = state.phase)
+            BuildPhaseList(
+                currentPhase = state.phase,
+                failedAtPhase = null,
+            )
         }
         Spacer(modifier = Modifier.weight(1f))
-        BuildActionRow(
-            state = state,
-            onCancel = onCancel,
-            onInstall = onInstall,
+        if (state.phase == BuildPhase.ReadyToInstall) {
+            val apkPath = state.apkLocalPath
+            Button(
+                label = "Install app",
+                onClick = { apkPath?.let(onInstall) },
+                modifier = Modifier.fillMaxWidth(),
+                variant = ButtonVariant.Primary,
+                enabled = apkPath != null,
+            )
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                Button(
+                    label = "Cancel",
+                    onClick = onCancel,
+                    variant = ButtonVariant.Secondary,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BuildFailedState(
+    state: BuildProgressUiState,
+    onRetry: (() -> Unit)?,
+    onDismiss: () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            BuildProgressHeader(
+                title = "Build failed",
+                titleColor = Colors.Danger,
+                message = state.error ?: state.message,
+            )
+            BuildPhaseList(
+                currentPhase = state.phase,
+                failedAtPhase = state.failedAtPhase ?: BuildPhase.Building,
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Button(
+                label = "Close",
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f),
+                variant = ButtonVariant.Secondary,
+            )
+            if (onRetry != null) {
+                Button(
+                    label = "Retry",
+                    onClick = onRetry,
+                    modifier = Modifier.weight(1f),
+                    variant = ButtonVariant.Primary,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BuildCancelledState(message: String?) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        BasicText(
+            text = "Build cancelled",
+            style = Typography.Headline.copy(color = Colors.Text),
+        )
+        BasicText(
+            text = message?.takeIf { it.isNotBlank() }
+                ?: "No APK was produced. You can start a new build when you're ready.",
+            style = Typography.Body.copy(color = Colors.Muted),
         )
     }
 }
 
 @Composable
 private fun BuildProgressHeader(
-    phase: BuildPhase,
+    title: String,
+    titleColor: Color,
     message: String?,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         BasicText(
-            text = phaseLabel(phase),
-            style = Typography.Headline.copy(color = Colors.Text),
+            text = title,
+            style = Typography.Headline.copy(color = titleColor),
         )
         if (!message.isNullOrBlank()) {
             BasicText(
@@ -154,7 +238,10 @@ private fun BuildProgressBar(fraction: Float) {
 }
 
 @Composable
-private fun BuildPhaseList(currentPhase: BuildPhase) {
+private fun BuildPhaseList(
+    currentPhase: BuildPhase,
+    failedAtPhase: BuildPhase?,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -166,7 +253,11 @@ private fun BuildPhaseList(currentPhase: BuildPhase) {
         progressPhases.forEach { phase ->
             BuildPhaseRow(
                 label = phaseLabel(phase),
-                status = phaseStatus(phase, currentPhase),
+                status = phaseStatus(
+                    phase = phase,
+                    current = currentPhase,
+                    failedAtPhase = failedAtPhase,
+                ),
             )
         }
     }
@@ -189,6 +280,7 @@ private fun BuildPhaseRow(
                 PhaseRowStatus.Current -> Typography.BodyStrong.copy(color = Colors.Text)
                 PhaseRowStatus.Complete -> Typography.Body.copy(color = Colors.Muted)
                 PhaseRowStatus.Upcoming -> Typography.Body.copy(color = Colors.Muted2)
+                PhaseRowStatus.Failed -> Typography.BodyStrong.copy(color = Colors.Danger)
             },
         )
     }
@@ -207,6 +299,18 @@ private fun PhaseStatusIcon(status: PhaseRowStatus) {
                 style = Typography.Caption.copy(color = Colors.Primary),
             )
         }
+        PhaseRowStatus.Failed -> Box(
+            modifier = Modifier.size(16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            BasicText(
+                text = "✕",
+                style = Typography.Caption.copy(
+                    color = Colors.Danger,
+                    textAlign = TextAlign.Center,
+                ),
+            )
+        }
         PhaseRowStatus.Upcoming -> Box(
             modifier = Modifier
                 .size(16.dp)
@@ -216,84 +320,11 @@ private fun PhaseStatusIcon(status: PhaseRowStatus) {
     }
 }
 
-@Composable
-private fun BuildActionRow(
-    state: BuildProgressUiState,
-    onCancel: () -> Unit,
-    onInstall: (apkLocalPath: String) -> Unit,
-) {
-    Spacer(modifier = Modifier.height(12.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (state.phase != BuildPhase.ReadyToInstall) {
-            Button(
-                label = "Cancel",
-                onClick = onCancel,
-                variant = ButtonVariant.Secondary,
-            )
-        }
-        if (state.phase == BuildPhase.ReadyToInstall) {
-            val apkPath = state.apkLocalPath
-            Button(
-                label = "Install app",
-                onClick = { apkPath?.let(onInstall) },
-                variant = ButtonVariant.Primary,
-                enabled = apkPath != null,
-            )
-        }
-    }
-}
-
-@Composable
-private fun BuildErrorState(
-    message: String,
-    onRetry: (() -> Unit)?,
-    onDismiss: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        BasicText(
-            text = "Build failed",
-            style = Typography.Headline.copy(color = Colors.Danger),
-        )
-        BasicText(
-            text = message,
-            style = Typography.Body.copy(color = Colors.Muted),
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(label = "Close", onClick = onDismiss, variant = ButtonVariant.Secondary)
-            if (onRetry != null) {
-                Button(label = "Retry", onClick = onRetry, variant = ButtonVariant.Primary)
-            }
-        }
-    }
-}
-
-@Composable
-private fun BuildCancelledState(onDismiss: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        BasicText(
-            text = "Build cancelled",
-            style = Typography.Headline.copy(color = Colors.Text),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Button(label = "Close", onClick = onDismiss, variant = ButtonVariant.Secondary)
-    }
-}
-
 private enum class PhaseRowStatus {
     Complete,
     Current,
     Upcoming,
+    Failed,
 }
 
 private fun phaseLabel(phase: BuildPhase): String = when (phase) {
@@ -306,8 +337,20 @@ private fun phaseLabel(phase: BuildPhase): String = when (phase) {
     BuildPhase.Cancelled -> "Cancelled"
 }
 
-private fun phaseStatus(phase: BuildPhase, current: BuildPhase): PhaseRowStatus {
+private fun phaseStatus(
+    phase: BuildPhase,
+    current: BuildPhase,
+    failedAtPhase: BuildPhase?,
+): PhaseRowStatus {
     val phaseIndex = progressPhases.indexOf(phase)
+    if (failedAtPhase != null) {
+        val failedIndex = progressPhases.indexOf(failedAtPhase).coerceAtLeast(0)
+        return when {
+            phaseIndex < failedIndex -> PhaseRowStatus.Complete
+            phaseIndex == failedIndex -> PhaseRowStatus.Failed
+            else -> PhaseRowStatus.Upcoming
+        }
+    }
     val currentIndex = progressPhases.indexOf(current).coerceAtLeast(0)
     return when {
         current == BuildPhase.ReadyToInstall && phaseIndex <= currentIndex -> PhaseRowStatus.Complete
