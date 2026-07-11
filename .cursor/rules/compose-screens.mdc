@@ -22,7 +22,7 @@ feature/<name>/presentation/<screen>/
 
 - Screen-specific UI/logic = **context extensions**; pass **`state`** into UI composables.
 - Designsystem composables keep normal parameters.
-- Host builds context + ViewModel; screen does not take a concrete VM.
+- Host builds context with **`remember(…keys)`** + ViewModel; screen does not take a concrete VM.
 - **Never nest function declarations.**
 
 ## Thin screen (optional)
