@@ -19,6 +19,7 @@ Short router only. For details, open the linked file or skill — do not duplica
 | Test review (before merge) | `docs/agents/test-review.md` |
 | Design review (before merge) | `.agents/skills/design-review/SKILL.md` |
 | Creating / updating Figma flow pages (any “make a design” ask) | **Required:** `docs/figma-design.md` + `.cursor/rules/figma-design.mdc` |
+| Whole-project status (what’s done / left in v0.1) | `project/progress.md` |
 
 ## Finish reviews (required before merge / Done)
 
