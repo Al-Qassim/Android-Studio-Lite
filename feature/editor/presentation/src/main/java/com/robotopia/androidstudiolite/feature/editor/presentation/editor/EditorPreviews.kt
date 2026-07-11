@@ -6,6 +6,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.robotopia.androidstudiolite.designsystem.component.ToastVariant
 import com.robotopia.androidstudiolite.feature.editor.api.DocumentStore
+import com.robotopia.androidstudiolite.feature.editor.api.EditorPreferences
 import com.robotopia.androidstudiolite.feature.editor.api.EditorSession
 import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
 import com.robotopia.androidstudiolite.feature.editor.model.OpenDocument
@@ -19,6 +20,7 @@ internal data class EditorPreviewCase(
     private val label: String,
     val state: EditorUiState,
     val document: OpenDocument? = null,
+    val autoSave: Boolean = true,
 ) {
     override fun toString(): String = label
 }
@@ -40,22 +42,24 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
         ),
         EditorPreviewCase(
             "dirty",
-            previewBaseState().copy(isLoading = false, autoSave = false),
+            previewBaseState().copy(isLoading = false),
             document = previewDocument(content = "fun main() {}\n", isDirty = true),
+            autoSave = false,
         ),
         EditorPreviewCase(
             "menu open",
-            previewBaseState().copy(isLoading = false, menuOpen = true, autoSave = true),
+            previewBaseState().copy(isLoading = false, menuOpen = true),
             document = previewDocument(content = "package demo\n"),
+            autoSave = true,
         ),
         EditorPreviewCase(
             "unsaved leave",
             previewBaseState().copy(
                 isLoading = false,
-                autoSave = false,
                 dialog = EditorDialog.UnsavedLeave,
             ),
             document = previewDocument(content = "changed", isDirty = true),
+            autoSave = false,
         ),
         EditorPreviewCase(
             "load error",
@@ -76,23 +80,29 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
             "save error toast",
             previewBaseState().copy(
                 isLoading = false,
-                autoSave = false,
                 toast = EditorToast("Couldn't save file", ToastVariant.Error),
             ),
             document = previewDocument(content = "ok", isDirty = true),
+            autoSave = false,
         ),
     )
 }
 
 @Composable
-internal fun EditorPreviewHost(state: EditorUiState, document: OpenDocument? = null) {
+internal fun EditorPreviewHost(
+    state: EditorUiState,
+    document: OpenDocument? = null,
+    autoSave: Boolean = true,
+) {
     val scope = rememberCoroutineScope()
     val session = remember(document) { PreviewEditorSession(document) }
-    val context = remember(scope, session) {
+    val preferences = remember(autoSave) { PreviewEditorPreferences(autoSave) }
+    val context = remember(scope, session, preferences) {
         EditorScreenContext(
             updateState = {},
             editorSession = session,
             documentStore = PreviewDocumentStore,
+            editorPreferences = preferences,
             onNavigateBack = {},
             onRun = null,
             scope = scope,
@@ -132,6 +142,16 @@ private class PreviewEditorSession(
     }
     override fun close() {
         _document.value = null
+    }
+}
+
+private class PreviewEditorPreferences(
+    initialAutoSave: Boolean,
+) : EditorPreferences {
+    private val _autoSave = MutableStateFlow(initialAutoSave)
+    override val autoSave: StateFlow<Boolean> = _autoSave.asStateFlow()
+    override fun setAutoSave(enabled: Boolean) {
+        _autoSave.value = enabled
     }
 }
 

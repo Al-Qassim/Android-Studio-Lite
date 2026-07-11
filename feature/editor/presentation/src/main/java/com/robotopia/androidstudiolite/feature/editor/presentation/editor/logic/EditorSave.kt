@@ -15,7 +15,7 @@ private const val AUTO_SAVE_DEBOUNCE_MS = 400L
 internal fun EditorScreenContext.onContentChange(state: EditorUiState, content: String) {
     editorSession.updateContent(content)
     updateState { copy(toast = null) }
-    if (!state.autoSave) {
+    if (!editorPreferences.autoSave.value) {
         cancelAutoSave()
         return
     }
@@ -38,8 +38,9 @@ internal fun EditorScreenContext.saveDocument(
 }
 
 internal fun EditorScreenContext.toggleAutoSave(state: EditorUiState) {
-    val enabling = !state.autoSave
-    updateState { copy(autoSave = enabling, menuOpen = false) }
+    val enabling = !editorPreferences.autoSave.value
+    editorPreferences.setAutoSave(enabling)
+    updateState { copy(menuOpen = false) }
     val document = editorSession.document.value
     if (enabling && document?.isDirty == true) {
         scheduleAutoSave(state, document.content)

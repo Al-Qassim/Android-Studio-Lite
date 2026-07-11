@@ -32,6 +32,7 @@ import kotlinx.coroutines.delay
 internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
     val document by editorSession.document.collectAsStateWithLifecycle()
     val openDocument = document?.takeIf { it.id == state.documentId }
+    val autoSave by editorPreferences.autoSave.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.documentId, state.root) {
         loadDocument(state)
@@ -78,7 +79,7 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
         }
     }
 
-    EditorOverflowMenu(state)
+    EditorOverflowMenu(state = state, autoSave = autoSave)
     EditorDialogs(state)
 }
 
@@ -87,5 +88,5 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
 private fun EditorPreview(
     @PreviewParameter(EditorPreviewProvider::class) case: EditorPreviewCase,
 ) {
-    EditorPreviewHost(case.state, case.document)
+    EditorPreviewHost(case.state, case.document, case.autoSave)
 }

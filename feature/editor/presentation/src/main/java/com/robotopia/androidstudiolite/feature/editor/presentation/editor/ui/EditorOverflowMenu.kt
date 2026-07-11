@@ -15,7 +15,7 @@ import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.toggleAutoSave
 
 @Composable
-internal fun EditorScreenContext.EditorOverflowMenu(state: EditorUiState) {
+internal fun EditorScreenContext.EditorOverflowMenu(state: EditorUiState, autoSave: Boolean) {
     if (!state.menuOpen) return
     Popup(
         alignment = Alignment.TopEnd,
@@ -23,7 +23,7 @@ internal fun EditorScreenContext.EditorOverflowMenu(state: EditorUiState) {
         properties = PopupProperties(focusable = true),
     ) {
         EditorMenu(
-            autoSave = state.autoSave,
+            autoSave = autoSave,
             onAutoSaveToggle = { toggleAutoSave(state) },
             onSave = { saveDocument(state) },
             showEditorSettings = false,

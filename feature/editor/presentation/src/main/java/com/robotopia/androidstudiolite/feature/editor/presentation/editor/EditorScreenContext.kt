@@ -2,6 +2,7 @@ package com.robotopia.androidstudiolite.feature.editor.presentation.editor
 
 import com.robotopia.androidstudiolite.designsystem.component.ToastVariant
 import com.robotopia.androidstudiolite.feature.editor.api.DocumentStore
+import com.robotopia.androidstudiolite.feature.editor.api.EditorPreferences
 import com.robotopia.androidstudiolite.feature.editor.api.EditorSession
 import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
@@ -12,6 +13,7 @@ class EditorScreenContext(
     val updateState: (EditorUiState.() -> EditorUiState) -> Unit,
     val editorSession: EditorSession,
     val documentStore: DocumentStore,
+    val editorPreferences: EditorPreferences,
     val onNavigateBack: () -> Unit,
     val onRun: (() -> Unit)?,
     val scope: CoroutineScope,
@@ -34,7 +36,6 @@ data class EditorUiState(
     val fileName: String = "",
     val isLoading: Boolean = true,
     val loadError: String? = null,
-    val autoSave: Boolean = true,
     val menuOpen: Boolean = false,
     val dialog: EditorDialog? = null,
     val toast: EditorToast? = null,

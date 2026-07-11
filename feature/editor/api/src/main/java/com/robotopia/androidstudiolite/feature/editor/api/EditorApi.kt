@@ -14,6 +14,11 @@ interface EditorSession {
     fun close()
 }
 
+interface EditorPreferences {
+    val autoSave: StateFlow<Boolean>
+    fun setAutoSave(enabled: Boolean)
+}
+
 interface DocumentStore {
     suspend fun load(root: ProjectRoot, relativePath: String): String
     suspend fun save(root: ProjectRoot, relativePath: String, content: String)

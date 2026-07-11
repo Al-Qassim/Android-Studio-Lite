@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.robotopia.androidstudiolite.feature.editor.api.DocumentStore
+import com.robotopia.androidstudiolite.feature.editor.api.EditorPreferences
 import com.robotopia.androidstudiolite.feature.editor.api.EditorScreens
 import com.robotopia.androidstudiolite.feature.editor.api.EditorSession
 import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
@@ -20,6 +21,7 @@ import org.koin.core.parameter.parametersOf
 class DefaultEditorScreens(
     private val editorSession: EditorSession,
     private val documentStore: DocumentStore,
+    private val editorPreferences: EditorPreferences,
 ) : EditorScreens {
 
     @Composable
@@ -54,6 +56,7 @@ class DefaultEditorScreens(
             viewModel,
             editorSession,
             documentStore,
+            editorPreferences,
             onNavigateBack,
             onRun,
         ) {
@@ -61,6 +64,7 @@ class DefaultEditorScreens(
                 updateState = { updater -> viewModel.uiState.update { updater(it) } },
                 editorSession = editorSession,
                 documentStore = documentStore,
+                editorPreferences = editorPreferences,
                 onNavigateBack = onNavigateBack,
                 onRun = onRun,
                 scope = viewModel.viewModelScope,
