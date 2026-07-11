@@ -11,7 +11,7 @@ internal fun EditorScreenContext.requestLeave(state: EditorUiState) {
             updateState { copy(dialog = null) }
         state.menuOpen ->
             updateState { copy(menuOpen = false) }
-        state.isDirty ->
+        editorSession.document.value?.isDirty == true ->
             updateState { copy(dialog = EditorDialog.UnsavedLeave, menuOpen = false) }
         else ->
             leaveClean()
@@ -30,10 +30,14 @@ internal fun EditorScreenContext.discardAndLeave() {
 }
 
 internal fun EditorScreenContext.saveAndLeave(state: EditorUiState) {
+    val content = editorSession.document.value?.content ?: run {
+        leaveClean()
+        return
+    }
     autoSaveJob?.cancel()
     autoSaveJob = null
     scope.launch {
-        val saved = persist(state = state, content = state.content, showToast = false)
+        val saved = persist(state = state, content = content, showToast = false)
         if (!saved) {
             updateState { copy(dialog = null) }
             return@launch

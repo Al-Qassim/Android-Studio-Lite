@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Toast
 import com.robotopia.androidstudiolite.designsystem.component.TopBarEditorMore
@@ -28,6 +30,9 @@ import kotlinx.coroutines.delay
 
 @Composable
 internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
+    val document by editorSession.document.collectAsStateWithLifecycle()
+    val openDocument = document?.takeIf { it.id == state.documentId }
+
     LaunchedEffect(state.documentId, state.root) {
         loadDocument(state)
     }
@@ -49,7 +54,7 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopBarEditorMore(
                 fileName = state.fileName,
-                isDirty = state.isDirty,
+                isDirty = openDocument?.isDirty == true,
                 onBackClick = { requestLeave(state) },
                 onMoreClick = { openMenu() },
             )
@@ -58,7 +63,7 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
                     .weight(1f)
                     .fillMaxWidth(),
             ) {
-                EditorBody(state)
+                EditorBody(state = state, content = openDocument?.content.orEmpty())
             }
         }
 
@@ -82,5 +87,5 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
 private fun EditorPreview(
     @PreviewParameter(EditorPreviewProvider::class) case: EditorPreviewCase,
 ) {
-    EditorPreviewHost(case.state)
+    EditorPreviewHost(case.state, case.document)
 }

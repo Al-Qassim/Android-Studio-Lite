@@ -32,8 +32,6 @@ data class EditorUiState(
     val documentId: DocumentId,
     val root: ProjectRoot,
     val fileName: String = "",
-    val content: String = "",
-    val isDirty: Boolean = false,
     val isLoading: Boolean = true,
     val loadError: String? = null,
     val autoSave: Boolean = true,

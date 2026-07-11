@@ -28,7 +28,7 @@ import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.retryLoad
 
 @Composable
-internal fun EditorScreenContext.EditorBody(state: EditorUiState) {
+internal fun EditorScreenContext.EditorBody(state: EditorUiState, content: String) {
     when {
         state.isLoading -> {
             Box(
@@ -68,7 +68,7 @@ internal fun EditorScreenContext.EditorBody(state: EditorUiState) {
 
         else -> {
             BasicTextField(
-                value = state.content,
+                value = content,
                 onValueChange = { onContentChange(state, it) },
                 modifier = Modifier
                     .fillMaxSize()

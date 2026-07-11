@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 internal data class EditorPreviewCase(
     private val label: String,
     val state: EditorUiState,
+    val document: OpenDocument? = null,
 ) {
     override fun toString(): String = label
 }
@@ -32,38 +33,29 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
         ),
         EditorPreviewCase(
             "ready",
-            previewBaseState().copy(
-                isLoading = false,
+            previewBaseState().copy(isLoading = false),
+            document = previewDocument(
                 content = "fun main() {\n    println(\"Hello\")\n}\n",
             ),
         ),
         EditorPreviewCase(
             "dirty",
-            previewBaseState().copy(
-                isLoading = false,
-                content = "fun main() {}\n",
-                isDirty = true,
-                autoSave = false,
-            ),
+            previewBaseState().copy(isLoading = false, autoSave = false),
+            document = previewDocument(content = "fun main() {}\n", isDirty = true),
         ),
         EditorPreviewCase(
             "menu open",
-            previewBaseState().copy(
-                isLoading = false,
-                content = "package demo\n",
-                menuOpen = true,
-                autoSave = true,
-            ),
+            previewBaseState().copy(isLoading = false, menuOpen = true, autoSave = true),
+            document = previewDocument(content = "package demo\n"),
         ),
         EditorPreviewCase(
             "unsaved leave",
             previewBaseState().copy(
                 isLoading = false,
-                content = "changed",
-                isDirty = true,
                 autoSave = false,
                 dialog = EditorDialog.UnsavedLeave,
             ),
+            document = previewDocument(content = "changed", isDirty = true),
         ),
         EditorPreviewCase(
             "load error",
@@ -76,30 +68,30 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
             "saved toast",
             previewBaseState().copy(
                 isLoading = false,
-                content = "ok",
                 toast = EditorToast("File saved", ToastVariant.Success),
             ),
+            document = previewDocument(content = "ok"),
         ),
         EditorPreviewCase(
             "save error toast",
             previewBaseState().copy(
                 isLoading = false,
-                content = "ok",
-                isDirty = true,
                 autoSave = false,
                 toast = EditorToast("Couldn't save file", ToastVariant.Error),
             ),
+            document = previewDocument(content = "ok", isDirty = true),
         ),
     )
 }
 
 @Composable
-internal fun EditorPreviewHost(state: EditorUiState) {
+internal fun EditorPreviewHost(state: EditorUiState, document: OpenDocument? = null) {
     val scope = rememberCoroutineScope()
-    val context = remember(scope) {
+    val session = remember(document) { PreviewEditorSession(document) }
+    val context = remember(scope, session) {
         EditorScreenContext(
             updateState = {},
-            editorSession = PreviewEditorSession,
+            editorSession = session,
             documentStore = PreviewDocumentStore,
             onNavigateBack = {},
             onRun = null,
@@ -109,19 +101,38 @@ internal fun EditorPreviewHost(state: EditorUiState) {
     context.EditorScreen(state)
 }
 
+private fun previewDocumentId() =
+    DocumentId(ProjectId("preview"), "app/src/main/java/MainActivity.kt")
+
+private fun previewDocument(content: String, isDirty: Boolean = false) = OpenDocument(
+    id = previewDocumentId(),
+    content = content,
+    isDirty = isDirty,
+)
+
 private fun previewBaseState() = EditorUiState(
-    documentId = DocumentId(ProjectId("preview"), "app/src/main/java/MainActivity.kt"),
+    documentId = previewDocumentId(),
     root = ProjectRoot("/preview"),
     fileName = "MainActivity.kt",
 )
 
-private object PreviewEditorSession : EditorSession {
-    private val _document = MutableStateFlow<OpenDocument?>(null)
+private class PreviewEditorSession(
+    initial: OpenDocument?,
+) : EditorSession {
+    private val _document = MutableStateFlow(initial)
     override val document: StateFlow<OpenDocument?> = _document.asStateFlow()
     override fun open(id: DocumentId, initialContent: String) = Unit
-    override fun updateContent(content: String) = Unit
-    override fun markSaved(content: String) = Unit
-    override fun close() = Unit
+    override fun updateContent(content: String) {
+        val current = _document.value ?: return
+        _document.value = current.copy(content = content, isDirty = true)
+    }
+    override fun markSaved(content: String) {
+        val current = _document.value ?: return
+        _document.value = current.copy(content = content, isDirty = false)
+    }
+    override fun close() {
+        _document.value = null
+    }
 }
 
 private object PreviewDocumentStore : DocumentStore {

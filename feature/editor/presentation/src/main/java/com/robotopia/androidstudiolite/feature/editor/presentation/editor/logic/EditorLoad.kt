@@ -18,8 +18,6 @@ internal suspend fun EditorScreenContext.loadDocument(state: EditorUiState) {
         editorSession.open(state.documentId, content)
         updateState {
             copy(
-                content = content,
-                isDirty = false,
                 isLoading = false,
                 loadError = null,
             )

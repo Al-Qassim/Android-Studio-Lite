@@ -14,10 +14,7 @@ private const val AUTO_SAVE_DEBOUNCE_MS = 400L
 
 internal fun EditorScreenContext.onContentChange(state: EditorUiState, content: String) {
     editorSession.updateContent(content)
-    val dirty = editorSession.document.value?.isDirty == true
-    updateState {
-        copy(content = content, isDirty = dirty, toast = null)
-    }
+    updateState { copy(toast = null) }
     if (!state.autoSave) {
         cancelAutoSave()
         return
@@ -30,9 +27,10 @@ internal fun EditorScreenContext.saveDocument(
     showToast: Boolean = true,
     onSuccess: (() -> Unit)? = null,
 ) {
+    val content = editorSession.document.value?.content ?: return
     cancelAutoSave()
     scope.launch {
-        val saved = persist(state = state, content = state.content, showToast = showToast)
+        val saved = persist(state = state, content = content, showToast = showToast)
         if (!saved) return@launch
         updateState { copy(menuOpen = false) }
         onSuccess?.invoke()
@@ -42,8 +40,9 @@ internal fun EditorScreenContext.saveDocument(
 internal fun EditorScreenContext.toggleAutoSave(state: EditorUiState) {
     val enabling = !state.autoSave
     updateState { copy(autoSave = enabling, menuOpen = false) }
-    if (enabling && state.isDirty) {
-        scheduleAutoSave(state, state.content)
+    val document = editorSession.document.value
+    if (enabling && document?.isDirty == true) {
+        scheduleAutoSave(state, document.content)
     } else {
         cancelAutoSave()
     }
@@ -59,7 +58,6 @@ internal suspend fun EditorScreenContext.persist(
         editorSession.markSaved(content)
         updateState {
             copy(
-                isDirty = false,
                 toast = if (showToast) {
                     EditorToast("File saved", ToastVariant.Success)
                 } else {
