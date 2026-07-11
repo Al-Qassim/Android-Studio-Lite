@@ -31,11 +31,15 @@ interface ProjectService {
  */
 interface ProjectsScreens {
     @Composable
-    fun NavHost(onOpenProject: (projectId: ProjectId) -> Unit)
+    fun NavHost(
+        onOpenProject: (projectId: ProjectId) -> Unit,
+        onRunProject: (projectId: ProjectId) -> Unit,
+    )
 
     @Composable
     fun ProjectsList(
         onOpenProject: (projectId: ProjectId) -> Unit,
+        onRunProject: (projectId: ProjectId) -> Unit,
         onCreateProject: () -> Unit,
     )
 

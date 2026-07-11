@@ -57,6 +57,7 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
                 fileName = state.fileName,
                 isDirty = openDocument?.isDirty == true,
                 onBackClick = { requestLeave(state) },
+                onRunClick = onRun,
                 onMoreClick = { openMenu() },
             )
             Box(

@@ -20,6 +20,7 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.icon.IconAdd
 import com.robotopia.androidstudiolite.designsystem.icon.IconBack
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
+import com.robotopia.androidstudiolite.designsystem.icon.IconRun
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 @Composable
@@ -161,6 +162,7 @@ fun TopBarEditorMore(
     fileName: String,
     isDirty: Boolean = false,
     onBackClick: () -> Unit = {},
+    onRunClick: (() -> Unit)? = null,
     onMoreClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -184,6 +186,12 @@ fun TopBarEditorMore(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (onRunClick != null) {
+            IconButton(
+                onClick = onRunClick,
+                icon = { _, size -> IconRun(tint = Colors.Primary, size = size) },
+            )
+        }
         IconButton(
             onClick = onMoreClick,
             icon = { tint, size -> IconMore(tint = tint, size = size) },

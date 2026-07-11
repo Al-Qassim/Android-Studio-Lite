@@ -18,6 +18,7 @@ import org.koin.androidx.compose.koinViewModel
 internal fun ProjectsListScreen(
     projectService: ProjectService,
     onOpenProject: (projectId: ProjectId) -> Unit,
+    onRunProject: (projectId: ProjectId) -> Unit,
     onCreateProject: () -> Unit,
     viewModel: ProjectsListViewModel = koinViewModel(),
 ) {
@@ -46,6 +47,10 @@ internal fun ProjectsListScreen(
         },
         onMenuDismiss = {
             viewModel.uiState.update { it.copy(menuProject = null) }
+        },
+        onRunMenuClick = { project ->
+            viewModel.uiState.update { it.copy(menuProject = null) }
+            onRunProject(project.id)
         },
         onDeleteMenuClick = { project ->
             viewModel.uiState.update {
