@@ -12,13 +12,12 @@ class EditorScreenContext(
     val updateState: (EditorUiState.() -> EditorUiState) -> Unit,
     val editorSession: EditorSession,
     val documentStore: DocumentStore,
-    val root: ProjectRoot,
     val onNavigateBack: () -> Unit,
     val onRun: (() -> Unit)?,
     val scope: CoroutineScope,
-    /** Holds the debounced auto-save job across recompositions. */
-    val autoSaveJob: Array<Job?> = arrayOf(null),
-)
+) {
+    var autoSaveJob: Job? = null
+}
 
 sealed interface EditorDialog {
     data object UnsavedLeave : EditorDialog

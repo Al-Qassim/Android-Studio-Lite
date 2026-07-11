@@ -81,13 +81,13 @@ internal suspend fun EditorScreenContext.persist(
 
 private fun EditorScreenContext.scheduleAutoSave(state: EditorUiState, content: String) {
     cancelAutoSave()
-    autoSaveJob[0] = scope.launch {
+    autoSaveJob = scope.launch {
         delay(AUTO_SAVE_DEBOUNCE_MS)
         persist(state = state, content = content, showToast = false)
     }
 }
 
 private fun EditorScreenContext.cancelAutoSave() {
-    autoSaveJob[0]?.cancel()
-    autoSaveJob[0] = null
+    autoSaveJob?.cancel()
+    autoSaveJob = null
 }

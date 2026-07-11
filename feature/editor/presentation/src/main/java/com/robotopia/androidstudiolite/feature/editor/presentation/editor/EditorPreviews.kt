@@ -11,7 +11,6 @@ import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
 import com.robotopia.androidstudiolite.feature.editor.model.OpenDocument
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -97,17 +96,14 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
 @Composable
 internal fun EditorPreviewHost(state: EditorUiState) {
     val scope = rememberCoroutineScope()
-    val autoSaveJob = remember { arrayOfNulls<Job>(1) }
     val context = remember(scope) {
         EditorScreenContext(
             updateState = {},
             editorSession = PreviewEditorSession,
             documentStore = PreviewDocumentStore,
-            root = state.root,
             onNavigateBack = {},
             onRun = null,
             scope = scope,
-            autoSaveJob = autoSaveJob,
         )
     }
     context.EditorScreen(state)

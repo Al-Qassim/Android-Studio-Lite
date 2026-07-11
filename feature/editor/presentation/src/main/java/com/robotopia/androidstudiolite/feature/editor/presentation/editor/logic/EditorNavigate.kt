@@ -23,15 +23,15 @@ internal fun EditorScreenContext.dismissDialog() {
 }
 
 internal fun EditorScreenContext.discardAndLeave() {
-    autoSaveJob[0]?.cancel()
-    autoSaveJob[0] = null
+    autoSaveJob?.cancel()
+    autoSaveJob = null
     updateState { copy(dialog = null) }
     leaveClean()
 }
 
 internal fun EditorScreenContext.saveAndLeave(state: EditorUiState) {
-    autoSaveJob[0]?.cancel()
-    autoSaveJob[0] = null
+    autoSaveJob?.cancel()
+    autoSaveJob = null
     scope.launch {
         val saved = persist(state = state, content = state.content, showToast = false)
         if (!saved) {
@@ -44,8 +44,8 @@ internal fun EditorScreenContext.saveAndLeave(state: EditorUiState) {
 }
 
 internal fun EditorScreenContext.leaveClean() {
-    autoSaveJob[0]?.cancel()
-    autoSaveJob[0] = null
+    autoSaveJob?.cancel()
+    autoSaveJob = null
     editorSession.close()
     onNavigateBack()
 }

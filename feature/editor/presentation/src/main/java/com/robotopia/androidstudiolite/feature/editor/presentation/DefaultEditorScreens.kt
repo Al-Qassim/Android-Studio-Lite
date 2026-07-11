@@ -13,7 +13,6 @@ import com.robotopia.androidstudiolite.feature.editor.presentation.editor.Editor
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.EditorScreenContext
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.EditorViewModel
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.update
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -51,18 +50,22 @@ class DefaultEditorScreens(
             parametersOf(documentId, root)
         }
         val state by viewModel.uiState.collectAsStateWithLifecycle()
-        val autoSaveJob = remember(viewModel) { arrayOfNulls<Job>(1) }
-
-        val screenContext = EditorScreenContext(
-            updateState = { updater -> viewModel.uiState.update { updater(it) } },
-            editorSession = editorSession,
-            documentStore = documentStore,
-            root = root,
-            onNavigateBack = onNavigateBack,
-            onRun = onRun,
-            scope = viewModel.viewModelScope,
-            autoSaveJob = autoSaveJob,
-        )
+        val screenContext = remember(
+            viewModel,
+            editorSession,
+            documentStore,
+            onNavigateBack,
+            onRun,
+        ) {
+            EditorScreenContext(
+                updateState = { updater -> viewModel.uiState.update { updater(it) } },
+                editorSession = editorSession,
+                documentStore = documentStore,
+                onNavigateBack = onNavigateBack,
+                onRun = onRun,
+                scope = viewModel.viewModelScope,
+            )
+        }
         screenContext.EditorScreen(state)
     }
 }
