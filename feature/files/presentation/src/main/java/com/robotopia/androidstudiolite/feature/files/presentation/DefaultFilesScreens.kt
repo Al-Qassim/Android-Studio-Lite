@@ -47,7 +47,9 @@ class DefaultFilesScreens(
         onNavigateBack: () -> Unit,
         onRun: (() -> Unit)?,
     ) {
-        val viewModel: FileBrowserViewModel = koinViewModel {
+        val viewModel: FileBrowserViewModel = koinViewModel(
+            key = "${root.absolutePath}/${projectName}/${initialRelativePath}",
+        ) {
             parametersOf(root, projectName, initialRelativePath)
         }
         val state by viewModel.uiState.collectAsStateWithLifecycle()
