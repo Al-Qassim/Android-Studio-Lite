@@ -131,6 +131,7 @@ internal fun FileBrowserPreviewHost(state: FileBrowserUiState) {
             fileExplorerService = PreviewFileExplorerService,
             onOpenFile = {},
             onNavigateBack = {},
+            onRun = {},
             scope = scope,
         )
     }

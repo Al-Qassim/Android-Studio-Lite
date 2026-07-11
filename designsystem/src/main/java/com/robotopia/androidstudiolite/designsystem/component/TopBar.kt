@@ -84,11 +84,12 @@ fun TopBarBackTitle(
     }
 }
 
-/** Back + title + add — file browser chrome (path lives in [PathBar] below). */
+/** Back + title + run + add — file browser chrome (path lives in [PathBar] below). */
 @Composable
 fun TopBarBackTitleAdd(
     title: String,
     onBackClick: () -> Unit = {},
+    onRunClick: (() -> Unit)? = null,
     onAddClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -112,6 +113,12 @@ fun TopBarBackTitleAdd(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (onRunClick != null) {
+            IconButton(
+                onClick = onRunClick,
+                icon = { _, size -> IconRun(tint = Colors.Primary, size = size) },
+            )
+        }
         IconButton(
             onClick = onAddClick,
             icon = { _, size -> IconAdd(tint = Colors.Primary, size = size) },
@@ -229,7 +236,10 @@ private fun TopBarBackTitleLongPreview() {
 @Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "BackTitleAdd · normal")
 @Composable
 private fun TopBarBackTitleAddPreview() {
-    TopBarBackTitleAdd(title = "MyApp")
+    TopBarBackTitleAdd(
+        title = "MyApp",
+        onRunClick = {},
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "PathAdd · normal")

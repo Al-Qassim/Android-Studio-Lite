@@ -26,6 +26,7 @@ class DefaultFilesScreens(
         initialRelativePath: String,
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
+        onRun: (() -> Unit)?,
     ) {
         FileBrowser(
             root = root,
@@ -33,6 +34,7 @@ class DefaultFilesScreens(
             initialRelativePath = initialRelativePath,
             onOpenFile = onOpenFile,
             onNavigateBack = onNavigateBack,
+            onRun = onRun,
         )
     }
 
@@ -43,6 +45,7 @@ class DefaultFilesScreens(
         initialRelativePath: String,
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
+        onRun: (() -> Unit)?,
     ) {
         val viewModel: FileBrowserViewModel = koinViewModel {
             parametersOf(root, projectName, initialRelativePath)
@@ -54,12 +57,14 @@ class DefaultFilesScreens(
             fileExplorerService,
             onOpenFile,
             onNavigateBack,
+            onRun,
         ) {
             FileBrowserScreenContext(
                 updateState = { updater -> viewModel.uiState.update { updater(it) } },
                 fileExplorerService = fileExplorerService,
                 onOpenFile = onOpenFile,
                 onNavigateBack = onNavigateBack,
+                onRun = onRun,
                 scope = viewModel.viewModelScope,
             )
         }

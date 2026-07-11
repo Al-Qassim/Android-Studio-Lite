@@ -87,6 +87,12 @@ fun IdeNavHost() {
                     )
                 },
                 onNavigateBack = { route = IdeRoute.Projects },
+                onRun = {
+                    route = IdeRoute.Build(
+                        project = current.project,
+                        returnTo = current,
+                    )
+                },
             )
         }
 
