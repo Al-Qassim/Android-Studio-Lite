@@ -18,29 +18,29 @@ internal object FakeBuildPhaseMachine {
         TimedPhase(
             phase = BuildPhase.Queued,
             durationMs = 1_000L,
-            message = "Simulating queue…",
+            message = "Waiting in queue…",
         ),
         TimedPhase(
             phase = BuildPhase.Uploading,
             durationMs = 1_500L,
-            message = "Simulating upload…",
+            message = "Uploading project sources…",
         ),
         TimedPhase(
             phase = BuildPhase.Building,
             durationMs = 3_000L,
-            message = "Simulating remote build…",
+            message = "Building APK remotely…",
         ),
         TimedPhase(
             phase = BuildPhase.Downloading,
             durationMs = 1_500L,
-            message = "Preparing bundled demo APK…",
+            message = "Downloading APK…",
         ),
     )
 
     val totalDurationMs: Long = timedPhases.sumOf { it.durationMs }
 
     fun messageForPhase(phase: BuildPhase): String? = when (phase) {
-        BuildPhase.ReadyToInstall -> "Demo APK ready to install"
+        BuildPhase.ReadyToInstall -> "APK ready to install"
         BuildPhase.Failed -> null
         BuildPhase.Cancelled -> null
         else -> timedPhases.firstOrNull { it.phase == phase }?.message

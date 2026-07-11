@@ -22,8 +22,6 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
-import com.robotopia.androidstudiolite.designsystem.icon.IconApk
-import com.robotopia.androidstudiolite.designsystem.icon.IconCloud
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
@@ -76,10 +74,6 @@ private fun BuildProgressBody(
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        if (state.isDemoApkNoticeVisible) {
-            DemoApkNotice()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
         when {
             state.error != null -> BuildErrorState(
                 message = state.error,
@@ -93,25 +87,6 @@ private fun BuildProgressBody(
                 onInstall = onInstall,
             )
         }
-    }
-}
-
-@Composable
-private fun DemoApkNotice() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Colors.Surface2)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.Top,
-    ) {
-        IconCloud(tint = Colors.Warning, size = 18.dp)
-        BasicText(
-            text = "v0.1 demo: this installs a bundled sample APK, not an APK built from your project sources yet.",
-            style = Typography.Caption.copy(color = Colors.Muted),
-        )
     }
 }
 
@@ -223,7 +198,15 @@ private fun BuildPhaseRow(
 private fun PhaseStatusIcon(status: PhaseRowStatus) {
     when (status) {
         PhaseRowStatus.Complete -> IconSuccess(tint = Colors.Primary, size = 16.dp)
-        PhaseRowStatus.Current -> IconCloud(tint = Colors.Primary, size = 16.dp)
+        PhaseRowStatus.Current -> Box(
+            modifier = Modifier.size(16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            BasicText(
+                text = "•••",
+                style = Typography.Caption.copy(color = Colors.Primary),
+            )
+        }
         PhaseRowStatus.Upcoming -> Box(
             modifier = Modifier
                 .size(16.dp)
@@ -255,11 +238,10 @@ private fun BuildActionRow(
         if (state.phase == BuildPhase.ReadyToInstall) {
             val apkPath = state.apkLocalPath
             Button(
-                label = "Install demo APK",
+                label = "Install app",
                 onClick = { apkPath?.let(onInstall) },
                 variant = ButtonVariant.Primary,
                 enabled = apkPath != null,
-                leadingIcon = { tint, size -> IconApk(tint = tint, size = size) },
             )
         }
     }
@@ -328,6 +310,7 @@ private fun phaseStatus(phase: BuildPhase, current: BuildPhase): PhaseRowStatus 
     val phaseIndex = progressPhases.indexOf(phase)
     val currentIndex = progressPhases.indexOf(current).coerceAtLeast(0)
     return when {
+        current == BuildPhase.ReadyToInstall && phaseIndex <= currentIndex -> PhaseRowStatus.Complete
         phaseIndex < currentIndex -> PhaseRowStatus.Complete
         phaseIndex == currentIndex -> PhaseRowStatus.Current
         else -> PhaseRowStatus.Upcoming

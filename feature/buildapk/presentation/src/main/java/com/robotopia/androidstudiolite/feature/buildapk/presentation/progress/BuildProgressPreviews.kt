@@ -10,7 +10,7 @@ private fun BuildProgressQueuedPreview() {
     BuildProgressContent(
         state = BuildProgressUiState(
             phase = BuildPhase.Queued,
-            message = "Simulating queue…",
+            message = "Waiting in queue…",
             progressFraction = 0.05f,
         ),
         onDismiss = {},
@@ -26,7 +26,7 @@ private fun BuildProgressBuildingPreview() {
     BuildProgressContent(
         state = BuildProgressUiState(
             phase = BuildPhase.Building,
-            message = "Simulating remote build…",
+            message = "Building APK remotely…",
             progressFraction = 0.55f,
         ),
         onDismiss = {},
@@ -42,7 +42,7 @@ private fun BuildProgressReadyPreview() {
     BuildProgressContent(
         state = BuildProgressUiState(
             phase = BuildPhase.ReadyToInstall,
-            message = "Demo APK ready to install",
+            message = "APK ready to install",
             progressFraction = 1f,
             apkLocalPath = "/cache/demo.apk",
         ),

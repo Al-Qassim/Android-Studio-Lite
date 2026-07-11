@@ -15,7 +15,6 @@ data class BuildProgressUiState(
     val progressFraction: Float = 0f,
     val apkLocalPath: String? = null,
     val error: String? = null,
-    val isDemoApkNoticeVisible: Boolean = true,
 )
 
 /** Holds build progress UI state across configuration changes. No service calls. */
@@ -32,7 +31,6 @@ class BuildProgressViewModel : ViewModel() {
                 progressFraction = progress.displayProgressFraction(),
                 apkLocalPath = progress.apkLocalPath,
                 error = progress.error,
-                isDemoApkNoticeVisible = true,
             )
         }
     }

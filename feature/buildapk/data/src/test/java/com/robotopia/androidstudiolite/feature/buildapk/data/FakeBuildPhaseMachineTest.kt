@@ -27,18 +27,15 @@ class FakeBuildPhaseMachineTest {
     }
 
     @Test
-    fun messageForPhase_returnsHonestDemoCopy() {
+    fun messageForPhase_matchesProductCopy() {
         FakeBuildPhaseMachine.timedPhases.forEach { timed ->
             assertEquals(timed.message, FakeBuildPhaseMachine.messageForPhase(timed.phase))
         }
         assertEquals(
-            "Demo APK ready to install",
+            "APK ready to install",
             FakeBuildPhaseMachine.messageForPhase(BuildPhase.ReadyToInstall),
         )
-        assertEquals("Simulating upload…", FakeBuildPhaseMachine.messageForPhase(BuildPhase.Uploading))
-        assertEquals(
-            "Preparing bundled demo APK…",
-            FakeBuildPhaseMachine.messageForPhase(BuildPhase.Downloading),
-        )
+        assertEquals("Uploading project sources…", FakeBuildPhaseMachine.messageForPhase(BuildPhase.Uploading))
+        assertEquals("Downloading APK…", FakeBuildPhaseMachine.messageForPhase(BuildPhase.Downloading))
     }
 }
