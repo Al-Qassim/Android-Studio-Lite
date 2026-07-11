@@ -12,7 +12,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -110,11 +109,6 @@ class FakeBuildService(
                 apkLocalPath = apkPath,
             )
         }
-    }
-
-    fun close() {
-        scope.cancel()
-        jobs.clear()
     }
 
     private data class BuildJob(
