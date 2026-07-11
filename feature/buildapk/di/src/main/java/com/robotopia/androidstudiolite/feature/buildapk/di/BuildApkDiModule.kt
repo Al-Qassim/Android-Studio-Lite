@@ -1,7 +1,9 @@
 package com.robotopia.androidstudiolite.feature.buildapk.di
 
+import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
+import com.robotopia.androidstudiolite.feature.buildapk.data.DefaultApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.data.FakeBuildService
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.DefaultBuildScreens
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.BuildProgressViewModel
@@ -11,6 +13,7 @@ import org.koin.dsl.module
 
 val buildApkDiModule = module {
     single<BuildService> { FakeBuildService(context = androidContext()) }
+    single<ApkInstaller> { DefaultApkInstaller(context = androidContext()) }
     single<BuildScreens> { DefaultBuildScreens(buildService = get()) }
     viewModel { BuildProgressViewModel() }
 }
