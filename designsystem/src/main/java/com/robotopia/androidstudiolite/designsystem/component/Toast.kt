@@ -15,15 +15,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
+import com.robotopia.androidstudiolite.designsystem.icon.IconWarning
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
+enum class ToastVariant {
+    Success,
+    Error,
+}
+
 /**
- * Success toast — pill shape, surface fill, no border.
+ * Pill toast — surface fill, no border. Success uses check; error uses warning.
  */
 @Composable
 fun Toast(
     message: String,
     modifier: Modifier = Modifier,
+    variant: ToastVariant = ToastVariant.Success,
 ) {
     val shape = RoundedCornerShape(999.dp)
     Row(
@@ -35,7 +42,10 @@ fun Toast(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        IconSuccess(tint = Colors.Primary, size = 18.dp)
+        when (variant) {
+            ToastVariant.Success -> IconSuccess(tint = Colors.Primary, size = 18.dp)
+            ToastVariant.Error -> IconWarning(tint = Colors.Danger, size = 18.dp)
+        }
         BasicText(
             text = message,
             style = Typography.BodyMedium.copy(color = Colors.Text),
@@ -45,9 +55,19 @@ fun Toast(
 
 @Preview(showBackground = true, backgroundColor = 0xFF12171C)
 @Composable
-private fun ToastPreview() {
+private fun ToastSuccessPreview() {
     Toast(
         message = "File saved",
+        modifier = Modifier.padding(16.dp),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Composable
+private fun ToastErrorPreview() {
+    Toast(
+        message = "Couldn't save file",
+        variant = ToastVariant.Error,
         modifier = Modifier.padding(16.dp),
     )
 }

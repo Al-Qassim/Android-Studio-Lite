@@ -32,8 +32,8 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
         loadDocument(state)
     }
 
-    LaunchedEffect(state.toastMessage) {
-        if (state.toastMessage != null) {
+    LaunchedEffect(state.toast) {
+        if (state.toast != null) {
             delay(2_000)
             dismissToast()
         }
@@ -62,9 +62,10 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
             }
         }
 
-        state.toastMessage?.let { message ->
+        state.toast?.let { toast ->
             Toast(
-                message = message,
+                message = toast.message,
+                variant = toast.variant,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 24.dp),

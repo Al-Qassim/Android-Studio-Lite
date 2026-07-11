@@ -10,7 +10,7 @@ private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
 
 internal suspend fun EditorScreenContext.loadDocument(state: EditorUiState) {
     updateState {
-        copy(isLoading = true, loadError = null, actionError = null)
+        copy(isLoading = true, loadError = null, toast = null)
     }
     runCatching {
         documentStore.load(state.root, state.documentId.relativePath)

@@ -1,19 +1,28 @@
 package com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic
 
 import com.robotopia.androidstudiolite.core.error.userMessageOrNull
+import com.robotopia.androidstudiolite.designsystem.component.ToastVariant
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.EditorScreenContext
+import com.robotopia.androidstudiolite.feature.editor.presentation.editor.EditorToast
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.EditorUiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val TAG = "Editor"
-private const val GENERIC_ERROR_MESSAGE = "Something went wrong"
+private const val GENERIC_ERROR_MESSAGE = "Couldn't save file"
+private const val AUTO_SAVE_DEBOUNCE_MS = 400L
 
-internal fun EditorScreenContext.onContentChange(content: String) {
+internal fun EditorScreenContext.onContentChange(state: EditorUiState, content: String) {
     editorSession.updateContent(content)
     val dirty = editorSession.document.value?.isDirty == true
     updateState {
-        copy(content = content, isDirty = dirty, toastMessage = null, actionError = null)
+        copy(content = content, isDirty = dirty, toast = null)
     }
+    if (!state.autoSave) {
+        cancelAutoSave()
+        return
+    }
+    scheduleAutoSave(state, content)
 }
 
 internal fun EditorScreenContext.saveDocument(
@@ -21,33 +30,64 @@ internal fun EditorScreenContext.saveDocument(
     showToast: Boolean = true,
     onSuccess: (() -> Unit)? = null,
 ) {
+    cancelAutoSave()
     scope.launch {
-        val saved = persist(state)
+        val saved = persist(state = state, content = state.content, showToast = showToast)
         if (!saved) return@launch
-        updateState {
-            copy(
-                menuOpen = false,
-                toastMessage = if (showToast) "File saved" else toastMessage,
-            )
-        }
+        updateState { copy(menuOpen = false) }
         onSuccess?.invoke()
     }
 }
 
 internal fun EditorScreenContext.toggleAutoSave(state: EditorUiState) {
-    updateState { copy(autoSave = !state.autoSave, menuOpen = false) }
+    val enabling = !state.autoSave
+    updateState { copy(autoSave = enabling, menuOpen = false) }
+    if (enabling && state.isDirty) {
+        scheduleAutoSave(state, state.content)
+    } else {
+        cancelAutoSave()
+    }
 }
 
-internal suspend fun EditorScreenContext.persist(state: EditorUiState): Boolean {
+internal suspend fun EditorScreenContext.persist(
+    state: EditorUiState,
+    content: String,
+    showToast: Boolean,
+): Boolean {
     return runCatching {
-        documentStore.save(state.root, state.documentId.relativePath, state.content)
-        editorSession.markSaved(state.content)
+        documentStore.save(state.root, state.documentId.relativePath, content)
+        editorSession.markSaved(content)
         updateState {
-            copy(isDirty = false, actionError = null)
+            copy(
+                isDirty = false,
+                toast = if (showToast) {
+                    EditorToast("File saved", ToastVariant.Success)
+                } else {
+                    toast
+                },
+            )
         }
     }.onFailure { error ->
         updateState {
-            copy(actionError = error.userMessageOrNull(TAG) ?: GENERIC_ERROR_MESSAGE)
+            copy(
+                toast = EditorToast(
+                    message = error.userMessageOrNull(TAG) ?: GENERIC_ERROR_MESSAGE,
+                    variant = ToastVariant.Error,
+                ),
+            )
         }
     }.isSuccess
+}
+
+private fun EditorScreenContext.scheduleAutoSave(state: EditorUiState, content: String) {
+    cancelAutoSave()
+    autoSaveJob[0] = scope.launch {
+        delay(AUTO_SAVE_DEBOUNCE_MS)
+        persist(state = state, content = content, showToast = false)
+    }
+}
+
+private fun EditorScreenContext.cancelAutoSave() {
+    autoSaveJob[0]?.cancel()
+    autoSaveJob[0] = null
 }

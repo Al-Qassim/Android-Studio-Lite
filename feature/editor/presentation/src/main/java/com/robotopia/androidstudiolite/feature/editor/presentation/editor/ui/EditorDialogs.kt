@@ -2,7 +2,6 @@ package com.robotopia.androidstudiolite.feature.editor.presentation.editor.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,13 +21,11 @@ import androidx.compose.ui.window.Dialog
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
-import com.robotopia.androidstudiolite.designsystem.component.DialogMessageAction
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.EditorDialog
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.EditorScreenContext
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.EditorUiState
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.discardAndLeave
-import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.dismissActionError
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.dismissDialog
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.saveAndLeave
 
@@ -39,7 +36,6 @@ internal fun EditorScreenContext.EditorDialogs(state: EditorUiState) {
             Dialog(onDismissRequest = { dismissDialog() }) {
                 UnsavedLeaveDialog(
                     fileName = state.fileName,
-                    onCancel = { dismissDialog() },
                     onDiscard = { discardAndLeave() },
                     onSave = { saveAndLeave(state) },
                 )
@@ -48,24 +44,11 @@ internal fun EditorScreenContext.EditorDialogs(state: EditorUiState) {
 
         null -> Unit
     }
-
-    state.actionError?.let { message ->
-        Dialog(onDismissRequest = { dismissActionError() }) {
-            DialogMessageAction(
-                title = "Couldn't save",
-                message = message,
-                actionLabel = "OK",
-                onCancel = { dismissActionError() },
-                onAction = { dismissActionError() },
-            )
-        }
-    }
 }
 
 @Composable
 private fun UnsavedLeaveDialog(
     fileName: String,
-    onCancel: () -> Unit,
     onDiscard: () -> Unit,
     onSave: () -> Unit,
 ) {
@@ -84,7 +67,7 @@ private fun UnsavedLeaveDialog(
         )
         Spacer(modifier = Modifier.height(12.dp))
         BasicText(
-            text = "Save changes to $fileName before leaving?",
+            text = "$fileName has unsaved edits. Save before leaving?",
             style = Typography.Body.copy(color = Colors.Muted),
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -93,12 +76,6 @@ private fun UnsavedLeaveDialog(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Button(
-                label = "Cancel",
-                onClick = onCancel,
-                variant = ButtonVariant.TextAction,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
             Button(
                 label = "Discard",
                 onClick = onDiscard,

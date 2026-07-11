@@ -7,8 +7,6 @@ import kotlinx.coroutines.launch
 
 internal fun EditorScreenContext.requestLeave(state: EditorUiState) {
     when {
-        state.actionError != null ->
-            updateState { copy(actionError = null) }
         state.dialog != null ->
             updateState { copy(dialog = null) }
         state.menuOpen ->
@@ -25,13 +23,17 @@ internal fun EditorScreenContext.dismissDialog() {
 }
 
 internal fun EditorScreenContext.discardAndLeave() {
+    autoSaveJob[0]?.cancel()
+    autoSaveJob[0] = null
     updateState { copy(dialog = null) }
     leaveClean()
 }
 
 internal fun EditorScreenContext.saveAndLeave(state: EditorUiState) {
+    autoSaveJob[0]?.cancel()
+    autoSaveJob[0] = null
     scope.launch {
-        val saved = persist(state)
+        val saved = persist(state = state, content = state.content, showToast = false)
         if (!saved) {
             updateState { copy(dialog = null) }
             return@launch
@@ -42,6 +44,8 @@ internal fun EditorScreenContext.saveAndLeave(state: EditorUiState) {
 }
 
 internal fun EditorScreenContext.leaveClean() {
+    autoSaveJob[0]?.cancel()
+    autoSaveJob[0] = null
     editorSession.close()
     onNavigateBack()
 }
@@ -54,10 +58,6 @@ internal fun EditorScreenContext.closeMenu() {
     updateState { copy(menuOpen = false) }
 }
 
-internal fun EditorScreenContext.dismissActionError() {
-    updateState { copy(actionError = null) }
-}
-
 internal fun EditorScreenContext.dismissToast() {
-    updateState { copy(toastMessage = null) }
+    updateState { copy(toast = null) }
 }

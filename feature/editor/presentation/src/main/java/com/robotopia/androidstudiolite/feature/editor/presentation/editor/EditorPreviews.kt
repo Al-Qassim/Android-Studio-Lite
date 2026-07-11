@@ -4,12 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.robotopia.androidstudiolite.designsystem.component.ToastVariant
 import com.robotopia.androidstudiolite.feature.editor.api.DocumentStore
 import com.robotopia.androidstudiolite.feature.editor.api.EditorSession
 import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
 import com.robotopia.androidstudiolite.feature.editor.model.OpenDocument
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,6 +44,7 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
                 isLoading = false,
                 content = "fun main() {}\n",
                 isDirty = true,
+                autoSave = false,
             ),
         ),
         EditorPreviewCase(
@@ -50,7 +53,7 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
                 isLoading = false,
                 content = "package demo\n",
                 menuOpen = true,
-                autoSave = false,
+                autoSave = true,
             ),
         ),
         EditorPreviewCase(
@@ -59,6 +62,7 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
                 isLoading = false,
                 content = "changed",
                 isDirty = true,
+                autoSave = false,
                 dialog = EditorDialog.UnsavedLeave,
             ),
         ),
@@ -66,7 +70,7 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
             "load error",
             previewBaseState().copy(
                 isLoading = false,
-                loadError = "File not found",
+                loadError = "File may have been moved or deleted.",
             ),
         ),
         EditorPreviewCase(
@@ -74,7 +78,17 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
             previewBaseState().copy(
                 isLoading = false,
                 content = "ok",
-                toastMessage = "File saved",
+                toast = EditorToast("File saved", ToastVariant.Success),
+            ),
+        ),
+        EditorPreviewCase(
+            "save error toast",
+            previewBaseState().copy(
+                isLoading = false,
+                content = "ok",
+                isDirty = true,
+                autoSave = false,
+                toast = EditorToast("Couldn't save file", ToastVariant.Error),
             ),
         ),
     )
@@ -83,6 +97,7 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
 @Composable
 internal fun EditorPreviewHost(state: EditorUiState) {
     val scope = rememberCoroutineScope()
+    val autoSaveJob = remember { arrayOfNulls<Job>(1) }
     val context = remember(scope) {
         EditorScreenContext(
             updateState = {},
@@ -92,6 +107,7 @@ internal fun EditorPreviewHost(state: EditorUiState) {
             onNavigateBack = {},
             onRun = null,
             scope = scope,
+            autoSaveJob = autoSaveJob,
         )
     }
     context.EditorScreen(state)
