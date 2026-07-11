@@ -19,10 +19,9 @@ interface BuildScreens {
     /** Feature-owned entry; integration calls this rather than individual screens. */
     @Composable
     fun NavHost(
-        jobId: String,
+        request: BuildRequest,
         onReadyToInstall: (apkLocalPath: String) -> Unit,
         onDismiss: () -> Unit,
-        onRetry: (() -> Unit)?,
     )
 
     @Composable

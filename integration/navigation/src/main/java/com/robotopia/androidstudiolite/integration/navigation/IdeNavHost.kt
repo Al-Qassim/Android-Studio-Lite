@@ -9,7 +9,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
-import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildRequest
 import com.robotopia.androidstudiolite.feature.editor.api.EditorScreens
 import com.robotopia.androidstudiolite.feature.editor.api.EditorSession
@@ -20,7 +19,6 @@ import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -34,7 +32,6 @@ fun IdeNavHost() {
     val filesScreens: FilesScreens = koinInject()
     val editorScreens: EditorScreens = koinInject()
     val buildScreens: BuildScreens = koinInject()
-    val buildService: BuildService = koinInject()
     val apkInstaller: ApkInstaller = koinInject()
     val editorSession: EditorSession = koinInject()
     val projectService: ProjectService = koinInject()
@@ -66,14 +63,14 @@ fun IdeNavHost() {
                     }
                 },
                 onRunProject = { projectId ->
-                    startBuildForProjectId(
-                        scope = scope,
-                        projectService = projectService,
-                        buildService = buildService,
-                        projectId = projectId,
-                        returnTo = IdeRoute.Projects,
-                        setRoute = { route = it },
-                    )
+                    scope.launch {
+                        openBuildForProjectId(
+                            projectService = projectService,
+                            projectId = projectId,
+                            returnTo = IdeRoute.Projects,
+                            setRoute = { route = it },
+                        )
+                    }
                 },
             )
         }
@@ -99,12 +96,9 @@ fun IdeNavHost() {
                 root = ProjectRoot(current.project.rootPath),
                 onNavigateBack = { route = IdeRoute.Files(current.project) },
                 onRun = {
-                    startBuildForProject(
-                        scope = scope,
-                        buildService = buildService,
+                    route = IdeRoute.Build(
                         project = current.project,
                         returnTo = current,
-                        setRoute = { route = it },
                     )
                 },
             )
@@ -112,69 +106,34 @@ fun IdeNavHost() {
 
         is IdeRoute.Build -> {
             buildScreens.NavHost(
-                jobId = current.jobId,
+                request = BuildRequest(
+                    projectId = current.project.id,
+                    projectRoot = ProjectRoot(current.project.rootPath),
+                    projectName = current.project.name,
+                    packageName = current.project.packageName,
+                ),
                 onReadyToInstall = { apkPath ->
                     apkInstaller.requestInstall(apkPath)
                 },
                 onDismiss = { route = current.returnTo },
-                onRetry = {
-                    startBuildForProject(
-                        scope = scope,
-                        buildService = buildService,
-                        project = current.project,
-                        returnTo = current.returnTo,
-                        setRoute = { route = it },
-                    )
-                },
             )
         }
     }
 }
 
-private fun startBuildForProjectId(
-    scope: CoroutineScope,
+private suspend fun openBuildForProjectId(
     projectService: ProjectService,
-    buildService: BuildService,
     projectId: ProjectId,
     returnTo: IdeRoute,
     setRoute: (IdeRoute) -> Unit,
 ) {
-    scope.launch {
-        val project = projectService.getProject(projectId) ?: return@launch
-        startBuildForProject(
-            scope = this,
-            buildService = buildService,
+    val project = projectService.getProject(projectId) ?: return
+    setRoute(
+        IdeRoute.Build(
             project = project,
             returnTo = returnTo,
-            setRoute = setRoute,
-        )
-    }
-}
-
-private fun startBuildForProject(
-    scope: CoroutineScope,
-    buildService: BuildService,
-    project: Project,
-    returnTo: IdeRoute,
-    setRoute: (IdeRoute) -> Unit,
-) {
-    scope.launch {
-        val jobId = buildService.startBuild(
-            BuildRequest(
-                projectId = project.id,
-                projectRoot = ProjectRoot(project.rootPath),
-                projectName = project.name,
-                packageName = project.packageName,
-            ),
-        )
-        setRoute(
-            IdeRoute.Build(
-                project = project,
-                jobId = jobId,
-                returnTo = returnTo,
-            ),
-        )
-    }
+        ),
+    )
 }
 
 private sealed interface IdeRoute {
@@ -186,7 +145,6 @@ private sealed interface IdeRoute {
     ) : IdeRoute
     data class Build(
         val project: Project,
-        val jobId: String,
         val returnTo: IdeRoute,
     ) : IdeRoute
 }
