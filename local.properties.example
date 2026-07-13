@@ -5,3 +5,7 @@ sdk.dir=/path/to/Android/sdk
 # GitHub OAuth App client id (public; not a secret). Enable Device Flow on the app.
 # Do not put client_secret here — device flow keeps the secret out of the APK.
 github.oauth.clientId=
+
+# Agents/humans: Gradle reads these keys via file readLines in build.gradle.kts
+# (see project/architecture.md). Do not use java.util.Properties in .gradle.kts —
+# it breaks Android Studio Gradle sync in this project.

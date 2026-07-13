@@ -164,6 +164,25 @@ Build ──► ApkInstaller (system UI) ; dismiss ──► returnTo
 | GitHub OAuth client id | `github.oauth.clientId` in gitignored `local.properties` → `auth:data` `BuildConfig.GITHUB_OAUTH_CLIENT_ID` (see `local.properties.example`) |
 | Remote CI | **None yet** (real GHA = `#25`) |
 
+### Reading `local.properties` from `build.gradle.kts`
+
+Do **not** use `java.util.Properties` / `java.util.*` inside module `build.gradle.kts` scripts here — Android Studio’s Gradle Kotlin DSL sync often fails with `Unresolved reference 'util'` (and cascading `load` / `getProperty` errors).
+
+**Preferred pattern** (as in `:feature:auth:data/build.gradle.kts`):
+
+```kotlin
+val value = rootProject.file("local.properties")
+    .takeIf { it.exists() }
+    ?.readLines()
+    ?.map { it.trim() }
+    ?.firstOrNull { it.startsWith("some.key=") && !it.startsWith("#") }
+    ?.substringAfter("=", missingDelimiterValue = "")
+    ?.trim()
+    .orEmpty()
+```
+
+After any `build.gradle.kts` edit: run a Gradle compile/sync for that module before calling the change done.
+
 ---
 
 ## 8. Out of scope / later

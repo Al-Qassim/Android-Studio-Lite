@@ -22,3 +22,5 @@ Whenever the user corrects your work, treat that as a defect in **documents, ski
 2. Find the **root cause** of why the work was wrong the first time (missing instruction, wrong instruction, ambiguous router, skill not triggered, conflicting docs, etc.).
 3. **Edit** the relevant docs/skills/rules so the same failure is unlikely next time: add missing process, fix wrong process, or delete harmful/outdated process.
 4. Goal: **minimize future user corrections** by hardening the system, not only the immediate artifact.
+
+**Breaks you introduce count too.** If a change fails Gradle sync, compile, install, or tests — and you fix the code — you **must still harden docs/skills in the same turn** for that failure class. Do not wait for the user to remind you that docs were missing. A silent code-only fix is incomplete.
