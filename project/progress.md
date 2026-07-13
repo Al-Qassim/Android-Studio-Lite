@@ -13,8 +13,8 @@ On-device Compose IDE: manage projects → browse/edit files → Run → fake re
 | Files | Done | `#8` · sandbox browser · create / rename / move / delete |
 | Editor | Done | `#9` · save · dirty leave · auto-save preference |
 | Fake build → install | Done | `#10` / [PR #16](https://github.com/Al-Qassim/Android-Studio-Lite/pull/16) · Build start → phases → Install app |
-| IDE nav wiring | Mostly done | Lived in `#16` via `:integration:navigation` · `#11` still open (wording stale: says `:integration:ide`) |
-| Parent plan | Open | `#5` · grilled decisions · `project/v0.1-implementation-plan.md` |
+| IDE nav wiring | Done | `#11` · `:integration:navigation` `IdeNavHost` · Projects → Files → Editor → Build → install |
+| Parent plan | Done | `#5` · `project/architecture.md` · `project/v0.1-implementation-plan.md` |
 
 ## Product path (shipped)
 
