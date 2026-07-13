@@ -15,10 +15,8 @@ class DefaultApkInstaller(
 ) : ApkInstaller {
 
     override fun requestInstall(apkLocalPath: String) {
-        val apkFile = File(apkLocalPath)
-        if (!apkFile.exists()) {
-            throw AppException("APK file not found")
-        }
+        val uri = resolveApkUri(apkLocalPath)
+            ?: throw AppException("APK file not found")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             !context.packageManager.canRequestPackageInstalls()
@@ -32,12 +30,6 @@ class DefaultApkInstaller(
             return
         }
 
-        val uri: Uri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            apkFile,
-        )
-
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, APK_MIME_TYPE)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -47,6 +39,22 @@ class DefaultApkInstaller(
         } catch (error: Exception) {
             throw AppException("Could not open package installer", error)
         }
+    }
+
+    private fun resolveApkUri(apkLocalPath: String): Uri? {
+        if (apkLocalPath.startsWith("content:", ignoreCase = true)) {
+            val uri = Uri.parse(apkLocalPath)
+            return runCatching {
+                context.contentResolver.openInputStream(uri)?.use { uri }
+            }.getOrNull()
+        }
+        val apkFile = File(apkLocalPath)
+        if (!apkFile.exists()) return null
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            apkFile,
+        )
     }
 
     private companion object {

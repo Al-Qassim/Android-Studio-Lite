@@ -128,6 +128,7 @@ class GitHubActionsBuildService(
             if (!coroutineContext.isActive) return
             downloadReadyApk(
                 jobId = jobId,
+                projectName = request.projectName,
                 token = token,
                 repo = repo,
                 releaseTag = releaseTag,
@@ -341,6 +342,7 @@ class GitHubActionsBuildService(
 
     private suspend fun downloadReadyApk(
         jobId: String,
+        projectName: String,
         token: String,
         repo: GitHubRepoRef,
         releaseTag: String,
@@ -356,14 +358,20 @@ class GitHubActionsBuildService(
                 error = null,
             )
         }
-        val apkFile = File(appContext.cacheDir, "buildapk/asl-$jobId.apk")
+        val tempApk = File(appContext.cacheDir, "buildapk/asl-$jobId.apk")
         val assetUrl = gitHubClient.findReleaseApkAssetUrl(token, repo, releaseTag)
-        gitHubClient.downloadAssetToFile(token, assetUrl, apkFile)
+        gitHubClient.downloadAssetToFile(token, assetUrl, tempApk)
+        val downloadsUri = ApkDownloads.publish(
+            context = appContext,
+            source = tempApk,
+            displayName = projectName,
+        )
+        tempApk.delete()
         progress.update {
             it.copy(
                 phase = BuildPhase.ReadyToInstall,
-                message = "APK ready to install",
-                apkLocalPath = apkFile.absolutePath,
+                message = "APK saved to Downloads",
+                apkLocalPath = downloadsUri,
                 logUrl = logUrl,
                 error = null,
             )
