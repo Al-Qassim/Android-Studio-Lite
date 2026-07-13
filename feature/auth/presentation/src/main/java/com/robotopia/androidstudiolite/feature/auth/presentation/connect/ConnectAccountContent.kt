@@ -122,22 +122,21 @@ private fun ShowCodeBody(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         BasicText(
             text = "Copy the code below",
             style = Typography.Body.copy(color = Colors.Muted),
         )
-        Spacer(modifier = Modifier.height(16.dp))
         UserCodeCopyRow(
             userCode = state.userCode,
             onCopyCode = onCopyCode,
         )
-        Spacer(modifier = Modifier.height(12.dp))
         BasicText(
             text = "Paste it at github.com/login/device",
             style = Typography.Body.copy(color = Colors.Muted),
         )
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(12.dp))
         Button(
             label = "Open GitHub",
             onClick = { onOpenGitHub(state.verificationUri) },
@@ -156,16 +155,15 @@ private fun WaitingBody(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         BasicText(
             text = "Waiting for approval…",
             style = Typography.Headline.copy(color = Colors.Text),
         )
-        Spacer(modifier = Modifier.height(16.dp))
         UserCodeCard(userCode = state.userCode)
-        Spacer(modifier = Modifier.height(16.dp))
         WaitingDotsRow(label = null)
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
         Button(
             label = "Cancel",
             onClick = onCancel,
@@ -185,21 +183,20 @@ private fun ConnectedBody(
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         IconSuccess(
             tint = Colors.Primary,
             size = 48.dp,
         )
-        Spacer(modifier = Modifier.height(16.dp))
         BasicText(
             text = "Connected",
             style = Typography.Headline.copy(color = Colors.Text),
             modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(modifier = Modifier.height(16.dp))
         AccountCard(account = state.account)
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
         Button(
             label = "Continue",
             onClick = onContinue,
@@ -219,17 +216,17 @@ private fun FailedBody(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         BasicText(
             text = "Couldn't connect",
             style = Typography.Headline.copy(color = Colors.Danger),
         )
-        Spacer(modifier = Modifier.height(8.dp))
         BasicText(
             text = state.message,
             style = Typography.Body.copy(color = Colors.Muted),
         )
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),

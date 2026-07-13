@@ -42,14 +42,14 @@ internal fun BuildAccountContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             BasicText(
                 text = "GitHub",
                 style = Typography.Headline.copy(color = Colors.Text),
             )
-            Spacer(modifier = Modifier.height(16.dp))
             AccountStatusCard(account = account)
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(8.dp))
             if (account == null) {
                 Button(
                     label = "Connect account",
