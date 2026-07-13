@@ -34,6 +34,7 @@ import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 internal fun ProjectsListContent(
     state: ProjectsListUiState,
     onCreateProject: () -> Unit,
+    onOpenBuildAccount: () -> Unit,
     onOpenClick: (Project) -> Unit,
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
@@ -52,6 +53,8 @@ internal fun ProjectsListContent(
             title = "Projects",
             actionLabel = "+ New",
             onActionClick = onCreateProject,
+            secondaryActionLabel = "GitHub",
+            onSecondaryActionClick = onOpenBuildAccount,
         )
         ProjectsListBody(
             state = state,
@@ -292,6 +295,7 @@ private fun ProjectsListEmptyPreview() {
     ProjectsListContent(
         state = ProjectsListUiState(),
         onCreateProject = {},
+        onOpenBuildAccount = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -315,6 +319,7 @@ private fun ProjectsListFilledPreview() {
     ProjectsListContent(
         state = ProjectsListUiState(projects = previewProjects),
         onCreateProject = {},
+        onOpenBuildAccount = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -341,6 +346,7 @@ private fun ProjectsListMenuPreview() {
             menuProject = previewProjects.first(),
         ),
         onCreateProject = {},
+        onOpenBuildAccount = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -367,6 +373,7 @@ private fun ProjectsListDeleteConfirmPreview() {
             pendingDelete = previewProjects.first(),
         ),
         onCreateProject = {},
+        onOpenBuildAccount = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -393,6 +400,7 @@ private fun ProjectsListActionErrorPreview() {
             actionError = "Project not found",
         ),
         onCreateProject = {},
+        onOpenBuildAccount = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},

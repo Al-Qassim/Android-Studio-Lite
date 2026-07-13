@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildRequest
@@ -32,6 +33,7 @@ fun IdeNavHost() {
     val filesScreens: FilesScreens = koinInject()
     val editorScreens: EditorScreens = koinInject()
     val buildScreens: BuildScreens = koinInject()
+    val authScreens: AuthScreens = koinInject()
     val apkInstaller: ApkInstaller = koinInject()
     val editorSession: EditorSession = koinInject()
     val projectService: ProjectService = koinInject()
@@ -72,6 +74,15 @@ fun IdeNavHost() {
                         )
                     }
                 },
+                onOpenBuildAccount = {
+                    route = IdeRoute.BuildAccount
+                },
+            )
+        }
+
+        IdeRoute.BuildAccount -> {
+            authScreens.BuildAccount(
+                onDismiss = { route = IdeRoute.Projects },
             )
         }
 
@@ -144,6 +155,7 @@ private suspend fun openBuildForProjectId(
 
 private sealed interface IdeRoute {
     data object Projects : IdeRoute
+    data object BuildAccount : IdeRoute
     data class Files(val project: Project) : IdeRoute
     data class Editor(
         val project: Project,

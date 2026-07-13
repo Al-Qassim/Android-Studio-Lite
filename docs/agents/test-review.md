@@ -4,6 +4,8 @@ Confirm the app runs without crashing **and is functionally usable** for everyth
 
 **You must run the app and test as a normal user.** Install/launch on an emulator or device, then walk the product the way a person would: open screens from the real entry points, tap the designed controls, complete (and fail) the flows by hand. Assembling an APK, watching logcat, or only driving UI from tests/scripts does **not** satisfy this review.
 
+**Reachability (required for UI PRs):** every new screen or state the PR asks humans to review must be reachable from the **running app** without clearing app data, adb tricks, or Compose previews alone. If re-entering a flow needs logout / disconnect / reset, that control must ship in the **same PR** (or the entry must always be available). Leaving a feature only behind a one-shot gate the reviewer cannot re-open is a **fail**.
+
 Unit tests and a clean assemble are necessary but **not sufficient** when the change includes UI, navigation, or user-visible behavior. Device/emulator truth — from that hands-on session — decides pass/fail for those flows.
 
 Requirements for what belongs in ticket ACs (upstream of this review) live in `docs/agents/writing-acceptance-criteria.md`. If a PR’s linked issue omitted system Back or designed affordances but the PR ships that UI, still add those rows to the checklist here and fail if they break.
@@ -40,6 +42,7 @@ Explicitly mark rows **blocked** only when a dependency is documented in the PR 
 **Run the app as a normal user** on an emulator or device (install the debug APK if needed, then launch from the launcher / Run configuration and use the UI by hand). Walk the checklist from §1 **in full**:
 
 - Enter features the way a user would (project list → open project → menus / Run / Settings / etc.) — not only by deep-link or preview harness unless that is the shipping entry.
+- Confirm a **stable in-app path** to each new screen (including reconnect / logout when the happy path consumes the only prior entry).
 - Open every screen the PR owns or newly wires.
 - For each checklist row: perform the action **yourself in the running app** and **verify the visible UI state** (list contents, path/title, dialogs, toasts/errors, destination screen).
 - Hierarchical UIs: open at least one child; confirm contents; go **back to parent with both** the in-app back control **and** system Back (nav bar button or gesture). Nested depth ≥2: system Back must climb one level at a time — it must **not** leave the app or jump to an unrelated screen while a parent folder/screen still exists.
@@ -75,6 +78,7 @@ Post on the PR/issue:
 
 - Any checklist capability from the PR/issue was skipped or only unit-tested.
 - Reviewer did not run the app, or only validated via assemble / unit tests / Compose previews / logcat without a normal-user UI session.
+- New screens exist in code but cannot be opened again from the running app (e.g. gated behind a consumed login with no Settings logout / alternate entry).
 - Root list works but folder/child navigation does not update content.
 - Create/rename/move/copy/delete/paste claimed in the PR but not exercised on device.
 - Action runs but UI does not update.

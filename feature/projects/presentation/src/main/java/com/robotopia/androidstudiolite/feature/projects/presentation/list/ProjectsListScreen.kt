@@ -20,6 +20,7 @@ internal fun ProjectsListScreen(
     onOpenProject: (projectId: ProjectId) -> Unit,
     onRunProject: (projectId: ProjectId) -> Unit,
     onCreateProject: () -> Unit,
+    onOpenBuildAccount: () -> Unit,
     viewModel: ProjectsListViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -32,6 +33,7 @@ internal fun ProjectsListScreen(
     ProjectsListContent(
         state = state,
         onCreateProject = onCreateProject,
+        onOpenBuildAccount = onOpenBuildAccount,
         onOpenClick = { project ->
             scope.launch {
                 openProject(

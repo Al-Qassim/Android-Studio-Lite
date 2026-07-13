@@ -13,6 +13,8 @@ Run this for any UI-facing change before calling the work finished. Prefer this 
 
 **Required:** screenshot comparison between the **running app UI** and the **Figma design reference** is mandatory — not optional, not “code looks fine,” not Compose previews alone. Every relevant screen/state must have side-by-side app shot vs Figma (and after fixes, Before | Figma | After).
 
+**Reachability:** before asking the human for design review, ship an in-app navigation path to every screen/state under review (including logout / reconnect when needed). Do not hand off a PR where the only way to see Connect is a one-shot build gate the reviewer cannot re-enter.
+
 **Default Figma (this repo):** [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) — also linked from `project/requierments.md` / `project/architecture.md`. Prefer `:designsystem` tokens/components when fixing gaps.
 
 ## Design review — steps

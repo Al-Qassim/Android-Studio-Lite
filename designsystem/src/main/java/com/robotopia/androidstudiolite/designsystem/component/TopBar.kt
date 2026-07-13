@@ -29,6 +29,8 @@ fun TopBarTitleAction(
     actionLabel: String,
     onActionClick: () -> Unit = {},
     modifier: Modifier = Modifier,
+    secondaryActionLabel: String? = null,
+    onSecondaryActionClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -46,6 +48,14 @@ fun TopBarTitleAction(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (!secondaryActionLabel.isNullOrBlank()) {
+            BasicText(
+                text = secondaryActionLabel,
+                style = Typography.ButtonCompact.copy(color = Colors.Muted),
+                maxLines = 1,
+                modifier = Modifier.clickable(onClick = onSecondaryActionClick),
+            )
+        }
         BasicText(
             text = actionLabel,
             style = Typography.ButtonCompact.copy(color = Colors.Primary),
