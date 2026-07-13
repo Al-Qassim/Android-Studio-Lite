@@ -59,13 +59,15 @@ flowchart TB
 
 ## When to use
 
-| Use Screen Context | Prefer a simpler screen |
+| Use Screen Context | Prefer thin screen (same shape, no Context class) |
 | --- | --- |
-| Many components (list + menus + dialogs + bars) | One form or a short list |
-| Logic naturally belongs next to each UI piece | A handful of callbacks is still readable |
-| File browser–scale screens | Projects list / create-style screens |
+| Many components (list + menus + dialogs + bars) | One form, Connect flow, Settings hub / section |
+| Logic naturally belongs next to each UI piece | Same split into `ui/` + `logic/`, but top-level functions |
+| File browser–scale screens | Still: ViewModel + Screen + Previews — **not** a mega `*Content` callback table |
 
-Do **not** force Screen Context onto every screen. Thin screens may still use a small Screen (+ optional Content) without a context type.
+Thin screens should still look like Screen Context on disk (`ViewModel`, `Screen`, `ui/`, `logic/`, `Previews`) — omit only the `*ScreenContext` type. See `/structure-feature-code` → *Thin screens*.
+
+Do **not** collapse a thin screen into one `*Content` with every `onClick` in the signature.
 
 ## Anti-patterns
 

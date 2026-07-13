@@ -57,18 +57,30 @@ Summary:
 - Host builds context with **`remember(…keys)`** + ViewModel; screen does not depend on a concrete VM.
 - **Never nest function declarations.**
 
-### Thin screens (optional simpler shape)
+### Thin screens (screen-context shape, no Context class)
 
-Short forms / simple lists may stay smaller without a context type:
+Simple screens still follow the **same layout roles** as Screen Context — just without a `*ScreenContext` type:
 
 ```text
 presentation/<screen>/
-  <Screen>ViewModel
-  <Screen>Screen      # wiring + private helpers
-  <Screen>Content     # optional pure drawing + previews
+  <Name>ViewModel.kt   # state-only + UiState types
+  <Name>Screen.kt      # host wiring + state-driven composition + thin @Preview stub
+  <Name>Previews.kt    # preview cases / provider
+  ui/                  # state-driven bodies (take state + only that piece’s actions)
+  logic/               # top-level functions (service, updateState, exits)
 ```
 
-Do not grow a Content callback list past ~6–8 parameters — switch to Screen Context instead.
+Rules (same as Screen Context, adapted):
+
+1. **ViewModel holds UI state only** — no service calls, validation, or navigation.
+2. **Screen wires resources** (service, exits, clipboard/uri) and calls **`logic/`**; compose **`ui/`** from `state`.
+3. **Do not** use a mega `*Content(state, onA, onB, onC, …)` that funnels every callback through one parameter list.
+4. **`ui/`** pieces take `state` (or the relevant subtype) plus only the actions that piece needs.
+5. **`logic/`** is top-level functions (not nested `fun` inside composables).
+6. Design-system stays parameterized.
+7. Prefer this shape over a single Screen+Content file even when the screen is small (Connect, Settings hub, Build account).
+
+When the screen grows many components (list + menus + dialogs), **add** a `*ScreenContext` and turn `ui/` / `logic/` into context extensions — see `docs/agents/screen-context.md`.
 
 ### ViewModel / state holder
 

@@ -7,7 +7,9 @@ import com.robotopia.androidstudiolite.feature.auth.data.BuildConfig
 import com.robotopia.androidstudiolite.feature.auth.data.DefaultAuthService
 import com.robotopia.androidstudiolite.feature.auth.data.PrefsAuthSessionStore
 import com.robotopia.androidstudiolite.feature.auth.presentation.DefaultAuthScreens
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ConnectAccountViewModel
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val authDiModule = module {
@@ -21,4 +23,5 @@ val authDiModule = module {
     }
     single<AuthSession> { get<AuthService>() }
     single<AuthScreens> { DefaultAuthScreens(authService = get()) }
+    viewModel { ConnectAccountViewModel() }
 }

@@ -1,80 +1,137 @@
 package com.robotopia.androidstudiolite.feature.auth.presentation.connect
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
-import com.robotopia.androidstudiolite.feature.auth.model.ConnectProgress
-import kotlinx.coroutines.flow.catch
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.logic.collectConnectProgress
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.logic.copyUserCode
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.logic.openGitHubDevicePage
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectConnectedBody
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectFailedBody
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectLoadingBody
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectShowCodeBody
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectWaitingBody
+import androidx.compose.runtime.LaunchedEffect
+import org.koin.androidx.compose.koinViewModel
+import java.util.UUID
 
 @Composable
 internal fun ConnectAccountScreen(
     authService: AuthService,
     onFinished: () -> Unit,
     onCancel: () -> Unit,
+    viewModel: ConnectAccountViewModel = koinViewModel(
+        key = rememberSaveable { UUID.randomUUID().toString() },
+    ),
 ) {
-    var attempt by remember { mutableIntStateOf(0) }
-    var state by remember { mutableStateOf<ConnectUiState>(ConnectUiState.Loading) }
-    var lastUserCode by remember { mutableStateOf("") }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val connectAttempt by viewModel.connectAttempt.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
     val clipboard = LocalClipboardManager.current
 
     BackHandler(onBack = onCancel)
 
-    LaunchedEffect(attempt) {
-        state = ConnectUiState.Loading
-        lastUserCode = ""
-        authService.connect()
-            .catch {
-                state = ConnectUiState.Failed(
-                    message = "Couldn't connect. Try again.",
-                )
-            }
-            .collect { progress ->
-                when (progress) {
-                    is ConnectProgress.ShowCode -> {
-                        lastUserCode = progress.userCode
-                        state = ConnectUiState.ShowCode(
-                            userCode = progress.userCode,
-                            verificationUri = progress.verificationUri,
-                        )
-                    }
-                    ConnectProgress.Waiting -> {
-                        state = ConnectUiState.Waiting(userCode = lastUserCode)
-                    }
-                    is ConnectProgress.Connected -> {
-                        state = ConnectUiState.Connected(account = progress.account)
-                    }
-                    is ConnectProgress.Failed -> {
-                        state = ConnectUiState.Failed(message = progress.message)
-                    }
-                }
-            }
+    LaunchedEffect(connectAttempt) {
+        collectConnectProgress(
+            authService = authService,
+            uiState = viewModel.uiState,
+        )
     }
 
-    ConnectAccountContent(
+    ConnectAccountScreen(
         state = state,
         onBackClick = onCancel,
         onOpenGitHub = { uri ->
-            runCatching { uriHandler.openUri(uri) }
-            val current = state
-            if (current is ConnectUiState.ShowCode) {
-                state = ConnectUiState.Waiting(userCode = current.userCode)
-            }
+            openGitHubDevicePage(
+                uri = uri,
+                uiState = viewModel.uiState,
+                openUri = uriHandler::openUri,
+            )
         },
         onCopyCode = { code ->
-            clipboard.setText(AnnotatedString(code))
+            copyUserCode(code) { text ->
+                clipboard.setText(AnnotatedString(text))
+            }
         },
         onCancel = onCancel,
         onContinue = onFinished,
-        onTryAgain = { attempt += 1 },
+        onTryAgain = viewModel::retryConnect,
+    )
+}
+
+@Composable
+internal fun ConnectAccountScreen(
+    state: ConnectUiState,
+    onBackClick: () -> Unit,
+    onOpenGitHub: (uri: String) -> Unit,
+    onCopyCode: (code: String) -> Unit,
+    onCancel: () -> Unit,
+    onContinue: () -> Unit,
+    onTryAgain: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Colors.Bg),
+    ) {
+        TopBarBackTitle(
+            title = "Connect",
+            onBackClick = onBackClick,
+        )
+        when (state) {
+            ConnectUiState.Loading -> ConnectLoadingBody()
+
+            is ConnectUiState.ShowCode -> ConnectShowCodeBody(
+                state = state,
+                onOpenGitHub = onOpenGitHub,
+                onCopyCode = onCopyCode,
+            )
+
+            is ConnectUiState.Waiting -> ConnectWaitingBody(
+                state = state,
+                onCancel = onCancel,
+            )
+
+            is ConnectUiState.Connected -> ConnectConnectedBody(
+                state = state,
+                onContinue = onContinue,
+            )
+
+            is ConnectUiState.Failed -> ConnectFailedBody(
+                state = state,
+                onCancel = onCancel,
+                onTryAgain = onTryAgain,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
+@Composable
+private fun ConnectAccountScreenPreview(
+    @PreviewParameter(ConnectAccountPreviewProvider::class) preview: ConnectAccountPreviewCase,
+) {
+    ConnectAccountScreen(
+        state = preview.state,
+        onBackClick = {},
+        onOpenGitHub = {},
+        onCopyCode = {},
+        onCancel = {},
+        onContinue = {},
+        onTryAgain = {},
     )
 }

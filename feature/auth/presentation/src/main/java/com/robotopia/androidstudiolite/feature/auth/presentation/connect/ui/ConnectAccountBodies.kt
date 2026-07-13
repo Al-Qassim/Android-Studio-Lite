@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.auth.presentation.connect
+package com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
@@ -28,92 +27,27 @@ import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IconButton
 import com.robotopia.androidstudiolite.designsystem.component.IconButtonVariant
-import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.designsystem.icon.IconCopy
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.auth.model.AuthAccount
-
-internal sealed interface ConnectUiState {
-    data class ShowCode(
-        val userCode: String,
-        val verificationUri: String,
-    ) : ConnectUiState
-
-    data class Waiting(
-        val userCode: String,
-    ) : ConnectUiState
-
-    data class Connected(
-        val account: AuthAccount,
-    ) : ConnectUiState
-
-    data class Failed(
-        val message: String,
-    ) : ConnectUiState
-
-    data object Loading : ConnectUiState
-}
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ConnectUiState
 
 @Composable
-internal fun ConnectAccountContent(
-    state: ConnectUiState,
-    onBackClick: () -> Unit,
-    onOpenGitHub: (uri: String) -> Unit,
-    onCopyCode: (code: String) -> Unit,
-    onCancel: () -> Unit,
-    onContinue: () -> Unit,
-    onTryAgain: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.Bg),
+internal fun ConnectLoadingBody() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
     ) {
-        TopBarBackTitle(
-            title = "Connect",
-            onBackClick = onBackClick,
+        BasicText(
+            text = "Preparing…",
+            style = Typography.Body.copy(color = Colors.Muted),
         )
-        when (state) {
-            ConnectUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    BasicText(
-                        text = "Preparing…",
-                        style = Typography.Body.copy(color = Colors.Muted),
-                    )
-                }
-            }
-
-            is ConnectUiState.ShowCode -> ShowCodeBody(
-                state = state,
-                onOpenGitHub = onOpenGitHub,
-                onCopyCode = onCopyCode,
-            )
-
-            is ConnectUiState.Waiting -> WaitingBody(
-                state = state,
-                onCancel = onCancel,
-            )
-
-            is ConnectUiState.Connected -> ConnectedBody(
-                state = state,
-                onContinue = onContinue,
-            )
-
-            is ConnectUiState.Failed -> FailedBody(
-                state = state,
-                onCancel = onCancel,
-                onTryAgain = onTryAgain,
-            )
-        }
     }
 }
 
 @Composable
-private fun ShowCodeBody(
+internal fun ConnectShowCodeBody(
     state: ConnectUiState.ShowCode,
     onOpenGitHub: (uri: String) -> Unit,
     onCopyCode: (code: String) -> Unit,
@@ -153,7 +87,7 @@ private fun ShowCodeBody(
 }
 
 @Composable
-private fun WaitingBody(
+internal fun ConnectWaitingBody(
     state: ConnectUiState.Waiting,
     onCancel: () -> Unit,
 ) {
@@ -172,7 +106,7 @@ private fun WaitingBody(
                 style = Typography.Headline.copy(color = Colors.Text),
             )
             UserCodeCard(userCode = state.userCode)
-            WaitingDotsRow(label = null)
+            WaitingDotsRow()
             Button(
                 label = "Cancel",
                 onClick = onCancel,
@@ -184,7 +118,7 @@ private fun WaitingBody(
 }
 
 @Composable
-private fun ConnectedBody(
+internal fun ConnectConnectedBody(
     state: ConnectUiState.Connected,
     onContinue: () -> Unit,
 ) {
@@ -221,7 +155,7 @@ private fun ConnectedBody(
 }
 
 @Composable
-private fun FailedBody(
+internal fun ConnectFailedBody(
     state: ConnectUiState.Failed,
     onCancel: () -> Unit,
     onTryAgain: () -> Unit,
@@ -345,91 +279,18 @@ private fun AccountCard(account: AuthAccount) {
 }
 
 @Composable
-private fun WaitingDotsRow(label: String?) {
+private fun WaitingDotsRow() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            repeat(3) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Colors.Primary),
-                )
-            }
-        }
-        if (!label.isNullOrBlank()) {
-            BasicText(
-                text = label,
-                style = Typography.Body.copy(color = Colors.Muted),
+        repeat(3) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Colors.Primary),
             )
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
-@Composable
-private fun ConnectShowCodePreview() {
-    ConnectAccountContent(
-        state = ConnectUiState.ShowCode(
-            userCode = "WDJB-MJHT",
-            verificationUri = "https://github.com/login/device",
-        ),
-        onBackClick = {},
-        onOpenGitHub = {},
-        onCopyCode = {},
-        onCancel = {},
-        onContinue = {},
-        onTryAgain = {},
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
-@Composable
-private fun ConnectWaitingPreview() {
-    ConnectAccountContent(
-        state = ConnectUiState.Waiting(
-            userCode = "WDJB-MJHT",
-        ),
-        onBackClick = {},
-        onOpenGitHub = {},
-        onCopyCode = {},
-        onCancel = {},
-        onContinue = {},
-        onTryAgain = {},
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
-@Composable
-private fun ConnectConnectedPreview() {
-    ConnectAccountContent(
-        state = ConnectUiState.Connected(
-            account = AuthAccount(providerName = "GitHub", identity = "@alex-dev"),
-        ),
-        onBackClick = {},
-        onOpenGitHub = {},
-        onCopyCode = {},
-        onCancel = {},
-        onContinue = {},
-        onTryAgain = {},
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
-@Composable
-private fun ConnectFailedPreview() {
-    ConnectAccountContent(
-        state = ConnectUiState.Failed(
-            message = "Expired or denied. Try again.",
-        ),
-        onBackClick = {},
-        onOpenGitHub = {},
-        onCopyCode = {},
-        onCancel = {},
-        onContinue = {},
-        onTryAgain = {},
-    )
 }
