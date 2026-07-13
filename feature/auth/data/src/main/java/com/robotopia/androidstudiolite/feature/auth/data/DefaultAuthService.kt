@@ -14,7 +14,7 @@ import kotlinx.coroutines.isActive
 class DefaultAuthService(
     private val store: PrefsAuthSessionStore,
     private val gitHubClient: GitHubClient,
-    private val clientId: String = PLACEHOLDER_CLIENT_ID,
+    private val clientId: String,
 ) : AuthService {
 
     override fun observeAccount(): Flow<AuthAccount?> = store.account
@@ -89,8 +89,6 @@ class DefaultAuthService(
     }
 
     private companion object {
-        /** Public OAuth App client id placeholder — not a secret. Real id lands with #25. */
-        const val PLACEHOLDER_CLIENT_ID = "asl-github-oauth-stub"
         const val PROVIDER_NAME = "GitHub"
     }
 }

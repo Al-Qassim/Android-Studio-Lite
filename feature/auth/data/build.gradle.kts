@@ -11,11 +11,27 @@ android {
     defaultConfig {
         minSdk = 34
         consumerProguardFiles("consumer-rules.pro")
+
+        val localProperties = java.util.Properties().apply {
+            val file = rootProject.file("local.properties")
+            if (file.exists()) {
+                file.inputStream().use { load(it) }
+            }
+        }
+        val githubOAuthClientId = localProperties.getProperty("github.oauth.clientId").orEmpty()
+        buildConfigField(
+            "String",
+            "GITHUB_OAUTH_CLIENT_ID",
+            "\"${githubOAuthClientId.replace("\\", "\\\\").replace("\"", "\\\"")}\"",
+        )
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 

@@ -3,6 +3,7 @@ package com.robotopia.androidstudiolite.feature.auth.di
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
 import com.robotopia.androidstudiolite.feature.auth.api.AuthSession
+import com.robotopia.androidstudiolite.feature.auth.data.BuildConfig
 import com.robotopia.androidstudiolite.feature.auth.data.DefaultAuthService
 import com.robotopia.androidstudiolite.feature.auth.data.PrefsAuthSessionStore
 import com.robotopia.androidstudiolite.feature.auth.presentation.DefaultAuthScreens
@@ -15,6 +16,7 @@ val authDiModule = module {
         DefaultAuthService(
             store = get(),
             gitHubClient = get(),
+            clientId = BuildConfig.GITHUB_OAUTH_CLIENT_ID,
         )
     }
     single<AuthSession> { get<AuthService>() }

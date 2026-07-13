@@ -161,6 +161,7 @@ Build ──► ApkInstaller (system UI) ; dismiss ──► returnTo
 | Editor buffer | Memory in `:feature:editor:data`; disk via files API |
 | Build artifacts | Local cache + demo asset in `:feature:buildapk:data` |
 | Auth session | SharedPreferences in `:feature:auth:data` (stub device flow) |
+| GitHub OAuth client id | `github.oauth.clientId` in gitignored `local.properties` → `auth:data` `BuildConfig.GITHUB_OAUTH_CLIENT_ID` (see `local.properties.example`) |
 | Remote CI | **None yet** (real GHA = `#25`) |
 
 ---
