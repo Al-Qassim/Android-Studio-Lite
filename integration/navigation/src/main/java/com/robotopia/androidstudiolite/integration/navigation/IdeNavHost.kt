@@ -81,7 +81,7 @@ fun IdeNavHost() {
         }
 
         IdeRoute.Settings -> {
-            settingsScreens.BuildAccount(
+            settingsScreens.Settings(
                 onDismiss = { route = IdeRoute.Projects },
             )
         }

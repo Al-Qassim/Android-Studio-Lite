@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
 import com.robotopia.androidstudiolite.feature.settings.api.SettingsScreens
-import com.robotopia.androidstudiolite.feature.settings.presentation.account.BuildAccountScreen
 
 class DefaultSettingsScreens(
     private val authService: AuthService,
@@ -12,10 +11,10 @@ class DefaultSettingsScreens(
 ) : SettingsScreens {
 
     @Composable
-    override fun BuildAccount(
+    override fun Settings(
         onDismiss: () -> Unit,
     ) {
-        BuildAccountScreen(
+        SettingsScreen(
             authService = authService,
             authScreens = authScreens,
             onDismiss = onDismiss,

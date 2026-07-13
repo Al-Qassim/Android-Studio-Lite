@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.library)
 }
 
+import java.util.Properties
+
 android {
     namespace = "com.robotopia.androidstudiolite.feature.auth.data"
     compileSdk {
@@ -12,7 +14,7 @@ android {
         minSdk = 34
         consumerProguardFiles("consumer-rules.pro")
 
-        val localProperties = java.util.Properties().apply {
+        val localProperties = Properties().apply {
             val file = rootProject.file("local.properties")
             if (file.exists()) {
                 file.inputStream().use { load(it) }

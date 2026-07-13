@@ -35,7 +35,7 @@ internal fun BuildAccountContent(
             .background(Colors.Bg),
     ) {
         TopBarBackTitle(
-            title = "Settings",
+            title = "Build account",
             onBackClick = onBackClick,
         )
         Column(

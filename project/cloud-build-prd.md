@@ -63,7 +63,7 @@ Ship real cloud APK builds on the user’s GitHub account:
 ### Architecture / modules
 
 - **`auth:api` + presentation** — Connect (login) + session observe/clear; used by build gate and Settings.
-- **`settings:api` + presentation** — Settings · Build account (connect / log out chrome); navigates into auth Connect.
+- **`settings:api` + presentation** — Settings hub with sections; Build account (connect / log out) is a sub-screen that navigates into auth Connect.
 - **`auth:data`** — owns token/session storage (provider-agnostic ownership of secrets).
 - **`:feature:github`** — stateless GitHub library (device flow + REST helpers); caller passes token.
 - **`buildapk:data`** — `GitHubActionsBuildService` uses auth credentials + github APIs; Koin replaces `FakeBuildService` on the product path when real ships.
