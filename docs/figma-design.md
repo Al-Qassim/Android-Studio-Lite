@@ -161,7 +161,8 @@ When an agent edits Figma:
 - [ ] Run (and other icons) use **Icon / …** from Design System, correct tint  
 - [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
 - [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions) — same cut on Waiting / Connected / Failed / Settings / gate / onboarding  
-- [ ] Obvious actions (copy / more / back / run) are **icon-only** — no redundant text label on the control  
+- [ ] Obvious actions (copy / more / back / run / settings) are **icon-only** — no redundant text label on the control  
+- [ ] Settings is a permanent Projects top-bar control (gear), not a transient text link  
 - [ ] Text inside cards/boxes does not overflow the card bounds  
 - [ ] In-progress = dots; complete = check; failed step = ✕ + error copy  
 - [ ] No nested frame title clutter; phone frame name blank if labeled in text  

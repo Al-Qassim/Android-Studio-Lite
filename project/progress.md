@@ -16,7 +16,7 @@ On-device Compose IDE: manage projects → browse/edit files → Run → build �
 | IDE nav wiring | Done | `#11` · `:integration:navigation` `IdeNavHost` |
 | Parent plan | Done | `#5` · `project/architecture.md` · `project/v0.1-implementation-plan.md` |
 | Cloud-build PRD + design | Done | `#19`–`#21` · `project/cloud-build-prd.md` · Figma Connect / Settings / Onboarding / Run & build |
-| Connect + build UI | **In review** | `#22` + `#24` (+ Settings GitHub from `#23`) · Projects **GitHub** → Connect / Log out; build gate; Preparing / via GitHub / View build log |
+| Connect + build UI | **In review** | `#22` + `#24` (+ Settings from `#23`) · Projects **⚙ Settings** → GitHub Connect / Log out; build gate; Preparing / via GitHub / View build log |
 
 ## Product path (shipped)
 

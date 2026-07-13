@@ -115,6 +115,13 @@ fun IconCopy(
 ) = VectorIcon(R.drawable.ic_copy, modifier, tint, size)
 
 @Composable
+fun IconSettings(
+    modifier: Modifier = Modifier,
+    tint: Color = Colors.Text,
+    size: Dp = 24.dp,
+) = VectorIcon(R.drawable.ic_settings, modifier, tint, size)
+
+@Composable
 fun IconApk(
     modifier: Modifier = Modifier,
     tint: Color = Colors.Text,

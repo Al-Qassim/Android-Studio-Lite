@@ -74,7 +74,7 @@ fun IdeNavHost() {
                         )
                     }
                 },
-                onOpenBuildAccount = {
+                onOpenSettings = {
                     route = IdeRoute.BuildAccount
                 },
             )

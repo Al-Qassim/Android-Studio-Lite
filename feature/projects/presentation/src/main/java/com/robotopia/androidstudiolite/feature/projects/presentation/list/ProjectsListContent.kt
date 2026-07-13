@@ -34,7 +34,7 @@ import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 internal fun ProjectsListContent(
     state: ProjectsListUiState,
     onCreateProject: () -> Unit,
-    onOpenBuildAccount: () -> Unit,
+    onOpenSettings: () -> Unit,
     onOpenClick: (Project) -> Unit,
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
@@ -53,8 +53,7 @@ internal fun ProjectsListContent(
             title = "Projects",
             actionLabel = "+ New",
             onActionClick = onCreateProject,
-            secondaryActionLabel = "GitHub",
-            onSecondaryActionClick = onOpenBuildAccount,
+            onSettingsClick = onOpenSettings,
         )
         ProjectsListBody(
             state = state,
@@ -295,7 +294,7 @@ private fun ProjectsListEmptyPreview() {
     ProjectsListContent(
         state = ProjectsListUiState(),
         onCreateProject = {},
-        onOpenBuildAccount = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -319,7 +318,7 @@ private fun ProjectsListFilledPreview() {
     ProjectsListContent(
         state = ProjectsListUiState(projects = previewProjects),
         onCreateProject = {},
-        onOpenBuildAccount = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -346,7 +345,7 @@ private fun ProjectsListMenuPreview() {
             menuProject = previewProjects.first(),
         ),
         onCreateProject = {},
-        onOpenBuildAccount = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -373,7 +372,7 @@ private fun ProjectsListDeleteConfirmPreview() {
             pendingDelete = previewProjects.first(),
         ),
         onCreateProject = {},
-        onOpenBuildAccount = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -400,7 +399,7 @@ private fun ProjectsListActionErrorPreview() {
             actionError = "Project not found",
         ),
         onCreateProject = {},
-        onOpenBuildAccount = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},

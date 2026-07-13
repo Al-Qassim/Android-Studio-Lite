@@ -19,13 +19,13 @@ class DefaultProjectsScreens(
     override fun NavHost(
         onOpenProject: (projectId: ProjectId) -> Unit,
         onRunProject: (projectId: ProjectId) -> Unit,
-        onOpenBuildAccount: () -> Unit,
+        onOpenSettings: () -> Unit,
     ) {
         ProjectsNavHost(
             projectService = projectService,
             onOpenProject = onOpenProject,
             onRunProject = onRunProject,
-            onOpenBuildAccount = onOpenBuildAccount,
+            onOpenSettings = onOpenSettings,
         )
     }
 
@@ -34,14 +34,14 @@ class DefaultProjectsScreens(
         onOpenProject: (projectId: ProjectId) -> Unit,
         onRunProject: (projectId: ProjectId) -> Unit,
         onCreateProject: () -> Unit,
-        onOpenBuildAccount: () -> Unit,
+        onOpenSettings: () -> Unit,
     ) {
         ProjectsListScreen(
             projectService = projectService,
             onOpenProject = onOpenProject,
             onRunProject = onRunProject,
             onCreateProject = onCreateProject,
-            onOpenBuildAccount = onOpenBuildAccount,
+            onOpenSettings = onOpenSettings,
         )
     }
 
@@ -65,14 +65,14 @@ private sealed interface ProjectsRoute {
 
 /**
  * Projects-owned sub-navigation: list ↔ create.
- * Cross-feature exits: [onOpenProject], [onRunProject], [onOpenBuildAccount].
+ * Cross-feature exits: [onOpenProject], [onRunProject], [onOpenSettings].
  */
 @Composable
 private fun ProjectsNavHost(
     projectService: ProjectService,
     onOpenProject: (projectId: ProjectId) -> Unit,
     onRunProject: (projectId: ProjectId) -> Unit,
-    onOpenBuildAccount: () -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     var route by remember { mutableStateOf<ProjectsRoute>(ProjectsRoute.List) }
 
@@ -83,7 +83,7 @@ private fun ProjectsNavHost(
                 onOpenProject = onOpenProject,
                 onRunProject = onRunProject,
                 onCreateProject = { route = ProjectsRoute.Create },
-                onOpenBuildAccount = onOpenBuildAccount,
+                onOpenSettings = onOpenSettings,
             )
         }
 
