@@ -6,7 +6,14 @@ The main checkout (`AndroidStudioLite/`) is reserved for the human. Agents must 
 
 ## Commit local edits
 
-Do not leave repo file changes uncommitted at the end of a turn. After creating or editing files, stage and commit them (see also `AGENTS.md` → *Commit after changes*). Skip only when the user said not to commit, or when leftovers are secrets / junk that must not be committed. Push only when the workflow or user asks for a push/PR.
+Do not leave repo file changes uncommitted at the end of a turn. After creating or editing files, **commit then push** in the same turn (see also `AGENTS.md` → *Commit after changes*).
+
+**Local and remote stay in sync**
+
+- Every local commit on a tracking branch must be followed by a **push** to `origin` (same branch). Do not end a turn with commits that exist only locally.
+- After push, local `HEAD` and `origin/<branch>` should match for that branch (aside from intentional fetch-only updates).
+- Skip commit/push only when the user said not to, or leftovers are secrets / junk that must not be committed.
+- Do not push to `main` unless the user explicitly asked to land work on `main`.
 
 ## Shared-branch vs worktree
 
