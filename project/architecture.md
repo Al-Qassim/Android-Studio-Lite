@@ -16,7 +16,7 @@ On-device Kotlin / Jetpack Compose IDE:
 | Run → build progress → install APK | Yes (**fake** local build + bundled demo APK today) |
 | Edit → rebuild → reinstall loop | Yes (same fake path) |
 
-**Not in v0.1:** real cloud/GHA Gradle, Git, AI assistant, syntax highlighting.
+**Not in v0.1:** real cloud/GHA Gradle (tracked in [`cloud-build-prd.md`](cloud-build-prd.md) / issues #19–#25), Git, AI assistant, syntax highlighting.
 
 Foundation: `:designsystem`, `:core:error` (`AppException`).
 

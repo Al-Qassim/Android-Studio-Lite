@@ -22,7 +22,7 @@ On-device Compose IDE: manage projects → browse/edit files → Run → fake re
 
 ## Not in v0.1 (by design)
 
-- Real cloud / GitHub Actions Gradle (same `BuildService` API later)
+- Real cloud / GitHub Actions Gradle — PRD + design done (`project/cloud-build-prd.md`, #19–#21 closed); impl frontier **#22** (then #23/#24 → #25)
 - Git, AI, syntax highlighting
 - User Documents storage; Gradle wrapper jars in generated projects
 
@@ -31,3 +31,4 @@ On-device Compose IDE: manage projects → browse/edit files → Run → fake re
 - Figma: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)
 - Design how-to: `docs/figma-design.md`
 - Architecture: `project/architecture.md`
+- Cloud build PRD: `project/cloud-build-prd.md`
