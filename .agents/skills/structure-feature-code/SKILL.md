@@ -80,7 +80,11 @@ Rules (same as Screen Context, adapted):
 6. Design-system stays parameterized.
 7. Prefer this shape over a single Screen+Content file even when the screen is small (Connect, Settings hub, Build account).
 
-### Provider-agnostic presentation
+### Kotlin control-flow traps
+
+In `repeat` / `forEach` / similar inline loops, `return@label` exits **only that iteration** (like `continue`), not the whole loop. To stop after success, use `for` + `break`, or `return@outer` from a wrapping `run { … }`. Mistaking this for `break` can fire side effects (e.g. `workflow_dispatch`) once per attempt.
+
+When the screen grows many components (list + menus + dialogs), **add** a `*ScreenContext` and turn `ui/` / `logic/` into context extensions — see `docs/agents/screen-context.md`.
 
 When a feature can swap backends (auth, cloud build):
 

@@ -145,11 +145,11 @@ class GitHubActionsBuildService(
             val dispatchAt = System.currentTimeMillis()
             var lastError: Exception? = null
             var dispatched = false
-            repeat(8) { attempt ->
+            for (attempt in 0 until 8) {
                 try {
                     gitHubClient.dispatchWorkflow(token, buildRepo, tag)
                     dispatched = true
-                    return@repeat
+                    break
                 } catch (e: Exception) {
                     lastError = e
                     delay(3_000L * (attempt + 1))
@@ -160,9 +160,9 @@ class GitHubActionsBuildService(
             }
 
             var run = gitHubClient.findLatestWorkflowRun(token, buildRepo, dispatchAt)
-            repeat(30) {
+            for (attempt in 0 until 30) {
                 if (!coroutineContext.isActive) return
-                if (run != null) return@repeat
+                if (run != null) break
                 delay(2_000)
                 run = gitHubClient.findLatestWorkflowRun(token, buildRepo, dispatchAt)
             }
