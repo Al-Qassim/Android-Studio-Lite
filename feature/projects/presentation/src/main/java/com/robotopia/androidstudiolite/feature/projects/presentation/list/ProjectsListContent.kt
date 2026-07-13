@@ -34,6 +34,7 @@ import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 internal fun ProjectsListContent(
     state: ProjectsListUiState,
     onCreateProject: () -> Unit,
+    onOpenSettings: () -> Unit,
     onOpenClick: (Project) -> Unit,
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
@@ -50,8 +51,8 @@ internal fun ProjectsListContent(
     ) {
         TopBarTitleAction(
             title = "Projects",
-            actionLabel = "+ New",
             onActionClick = onCreateProject,
+            onSettingsClick = onOpenSettings,
         )
         ProjectsListBody(
             state = state,
@@ -111,7 +112,7 @@ private fun ProjectsListEmpty() {
     ) {
         EmptyState(
             title = "No projects yet",
-            hint = "Tap + New to create your first project.",
+            hint = "Tap + to create your first project.",
         )
     }
 }
@@ -213,7 +214,7 @@ private fun ProjectsListFooterHint() {
             ),
         )
         BasicText(
-            text = "or + New to create one",
+            text = "or + to create one",
             style = Typography.Caption.copy(
                 color = Colors.Muted2,
                 textAlign = TextAlign.Center,
@@ -292,6 +293,7 @@ private fun ProjectsListEmptyPreview() {
     ProjectsListContent(
         state = ProjectsListUiState(),
         onCreateProject = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -315,6 +317,7 @@ private fun ProjectsListFilledPreview() {
     ProjectsListContent(
         state = ProjectsListUiState(projects = previewProjects),
         onCreateProject = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -341,6 +344,7 @@ private fun ProjectsListMenuPreview() {
             menuProject = previewProjects.first(),
         ),
         onCreateProject = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -367,6 +371,7 @@ private fun ProjectsListDeleteConfirmPreview() {
             pendingDelete = previewProjects.first(),
         ),
         onCreateProject = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
@@ -393,6 +398,7 @@ private fun ProjectsListActionErrorPreview() {
             actionError = "Project not found",
         ),
         onCreateProject = {},
+        onOpenSettings = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},

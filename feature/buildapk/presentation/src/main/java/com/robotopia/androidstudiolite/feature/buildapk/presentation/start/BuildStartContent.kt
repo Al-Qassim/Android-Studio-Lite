@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -25,8 +26,11 @@ internal fun BuildStartContent(
     projectName: String,
     packageName: String,
     starting: Boolean,
+    signedIn: Boolean,
+    providerDisplayName: String,
     onBackClick: () -> Unit,
     onStartBuildClick: () -> Unit,
+    onConnectAccountClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -47,13 +51,30 @@ internal fun BuildStartContent(
                 packageName = packageName,
             )
             Spacer(modifier = Modifier.weight(1f))
-            Button(
-                label = if (starting) "Starting…" else "Start build",
-                onClick = onStartBuildClick,
-                modifier = Modifier.fillMaxWidth(),
-                variant = ButtonVariant.Primary,
-                enabled = !starting,
-            )
+            if (signedIn) {
+                Button(
+                    label = if (starting) "Starting…" else "Start build",
+                    onClick = onStartBuildClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    variant = ButtonVariant.Primary,
+                    enabled = !starting,
+                )
+            } else {
+                Button(
+                    label = "Start build",
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth(),
+                    variant = ButtonVariant.Disabled,
+                    enabled = false,
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(
+                    label = "Connect $providerDisplayName",
+                    onClick = onConnectAccountClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    variant = ButtonVariant.Primary,
+                )
+            }
         }
     }
 }
@@ -84,12 +105,30 @@ private fun ProjectSummaryCard(
 
 @Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
 @Composable
-private fun BuildStartContentPreview() {
+private fun BuildStartContentSignedInPreview() {
     BuildStartContent(
         projectName = "HelloCompose",
         packageName = "com.example.hellocompose",
         starting = false,
+        signedIn = true,
+        providerDisplayName = "GitHub",
         onBackClick = {},
         onStartBuildClick = {},
+        onConnectAccountClick = {},
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
+@Composable
+private fun BuildStartContentGatePreview() {
+    BuildStartContent(
+        projectName = "HelloCompose",
+        packageName = "com.example.hellocompose",
+        starting = false,
+        signedIn = false,
+        providerDisplayName = "GitHub",
+        onBackClick = {},
+        onStartBuildClick = {},
+        onConnectAccountClick = {},
     )
 }

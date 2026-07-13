@@ -12,8 +12,11 @@ import kotlinx.coroutines.launch
 internal fun BuildStartScreen(
     projectName: String,
     packageName: String,
+    signedIn: Boolean,
+    providerDisplayName: String,
     onBackClick: () -> Unit,
     onStartBuild: suspend () -> Unit,
+    onConnectAccountClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var starting by remember { mutableStateOf(false) }
@@ -22,6 +25,8 @@ internal fun BuildStartScreen(
         projectName = projectName,
         packageName = packageName,
         starting = starting,
+        signedIn = signedIn,
+        providerDisplayName = providerDisplayName,
         onBackClick = onBackClick,
         onStartBuildClick = {
             if (starting) return@BuildStartContent
@@ -34,5 +39,6 @@ internal fun BuildStartScreen(
                 }
             }
         },
+        onConnectAccountClick = onConnectAccountClick,
     )
 }

@@ -1,10 +1,10 @@
 # Android Studio Lite — Progress (brief)
 
-**As of:** 2026-07-11 · **Track:** v0.1
+**As of:** 2026-07-13 · **Track:** cloud build (post-v0.1)
 
-On-device Compose IDE: manage projects → browse/edit files → Run → fake remote build → install a demo APK.
+On-device Compose IDE: manage projects → browse/edit files → Run → build → install APK.
 
-## Status: v0.1 loop works end-to-end
+## Status: v0.1 loop works; cloud-build UI in review
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -13,16 +13,19 @@ On-device Compose IDE: manage projects → browse/edit files → Run → fake re
 | Files | Done | `#8` · sandbox browser · create / rename / move / delete |
 | Editor | Done | `#9` · save · dirty leave · auto-save preference |
 | Fake build → install | Done | `#10` / [PR #16](https://github.com/Al-Qassim/Android-Studio-Lite/pull/16) · Build start → phases → Install app |
-| IDE nav wiring | Done | `#11` · `:integration:navigation` `IdeNavHost` · Projects → Files → Editor → Build → install |
+| IDE nav wiring | Done | `#11` · `:integration:navigation` `IdeNavHost` |
 | Parent plan | Done | `#5` · `project/architecture.md` · `project/v0.1-implementation-plan.md` |
+| Cloud-build PRD + design | Done | `#19`–`#21` · `project/cloud-build-prd.md` · Figma Connect / Settings / Onboarding / Run & build |
+| Connect + build UI | **In review** | `#22` + `#24` (+ Settings from `#23`) · Projects **⚙ Settings** → GitHub Connect / Log out; build gate; Preparing / via GitHub / View build log |
 
 ## Product path (shipped)
 
-**Projects** → **Files** → **Editor** → **Run** (also from project menu / files top bar) → **Build start** → **Start build** → progress → **Install app** → system installer (bundled demo APK, not from project sources).
+**Projects** → **Files** → **Editor** → **Run** → **Build** (logged-out: Connect GitHub gate → Connect account) → progress (Preparing…) → **Install app** (still fake APK until `#25`).
 
 ## Not in v0.1 (by design)
 
-- Real cloud / GitHub Actions Gradle — PRD + design done (`project/cloud-build-prd.md`, #19–#21 closed); impl frontier **#22** (then #23/#24 → #25)
+- Real GitHub Actions Gradle — `#25` (after Connect surfaces `#23`)
+- Settings / Onboarding Connect surfaces — `#23`
 - Git, AI, syntax highlighting
 - User Documents storage; Gradle wrapper jars in generated projects
 

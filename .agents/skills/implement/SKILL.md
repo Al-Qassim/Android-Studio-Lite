@@ -8,6 +8,10 @@ Implement the work described by the user in the spec or tickets.
 
 Before coding UI/navigation work, read the ticket’s acceptance criteria against `docs/agents/writing-acceptance-criteria.md`. If the ticket is thin (e.g. missing system Back or designed primary affordances), **add those criteria to the issue** (comment or edit) before treating them as optional — do not silently ship toolbar-only behaviour.
 
+**Keep app UI and Figma in sync.** When you add, change, or remove on-screen UI (controls, copy, screens, states), update the matching frames in the [ASL Figma file](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) in the same change set (follow `docs/figma-design.md` / `/figma-design`). Do not leave Compose ahead of Figma or Figma ahead of Compose unless an ADR explicitly says one leads.
+
+**Verify before done.** After edits, run the checks that would catch the change class (Gradle sync/compile for build or Kotlin edits; install + walk the flow for UI; screenshot pass for Figma; tests for logic). If verification fails and you fix it, harden docs per `AGENTS.md` → *User correction = system error* (generalize the process — don’t only ban the one API that broke).
+
 Use /tdd where possible, at pre-agreed seams.
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.

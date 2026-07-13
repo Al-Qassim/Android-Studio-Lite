@@ -44,6 +44,9 @@ feature/
   files/      model · api · data · presentation · di
   editor/     model · api · data · presentation · di
   buildapk/   model · api · data · presentation · di
+  auth/       model · api · data · presentation · di   # session + Connect (login) only
+  settings/   api · presentation · di                  # Settings hub + Build account (uses auth)
+  github/     api · data · di                          # stateless GitHub helpers
 integration/
   database                  # Room assembly (feature entities/DAOs)
   di                        # aggregates feature + database Koin modules
@@ -54,11 +57,13 @@ Full include list: `settings.gradle.kts`.
 
 | Slice | Owns |
 | --- | --- |
-| `:model` | Immutable types / IDs |
+| `:model` | Immutable domain types / IDs — facts for callers, not UI layout bags |
 | `:api` | Service + `*Screens` interfaces |
 | `:data` | Persistence / FS / service impl |
-| `:presentation` | Compose UI (+ Screen Context for busy screens) |
+| `:presentation` | Compose UI (+ Screen Context for busy screens); may retain prior domain facts for display |
 | `:di` | Feature Koin bindings |
+
+**Provider-shaped UI:** presentation (and feature `:api` / `:model` names) stay **provider-agnostic**. Vendor strings (e.g. “GitHub”) and vendor URIs come from **data** / `:feature:github` via API fields (`providerName`, `providerDisplayName`, `verificationUri`). Do not hardcode a vendor in Compose identifiers (`openGitHubDevicePage`, `onConnectGitHubClick`) or chrome templates — render `"Open $providerName"`, `"Connect $providerDisplayName"`, host from `verificationUri`. Previews and Figma may still show the concrete current provider as fixture copy.
 
 ---
 
@@ -157,7 +162,13 @@ Build ──► ApkInstaller (system UI) ; dismiss ──► returnTo
 | Project files | App-private FS; CRUD via `:feature:files:data` |
 | Editor buffer | Memory in `:feature:editor:data`; disk via files API |
 | Build artifacts | Local cache + demo asset in `:feature:buildapk:data` |
-| Remote CI | **None yet** |
+| Auth session | SharedPreferences in `:feature:auth:data` (stub device flow) |
+| GitHub OAuth client id | `github.oauth.clientId` in gitignored `local.properties` → `auth:data` `BuildConfig.GITHUB_OAUTH_CLIENT_ID` (see `local.properties.example`) |
+| Remote CI | **None yet** (real GHA = `#25`) |
+
+### `local.properties` → `BuildConfig`
+
+`:feature:auth:data/build.gradle.kts` reads `github.oauth.clientId` from the root `local.properties` into `BuildConfig.GITHUB_OAUTH_CLIENT_ID`. After changing that script (or any Gradle/app code), **compile/sync the affected modules** before finishing — see `AGENTS.md` (*User correction = system error*: verify generally, don’t rely on one-off bans).
 
 ---
 
@@ -177,5 +188,7 @@ Locked product decisions: `project/v0.1-implementation-plan.md` (and grilling no
 | Files | `:feature:files:api` | Sandboxed FS |
 | Editor | `:feature:editor:api` | Session + files API |
 | Build | `:feature:buildapk:api` | Fake service + demo APK |
+| Auth | `:feature:auth:api` | Session + Connect (login) only |
+| Settings | `:feature:settings:api` | Settings hub; Build account section (uses auth) |
 | Nav / DI / DB | `:integration:*` | Wire only |
 | UI kit / errors | `:designsystem`, `:core:error` | Shared |

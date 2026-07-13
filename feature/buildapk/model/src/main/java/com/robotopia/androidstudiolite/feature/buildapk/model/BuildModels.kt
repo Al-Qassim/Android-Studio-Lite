@@ -11,8 +11,9 @@ data class BuildRequest(
 )
 
 enum class BuildPhase {
-    Queued,
+    Preparing,
     Uploading,
+    Queued,
     Building,
     Downloading,
     ReadyToInstall,
@@ -26,4 +27,8 @@ data class BuildProgress(
     val message: String? = null,
     val apkLocalPath: String? = null,
     val error: String? = null,
+    /** Display name from the build provider (e.g. "GitHub"). */
+    val providerName: String? = null,
+    /** Optional URL to open provider build logs when present. */
+    val logUrl: String? = null,
 )

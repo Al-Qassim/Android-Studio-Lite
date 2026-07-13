@@ -29,8 +29,9 @@ import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
 
 private val progressPhases = listOf(
-    BuildPhase.Queued,
+    BuildPhase.Preparing,
     BuildPhase.Uploading,
+    BuildPhase.Queued,
     BuildPhase.Building,
     BuildPhase.Downloading,
     BuildPhase.ReadyToInstall,
@@ -43,6 +44,7 @@ internal fun BuildProgressContent(
     onCancel: () -> Unit,
     onInstall: (apkLocalPath: String) -> Unit,
     onRetry: (() -> Unit)?,
+    onViewLog: ((logUrl: String) -> Unit)? = null,
 ) {
     Column(
         modifier = Modifier
@@ -59,6 +61,7 @@ internal fun BuildProgressContent(
             onCancel = onCancel,
             onInstall = onInstall,
             onRetry = onRetry,
+            onViewLog = onViewLog,
         )
     }
 }
@@ -70,6 +73,7 @@ private fun BuildProgressBody(
     onCancel: () -> Unit,
     onInstall: (apkLocalPath: String) -> Unit,
     onRetry: (() -> Unit)?,
+    onViewLog: ((logUrl: String) -> Unit)?,
 ) {
     Column(
         modifier = Modifier
@@ -81,6 +85,7 @@ private fun BuildProgressBody(
                 state = state,
                 onRetry = onRetry,
                 onDismiss = onDismiss,
+                onViewLog = onViewLog,
             )
             state.phase == BuildPhase.Cancelled -> BuildCancelledState(
                 message = state.message,
@@ -106,6 +111,7 @@ private fun BuildActiveState(
                 title = phaseLabel(state.phase),
                 titleColor = Colors.Text,
                 message = state.message,
+                providerName = state.providerName,
             )
             BuildProgressBar(fraction = state.progressFraction)
             BuildPhaseList(
@@ -143,13 +149,17 @@ private fun BuildFailedState(
     state: BuildProgressUiState,
     onRetry: (() -> Unit)?,
     onDismiss: () -> Unit,
+    onViewLog: ((logUrl: String) -> Unit)?,
 ) {
+    val logUrl = state.logUrl
     Column(modifier = Modifier.fillMaxSize()) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             BuildProgressHeader(
                 title = "Build failed",
                 titleColor = Colors.Danger,
-                message = state.error ?: state.message,
+                message = state.error ?: state.message
+                    ?: "Build failed. Open the build log.",
+                providerName = state.providerName,
             )
             BuildPhaseList(
                 currentPhase = state.phase,
@@ -157,23 +167,33 @@ private fun BuildFailedState(
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Button(
-                label = "Close",
-                onClick = onDismiss,
-                modifier = Modifier.weight(1f),
-                variant = ButtonVariant.Secondary,
-            )
-            if (onRetry != null) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (!logUrl.isNullOrBlank() && onViewLog != null) {
                 Button(
-                    label = "Retry",
-                    onClick = onRetry,
-                    modifier = Modifier.weight(1f),
-                    variant = ButtonVariant.Primary,
+                    label = "View build log",
+                    onClick = { onViewLog(logUrl) },
+                    modifier = Modifier.fillMaxWidth(),
+                    variant = ButtonVariant.Secondary,
                 )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Button(
+                    label = "Close",
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                    variant = ButtonVariant.Secondary,
+                )
+                if (onRetry != null) {
+                    Button(
+                        label = "Retry",
+                        onClick = onRetry,
+                        modifier = Modifier.weight(1f),
+                        variant = ButtonVariant.Primary,
+                    )
+                }
             }
         }
     }
@@ -202,6 +222,7 @@ private fun BuildProgressHeader(
     title: String,
     titleColor: Color,
     message: String?,
+    providerName: String?,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         BasicText(
@@ -212,6 +233,12 @@ private fun BuildProgressHeader(
             BasicText(
                 text = message,
                 style = Typography.Body.copy(color = Colors.Muted),
+            )
+        }
+        if (!providerName.isNullOrBlank()) {
+            BasicText(
+                text = "via $providerName",
+                style = Typography.Caption.copy(color = Colors.Muted),
             )
         }
     }
@@ -328,8 +355,9 @@ private enum class PhaseRowStatus {
 }
 
 private fun phaseLabel(phase: BuildPhase): String = when (phase) {
-    BuildPhase.Queued -> "Queued"
+    BuildPhase.Preparing -> "Preparing"
     BuildPhase.Uploading -> "Uploading"
+    BuildPhase.Queued -> "Queued"
     BuildPhase.Building -> "Building"
     BuildPhase.Downloading -> "Downloading"
     BuildPhase.ReadyToInstall -> "Ready to install"

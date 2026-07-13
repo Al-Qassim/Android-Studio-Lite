@@ -54,3 +54,17 @@ include(":feature:buildapk:di")
 include(":integration:database")
 include(":integration:di")
 include(":integration:navigation")
+
+include(":feature:auth:model")
+include(":feature:auth:api")
+include(":feature:auth:data")
+include(":feature:auth:presentation")
+include(":feature:auth:di")
+
+include(":feature:settings:api")
+include(":feature:settings:presentation")
+include(":feature:settings:di")
+
+include(":feature:github:api")
+include(":feature:github:data")
+include(":feature:github:di")

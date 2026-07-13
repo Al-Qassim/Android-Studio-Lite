@@ -51,9 +51,10 @@ Ship real cloud APK builds on the user’s GitHub account:
 19. As a user, I want Close and Retry after failure, so that I can leave or try again.
 20. As a user, I do **not** want to create a GitHub repo per ASL project, so that setup stays low friction.
 21. As a user, I want concurrent builds supported, so that one project does not block another job id.
-22. As an implementer, I want `auth:api` / `auth:data` to own session storage and Connect UI, so that buildapk does not own OAuth UX.
-23. As an implementer, I want a stateless `:feature:github` library, so that GitHub REST/device APIs are reusable without ASL session coupling.
-24. As an implementer, I want `buildapk:data` to read credentials via `auth:api` then call github helpers, so that the BuildService remains the build seam.
+22. As an implementer, I want `auth:api` / `auth:data` to own session storage and Connect (login) UI, so that buildapk does not own OAuth UX.
+23. As an implementer, I want Settings · Build account in `settings` (not auth), so that auth stays login/session-only.
+24. As an implementer, I want a stateless `:feature:github` library, so that GitHub REST/device APIs are reusable without ASL session coupling.
+25. As an implementer, I want `buildapk:data` to read credentials via `auth:api` then call github helpers, so that the BuildService remains the build seam.
 
 ---
 
@@ -61,7 +62,8 @@ Ship real cloud APK builds on the user’s GitHub account:
 
 ### Architecture / modules
 
-- **`auth:api` + presentation** — login/logout/session UI; observe session for gates.
+- **`auth:api` + presentation** — Connect (login) + session observe/clear; used by build gate and Settings.
+- **`settings:api` + presentation** — Settings hub with sections; Build account (connect / log out) is a sub-screen that navigates into auth Connect.
 - **`auth:data`** — owns token/session storage (provider-agnostic ownership of secrets).
 - **`:feature:github`** — stateless GitHub library (device flow + REST helpers); caller passes token.
 - **`buildapk:data`** — `GitHubActionsBuildService` uses auth credentials + github APIs; Koin replaces `FakeBuildService` on the product path when real ships.

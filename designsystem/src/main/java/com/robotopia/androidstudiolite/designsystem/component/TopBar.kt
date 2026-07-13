@@ -1,7 +1,6 @@
 package com.robotopia.androidstudiolite.designsystem.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +12,8 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,22 +22,23 @@ import com.robotopia.androidstudiolite.designsystem.icon.IconAdd
 import com.robotopia.androidstudiolite.designsystem.icon.IconBack
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
 import com.robotopia.androidstudiolite.designsystem.icon.IconRun
+import com.robotopia.androidstudiolite.designsystem.icon.IconSettings
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 @Composable
 fun TopBarTitleAction(
     title: String,
-    actionLabel: String,
     onActionClick: () -> Unit = {},
     modifier: Modifier = Modifier,
+    onSettingsClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
             .background(Colors.Bg)
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BasicText(
@@ -44,13 +46,23 @@ fun TopBarTitleAction(
             style = Typography.TitleNav.copy(color = Colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 4.dp),
         )
-        BasicText(
-            text = actionLabel,
-            style = Typography.ButtonCompact.copy(color = Colors.Primary),
-            maxLines = 1,
-            modifier = Modifier.clickable(onClick = onActionClick),
+        if (onSettingsClick != null) {
+            IconButton(
+                onClick = onSettingsClick,
+                variant = IconButtonVariant.Ghost,
+                modifier = Modifier.semantics { contentDescription = "Settings" },
+                icon = { tint, size -> IconSettings(tint = tint, size = size) },
+            )
+        }
+        IconButton(
+            onClick = onActionClick,
+            variant = IconButtonVariant.Ghost,
+            modifier = Modifier.semantics { contentDescription = "New project" },
+            icon = { _, size -> IconAdd(tint = Colors.Primary, size = size) },
         )
     }
 }
@@ -209,7 +221,10 @@ fun TopBarEditorMore(
 @Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "TitleAction · normal")
 @Composable
 private fun TopBarTitleActionPreview() {
-    TopBarTitleAction(title = "Projects", actionLabel = "+ New")
+    TopBarTitleAction(
+        title = "Projects",
+        onSettingsClick = {},
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 280, name = "TitleAction · long title")
@@ -217,7 +232,6 @@ private fun TopBarTitleActionPreview() {
 private fun TopBarTitleActionLongPreview() {
     TopBarTitleAction(
         title = "Very Long Project List Title That Should Ellipsize",
-        actionLabel = "+ New",
     )
 }
 

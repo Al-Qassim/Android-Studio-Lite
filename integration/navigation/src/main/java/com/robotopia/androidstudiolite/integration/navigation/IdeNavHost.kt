@@ -19,6 +19,7 @@ import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
+import com.robotopia.androidstudiolite.feature.settings.api.SettingsScreens
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -32,6 +33,7 @@ fun IdeNavHost() {
     val filesScreens: FilesScreens = koinInject()
     val editorScreens: EditorScreens = koinInject()
     val buildScreens: BuildScreens = koinInject()
+    val settingsScreens: SettingsScreens = koinInject()
     val apkInstaller: ApkInstaller = koinInject()
     val editorSession: EditorSession = koinInject()
     val projectService: ProjectService = koinInject()
@@ -72,6 +74,15 @@ fun IdeNavHost() {
                         )
                     }
                 },
+                onOpenSettings = {
+                    route = IdeRoute.Settings
+                },
+            )
+        }
+
+        IdeRoute.Settings -> {
+            settingsScreens.Settings(
+                onDismiss = { route = IdeRoute.Projects },
             )
         }
 
@@ -144,6 +155,7 @@ private suspend fun openBuildForProjectId(
 
 private sealed interface IdeRoute {
     data object Projects : IdeRoute
+    data object Settings : IdeRoute
     data class Files(val project: Project) : IdeRoute
     data class Editor(
         val project: Project,

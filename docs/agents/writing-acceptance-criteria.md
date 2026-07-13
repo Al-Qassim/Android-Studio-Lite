@@ -8,6 +8,8 @@ Criteria must be **user-observable and independently checkable**. Prefer “user
 
 When a ticket or story ships screens, hierarchy, dialogs, menus, or multi-step actions, run this checklist **before** publishing ACs. Add an explicit criterion for every item that applies; do not assume “happy path” covers it.
 
+**Reachability:** for each new screen, ACs must name (1) how a user opens it from the shipping app, and (2) how they re-open it after the happy path without clearing app data. If the only entry is consumed after success (e.g. login gate), include a **second entry** (Settings / account management) in the same ticket or an explicit blocker that ships first. Pair **System Back** with in-app back where nested.
+
 ### 1. Designed primary affordances
 
 - Name the **visible** control the user is meant to use (toolbar, bottom bar, dialog button, Figma component — e.g. `MoveBar` after Move/Copy).

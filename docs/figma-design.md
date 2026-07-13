@@ -70,6 +70,17 @@ From the **Design System → Components** section (promoted to real Components w
 - Do **not** use a green filled chip with a black play glyph unless the Design System / Compose `IconButton` variant actually does that.  
 - Clone or instance from **Design System → Icons**, then tint strokes to the token color.
 
+### Missing icons — never invent stand-ins
+
+If Compose has an icon (`IconSettings` / `ic_settings.xml`) but Figma Design System does **not**:
+
+1. **Add it to Design System first** — `createNodeFromSvg` from the drawable path (or clone the `icon/add` row pattern), name it `icon/settings` + promote `Icon / settings` as a Component.  
+2. **Then** instance that component on phones.  
+3. **Never** ship placeholders: ellipse/circle+dot “gears”, emoji (`⚙`), freehand scribbles, or a lone `+` text glyph when `svg/add` exists.  
+4. Screenshot fail: if the glyph does not read as the real icon (settings looks like a target / bullseye), the pass **fails** — fix before calling done.
+
+Sibling top-bar icons must share the **same DS icon family and size** (~18–20 on 240-wide phones), with token tints (e.g. Settings = Text, Add = Primary).
+
 If a Design System control is still a plain Frame (not a Component), **promote it to a Component on the Design System page first**, then instance it on flow pages so updates stay linked.
 
 ---
@@ -80,7 +91,7 @@ Mockups should show the **real UX** users will get when the feature is honest/pr
 
 - **Do not** put v0.1 / “demo APK” / “not from your sources” banners on screens. Demo honesty can live in notes or docs, not in the phone chrome.  
 - Prefer real-case copy: e.g. `Waiting in queue…`, `Uploading project sources…`, `Building APK remotely…`, `Downloading APK…`, `APK ready to install`.  
-- **Name the build provider on phones.** UI is fed provider name/logo from the API (not hardcoded forever in Compose), but mockups must show the **concrete current provider** — today that is **GitHub** (`Connect GitHub`, `github.com/login/device`, `via GitHub`). Do **not** leave vague “your provider” / “cloud account” wording on user-visible phone chrome when GitHub is the only shipping provider.  
+- **Name the build provider on phones.** Mockups and preview fixtures show the **concrete current provider** (today **GitHub**). Production Compose must still be **provider-agnostic**: interpolate API fields (`providerName` / `providerDisplayName` / `verificationUri`) — do not hardcode a vendor in identifiers or chrome. Do **not** leave vague “your provider” / “cloud account” wording on user-visible phone chrome when a concrete provider is shipping.  
 - Labels like **Install app** (not “Install demo APK”) unless the shipping UI truly says otherwise.  
 - Skip system-installer handoff screens — after **Install app**, Android’s package UI takes over; don’t mock that as case `4a`.
 
@@ -121,14 +132,18 @@ If a phone looks light on a dark page, inspect children: `Status` / `TopBar` / `
 
 ---
 
-## Align Figma with Compose
+## Align Figma with Compose (always stay in sync)
+
+**App implementation and Figma must stay in sync.** Adding, changing, or removing on-screen UI in Compose requires the same update in Figma (and the reverse when Figma leads). Do not ship one side without the other unless an ADR says which side leads temporarily.
 
 Before locking a screen:
 
 1. Read the real composable (e.g. `BuildProgressContent`, `TopBarEditorMore`, `ProjectMenu`).  
 2. Match **structure** (back title bar vs cancel-in-top-bar), **actions**, **phase names**, and **icons**.  
 3. Prefer Design System + `:designsystem` names over Main Screens copy if Main Screens is outdated.  
-4. After Figma changes that affect shipping UI, expect a **design-review** pass (device screenshots vs Figma) — see `.agents/skills/design-review/SKILL.md`.
+4. **Obvious actions are icon-only** (copy, more, back, run, add, settings): DS `IconButton` / icon — no “Copy”/“More”/“+ New” text beside an icon that already means that.  
+5. **Sibling top-bar actions match type** — do not place a text label action next to an icon button in the same action cluster (e.g. Settings gear + “+ New” text); use icon buttons for both.  
+6. After either side changes shipping UI, expect a **design-review** pass (device screenshots vs Figma) — see `.agents/skills/design-review/SKILL.md`.
 
 ---
 
@@ -146,6 +161,8 @@ When an agent edits Figma:
    - **Case subtitles** under side-by-side phones must be **≤ phone column width (~240)** — never leave 500px-wide text that overlaps the next case.
    - **Main action on a phone** = DS **`Button / primary`**. Do not use a homemade chip/rect for the primary CTA (e.g. “Open device page”).
    - **Text must stay inside its card/box.** Do not paste long body copy into a small surface card; use a short subtitle (or grow the card). After text edits, check that `text.y + text.height` ≤ card bottom.
+   - **No homemade icons.** Every glyph on a phone must be a Design System `icon/…` / `Icon / …` (or clone of `svg/…`). Ban ellipse/circle+dot stand-ins, emoji gears, and freehand icons. If the icon is missing from DS, add it from Compose drawable first, then instance it. Screenshot fail if settings looks like a target or add is raw “+” text while `svg/add` exists.
+   - **After cutting copy, re-layout.** Short phones must not leave a huge empty band with the CTA stuck to the bottom, **and** must not leave a top-cramped stack with a dead lower half. Keep content + primary actions as **one tight group**, then **vertically center that group** in the space below the top bar (auth / device-code / empty states). Do not `weight`/`spacer` the button to the phone footer unless the screen still has dense mid content. Settings-style list screens stay top-aligned.
 7. **Before calling done:** take a fresh screenshot of the finished design, evaluate it, and improve anything that fails the checklist or looks worse than Projects management / Files editor. Repeat until the screenshot looks right.
 
 ---
@@ -157,8 +174,14 @@ When an agent edits Figma:
 - [ ] Flows index height hugs content (not collapsed/clipped)  
 - [ ] Case subtitles do not overlap adjacent columns (≤ ~240 wide)  
 - [ ] Buttons / top bars / status / icons are **DS instances**; main CTA is **primary**  
-- [ ] Run (and other icons) use **Icon / …** from Design System, correct tint  
+- [ ] Run / add / settings (and other icons) use **Icon / …** from Design System — **no homemade stand-ins** (circle+dot, emoji, freehand); if missing from DS, add from Compose drawable first  
+- [ ] Sibling top-bar icons match size/family/tint tokens  
 - [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
+- [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions) — same cut on Waiting / Connected / Failed / Settings / gate / onboarding  
+- [ ] After cutting copy, content + CTA is one tight group, vertically centered under the top bar on short instructional phones (no mid-band void, no dead lower half)  
+- [ ] Obvious actions (copy / more / back / run / add / settings) are **icon-only** — no redundant text label on the control; sibling top-bar actions match type  
+- [ ] Settings is a permanent Projects top-bar control (gear), not a transient text link  
+- [ ] App UI and Figma stay in sync for the change (or ADR says which side leads)  
 - [ ] Text inside cards/boxes does not overflow the card bounds  
 - [ ] In-progress = dots; complete = check; failed step = ✕ + error copy  
 - [ ] No nested frame title clutter; phone frame name blank if labeled in text  

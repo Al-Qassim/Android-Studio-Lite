@@ -17,6 +17,8 @@ Reusable conventions for feature modules (mobile or similar layered apps). Adapt
 1. Split by role: **model** (types) · **api** (contracts) · **data** (impl) · **presentation** (UI) · **di** (bindings) — or the project’s equivalent.
 2. Each feature owns its **in-feature** navigation (e.g. list ↔ create).
 3. The app / integration navigator only wires **cross-feature** exits. No feature toasts, dialogs, or internal routes in the root host.
+4. **`:model` / `:api` do not shape themselves around UI layout.** Progress/result types carry domain facts the caller needs for the next action (e.g. challenge code + URI to open). Do not add fields only so a later screen can redraw chrome that the presentation layer can retain from an earlier emission. UI state may keep display data; the public model must not.
+5. **Comments describe the present.** KDoc/comments say what the type or function is for now. Do not narrate removed fields, old mistakes, or “why we didn’t put X here.”
 
 ## 2. Errors
 
@@ -55,18 +57,39 @@ Summary:
 - Host builds context with **`remember(…keys)`** + ViewModel; screen does not depend on a concrete VM.
 - **Never nest function declarations.**
 
-### Thin screens (optional simpler shape)
+### Thin screens (screen-context shape, no Context class)
 
-Short forms / simple lists may stay smaller without a context type:
+Simple screens still follow the **same layout roles** as Screen Context — just without a `*ScreenContext` type:
 
 ```text
 presentation/<screen>/
-  <Screen>ViewModel
-  <Screen>Screen      # wiring + private helpers
-  <Screen>Content     # optional pure drawing + previews
+  <Name>ViewModel.kt   # state-only + UiState types
+  <Name>Screen.kt      # host wiring + state-driven composition + thin @Preview stub
+  <Name>Previews.kt    # preview cases / provider
+  ui/                  # state-driven bodies (take state + only that piece’s actions)
+  logic/               # top-level functions (service, updateState, exits)
 ```
 
-Do not grow a Content callback list past ~6–8 parameters — switch to Screen Context instead.
+Rules (same as Screen Context, adapted):
+
+1. **ViewModel holds UI state only** — no service calls, validation, or navigation.
+2. **Screen wires resources** (service, exits, clipboard/uri) and calls **`logic/`**; compose **`ui/`** from `state`.
+3. **Do not** use a mega `*Content(state, onA, onB, onC, …)` that funnels every callback through one parameter list.
+4. **`ui/`** pieces take `state` (or the relevant subtype) plus only the actions that piece needs.
+5. **`logic/`** is top-level functions (not nested `fun` inside composables).
+6. Design-system stays parameterized.
+7. Prefer this shape over a single Screen+Content file even when the screen is small (Connect, Settings hub, Build account).
+
+### Provider-agnostic presentation
+
+When a feature can swap backends (auth, cloud build):
+
+1. **Identifiers and APIs** in `:presentation` / feature `:api` / `:model` use generic names (`openVerificationUri`, `providerDisplayName`, `ConnectAccount`) — not a vendor (`openGitHub…`, `onConnectGitHubClick`).
+2. **User-visible chrome** interpolates API-supplied fields (`"Open ${state.providerName}"`, paste host from `verificationUri`). Do not bake a vendor into production Compose strings.
+3. **Vendor lives in** `:data` and dedicated vendor modules (e.g. `:feature:github`). They emit the concrete display name / URIs.
+4. **Previews / Figma** may use the current provider as fixture copy so phones look real.
+
+When the screen grows many components (list + menus + dialogs), **add** a `*ScreenContext` and turn `ui/` / `logic/` into context extensions — see `docs/agents/screen-context.md`.
 
 ### ViewModel / state holder
 
@@ -82,15 +105,28 @@ Do not grow a Content callback list past ~6–8 parameters — switch to Screen 
 4. Comment on the PR for that slice.
 5. Repeat.
 
-## 6. Checklist
+## 6. Finish checks
 
+Before calling UI/code work done:
+
+1. Compile the touched modules (and install when the change is user-visible).
+2. Clear **deprecation / error diagnostics in files you touched** — prefer current public APIs over `@Deprecated` replacements the IDE already flags.
+3. Match existing Kotlin style in the file/module: **import types** and use short names; avoid inline fully-qualified names (`android.net.Uri.parse(…)`) except when disambiguating a clash.
+4. Walk the changed flow on device when UX changed.
+
+## 7. Checklist
+
+- [ ] Provider-shaped screens: no vendor in presentation identifiers or hardcoded chrome; name/URI from API (previews may fixture the current provider)
 - [ ] Feature owns sub-navigation; root host stays thin
+- [ ] `:model` / `:api` carry domain facts only — not fields added solely for redrawing UI chrome
 - [ ] Validation only in data/domain; API exposed for UI
 - [ ] User-safe errors (UI message vs log-only unexpected)
 - [ ] State holder is state-only
 - [ ] Host builds context with `remember(…keys)` + VM; busy screen → Screen Context (`docs/agents/screen-context.md`); thin screen → small Screen/Content OK
 - [ ] No nested function declarations (helpers at file / private top level)
 - [ ] Multi-state previews (fixtures in `*Previews.kt`, thin stub on screen)
+- [ ] Touched files free of deprecation/error diagnostics; compile (+ install if UI) before done
+- [ ] Types imported (no unnecessary fully-qualified names in call sites)
 - [ ] Focused commit → push → PR comment (if on a PR)
 
 ## Portability

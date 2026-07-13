@@ -34,6 +34,7 @@ interface ProjectsScreens {
     fun NavHost(
         onOpenProject: (projectId: ProjectId) -> Unit,
         onRunProject: (projectId: ProjectId) -> Unit,
+        onOpenSettings: () -> Unit,
     )
 
     @Composable
@@ -41,6 +42,7 @@ interface ProjectsScreens {
         onOpenProject: (projectId: ProjectId) -> Unit,
         onRunProject: (projectId: ProjectId) -> Unit,
         onCreateProject: () -> Unit,
+        onOpenSettings: () -> Unit,
     )
 
     @Composable
