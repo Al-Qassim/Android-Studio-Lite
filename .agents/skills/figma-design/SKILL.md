@@ -1,37 +1,85 @@
 ---
 name: figma-design
 description: >-
-  Figma design workflow — follow docs/figma-design.md; finish with screenshot,
-  evaluate, and improve if needed. Use when the user asks to make, update,
-  polish, or fix a Figma design, flow, mockup, or screen. Ignore for pure
-  code/git with no design ask.
+  General Figma design workflow: find the project's design contract, reuse the
+  design system, edit via Figma MCP, finish with a screenshot evaluate-fix
+  loop. Use when the user asks to make, update, polish, or fix a Figma design,
+  flow, mockup, or screen. Ignore for pure code/git with no design ask.
 ---
 
 # Figma design
 
-**Applies when** the user asks to make, create, update, polish, or fix a **design** in Figma. Ignore for pure code/git with no design ask.
+Portable workflow for designing in Figma. **Project-specific** layout, density,
+tokens, copy, and product rules live in the repo’s design contract — not here.
 
-1. **Read and follow** [`docs/figma-design.md`](../../../docs/figma-design.md) **before** any Figma MCP / `use_figma` work.
-2. Treat that doc as the project contract — do not invent alternate layout, button, or icon patterns.
-3. After edits, run the checklist at the end of `docs/figma-design.md`.
-4. **Finish with a screenshot pass (required):** take an image of the finished work (full page and/or key phones), **evaluate** it against Projects management / Files editor density and this doc’s non-negotiables, then **edit again** if anything looks weak, sparse, off-DS, or inconsistent. Do not call the design done until a fresh screenshot looks good.
-5. **If the user points out an error:** re-review the **whole latest design pass** (all new/edited pages) for the same failure class — collapsed index boxes, overlapping case subtitles, homemade CTAs, **homemade icon stand-ins** (circle+dot “settings”, emoji gears, raw “+” text), etc. — fix them all, then harden `docs/figma-design.md` / this skill if the checklist was missing the catch.
+**Applies when** the user asks to make, create, update, polish, or fix a
+**design** in Figma. Ignore for pure code/git with no design ask.
 
-## Non-negotiables (summary)
+## Steps
 
-- Reuse **Design System** components/icons — never homemade `▶`, freehand buttons, or ellipse/circle stand-in icons.
-- If an icon exists in Compose but not in Figma DS, **add `icon/…` to Design System from the drawable first**, then instance it — never invent a placeholder glyph.
-- Match **Projects management** / **Files editor** density; flow phones **240×420**.
-- Real product UI — no v0.1/demo banners on phones.
-- Phone copy names the concrete provider (**GitHub** today); don’t leave vague “your provider” alone.
-- **Instructional phones stay short:** prefer two short lines (what to do + where) + one primary CTA. Do not stack a headline, long body, and a third sentence that all say the same thing (device-flow Connect is the reference). Apply the same cut across **all new flow phones** (Connected / Failed / Settings / gate / onboarding) — status + one action is enough when the control already says what to do.
-- **Connect stays actionable while polling:** keep user code + Open CTA until Connected/Failed; do not auto-swap to a Waiting phone that removes copy/open.
-- **After cutting copy, re-layout** so content + CTA are one tight group, **vertically centered** under the top bar on short instructional phones (no mid-band void, no dead lower half; Settings lists stay top-aligned).
-- In-progress = **•••**; complete = check; failed = ✕ + clear error.
-- Blank phone frame names; notes in **boxes**.
-- **Obvious actions are icon-only** (copy, more, back, run, add, settings) — no redundant text labels on icon controls. Sibling top-bar actions must match type (all icon buttons in the same cluster) and use **DS icon glyphs** at matching size.
-- Permanent Settings entry lives on the **Projects** top bar (gear icon from DS), not a one-off text link.
-- **App ↔ Figma stay in sync** whenever shipping UI changes (see `docs/figma-design.md` → Align Figma with Compose).
-- Screenshot finish pass **fails** if an icon does not read as the real glyph (e.g. settings looks like a target).
+1. **Load the project design contract** before any Figma write.
+   - Prefer (first match): `docs/figma-design.md`, `docs/design.md`,
+     `docs/design/figma.md`, or a path named by the project overview / AGENTS.
+   - If none exists, ask where the Figma file and design-system conventions live,
+     or create a short project contract under `docs/` from existing screens
+     before inventing patterns.
+   - Follow that contract for size, density, pages, DS component names, and
+     product-specific UI rules. Do not invent alternate patterns when the
+     contract already states them.
 
-Figma: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)
+2. **Orient in Figma.** Resolve `fileKey` / `node-id` from the user URL or the
+   contract. Open a strong existing screen/page the contract names as the
+   density/reference target and match it.
+
+3. **Load Figma skills/tools before writing.**
+   - `/figma-use` before every `use_figma` call.
+   - `/figma-generate-design` when assembling a full page/flow from the design
+     system.
+   - Prefer MCP `search_design_system` / library tools over freehand drawing.
+
+4. **Build by reuse.** Instance design-system components, variables, and icons.
+   Prefer positive rules: clone/instance what exists; promote missing primitives
+   into the DS first, then instance them. Homemade buttons, freehand icons, and
+   placeholder glyphs are last resorts only when the contract and DS truly lack
+   the control — and then harden the contract/DS afterward.
+
+5. **Edit incrementally.** One coherent pass at a time (page switch, section,
+   or phone row). Return created/mutated node IDs. After text cuts or content
+   changes, re-layout so spacing still matches the reference screens.
+
+6. **Screenshot finish pass (required).** Capture the finished work (full page
+   and/or key frames). Evaluate against the project contract and the reference
+   screens. Fix gaps; re-screenshot. Do not call the design done until a fresh
+   screenshot looks right.
+
+7. **User correction = harden the contract.** If the user points out an error,
+   re-review the **whole latest design pass** for the same failure class, fix
+   everything that fails, then update the **project** design doc (and this skill
+   only if the failure was process-general). Prefer generalized prevention over
+   one-off bans.
+
+## Completion criteria
+
+Done when all of the following hold:
+
+- [ ] Project design contract was read and followed (or explicitly created)
+- [ ] New/changed UI uses DS instances (or DS was extended first)
+- [ ] Contract checklist (if any) passes
+- [ ] Fresh screenshot evaluated and gaps fixed
+- [ ] Project contract updated if a new failure class was discovered
+
+## Agent / MCP tips (general)
+
+- Search the design system before drawing buttons or icons.
+- Prefer blank phone/frame names when labels already live as page text — avoid
+  double titles and default white fills on structural frames.
+- Put notes/captions in consistent containers the reference pages use.
+- Keep app implementation and Figma in sync when the project says so (code↔design
+  in the same change set unless an ADR picks a temporary leader).
+
+## Portability
+
+Copy this skill into another repo’s `.agents/skills/figma-design/` (or a personal
+skills folder). Pair it with a project-local `docs/figma-design.md` (or equivalent)
+that names the Figma file, reference pages, phone sizes, DS component names, and
+product-specific rules.
