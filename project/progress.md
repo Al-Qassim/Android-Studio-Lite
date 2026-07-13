@@ -4,7 +4,7 @@
 
 On-device Compose IDE: manage projects → browse/edit files → Run → build → install APK.
 
-## Status: v0.1 loop works; cloud-build Connect UI on main
+## Status: real GitHub Actions builds in progress
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -12,20 +12,20 @@ On-device Compose IDE: manage projects → browse/edit files → Run → build �
 | Projects | Done | `#7` · create / list / delete · empty Compose template |
 | Files | Done | `#8` · sandbox browser · create / rename / move / delete |
 | Editor | Done | `#9` · save · dirty leave · auto-save preference |
-| Fake build → install | Done | `#10` / [PR #16](https://github.com/Al-Qassim/Android-Studio-Lite/pull/16) · Build start → phases → Install app |
+| Fake build → install | Done | `#10` / [PR #16](https://github.com/Al-Qassim/Android-Studio-Lite/pull/16) · superseded on product path by `#25` |
 | IDE nav wiring | Done | `#11` · `:integration:navigation` `IdeNavHost` |
 | Parent plan | Done | `#5` · `project/architecture.md` · `project/v0.1-implementation-plan.md` |
 | Cloud-build PRD + design | Done | `#19`–`#21` · `project/cloud-build-prd.md` · Figma Connect / Settings / Onboarding / Run & build |
-| Connect + build UI | Done | `#22` + `#24` / [PR #26](https://github.com/Al-Qassim/Android-Studio-Lite/pull/26) · Settings Build account; build gate; Preparing / via provider / View build log |
+| Connect + build UI | Done | `#22` + `#24` / [PR #26](https://github.com/Al-Qassim/Android-Studio-Lite/pull/26) |
+| Onboarding + real GHA | **In progress** | `#23` + `#25` · `feature/real-cloud-build` · public sandbox; private choice backlog `#27` |
 
-## Product path (shipped)
+## Product path (shipping)
 
-**Projects** → **Files** → **Editor** → **Run** → **Build** (logged-out: Connect gate → Connect account) → progress (Preparing…) → **Install app** (still fake APK until `#25`).
+**Onboarding (first launch)** → **Projects** → **Files** → **Editor** → **Run** → **Build** (Connect gate if needed) → GitHub Actions → **Install app**.
 
-## Not in v0.1 (by design)
+## Not done yet
 
-- Real GitHub Actions Gradle — `#25`
-- Onboarding Connect surface — remaining `#23` (Settings + build gate already shipped in `#26`)
+- Optional private build sandbox — `#27` (Backlog)
 - Git, AI, syntax highlighting
 - User Documents storage; Gradle wrapper jars in generated projects
 

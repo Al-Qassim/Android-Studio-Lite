@@ -15,6 +15,8 @@ import com.robotopia.androidstudiolite.feature.editor.api.EditorSession
 import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
 import com.robotopia.androidstudiolite.feature.files.api.FilesScreens
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
+import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingScreens
+import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingStore
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
 import com.robotopia.androidstudiolite.feature.projects.model.Project
@@ -34,10 +36,16 @@ fun IdeNavHost() {
     val editorScreens: EditorScreens = koinInject()
     val buildScreens: BuildScreens = koinInject()
     val settingsScreens: SettingsScreens = koinInject()
+    val onboardingScreens: OnboardingScreens = koinInject()
+    val onboardingStore: OnboardingStore = koinInject()
     val apkInstaller: ApkInstaller = koinInject()
     val editorSession: EditorSession = koinInject()
     val projectService: ProjectService = koinInject()
-    var route by remember { mutableStateOf<IdeRoute>(IdeRoute.Projects) }
+    var route by remember {
+        mutableStateOf<IdeRoute>(
+            if (onboardingStore.isCompleted()) IdeRoute.Projects else IdeRoute.Onboarding,
+        )
+    }
     val scope = rememberCoroutineScope()
 
     // Force-close editor when the open document's project is deleted.
@@ -54,6 +62,12 @@ fun IdeNavHost() {
     }
 
     when (val current = route) {
+        IdeRoute.Onboarding -> {
+            onboardingScreens.Onboarding(
+                onFinished = { route = IdeRoute.Projects },
+            )
+        }
+
         IdeRoute.Projects -> {
             projectsScreens.NavHost(
                 onOpenProject = { projectId ->
@@ -154,6 +168,7 @@ private suspend fun openBuildForProjectId(
 }
 
 private sealed interface IdeRoute {
+    data object Onboarding : IdeRoute
     data object Projects : IdeRoute
     data object Settings : IdeRoute
     data class Files(val project: Project) : IdeRoute

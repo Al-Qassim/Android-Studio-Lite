@@ -46,7 +46,8 @@ feature/
   buildapk/   model · api · data · presentation · di
   auth/       model · api · data · presentation · di   # session + Connect (login) only
   settings/   api · presentation · di                  # Settings hub + Build account (uses auth)
-  github/     api · data · di                          # stateless GitHub helpers
+  onboarding/ api · presentation · di                  # first-launch Connect / Skip
+  github/     api · data · di                          # stateless GitHub helpers (device + build REST)
 integration/
   database                  # Room assembly (feature entities/DAOs)
   di                        # aggregates feature + database Koin modules
@@ -127,9 +128,16 @@ flowchart TB
 
 ### Build (`buildapk`)
 - `BuildService` + `ApkInstaller` in `:api`.
-- **Current data:** `FakeBuildService` (timed phases) + bundled `demo-sample.apk` — not GitHub Actions.
+- **Product data:** `GitHubActionsBuildService` — public sandbox `asl-builds-android-studio-lite`, ephemeral release, Actions `workflow_dispatch`, APK download (`FakeBuildService` remains for tests).
 - UI: start → progress; on ready, nav asks installer to open the system install flow.
-- Future: swap impl behind the same `BuildService` without changing UI contracts.
+
+### Auth / Settings / Onboarding
+- **Auth:** Connect device flow + session (`accessToken` via `auth:api`).
+- **Settings:** hub + Build account (connect / log out).
+- **Onboarding:** first-launch Connect / Skip; gate in `IdeNavHost`.
+
+### GitHub
+- Stateless `:feature:github` — device flow + build REST (`HttpGitHubClient`).
 
 Busy-screen layout: `docs/agents/screen-context.md`. Feature conventions: `/structure-feature-code`.
 
@@ -141,7 +149,7 @@ Busy-screen layout: `docs/agents/screen-context.md`. Feature conventions: `/stru
 | --- | --- |
 | `:integration:database` | `AslDatabase` — today projects entity/DAO only |
 | `:integration:di` | `integrationDiModule` — only module `:app` starts |
-| `:integration:navigation` | `IdeNavHost` — `Projects` / `Files` / `Editor` / `Build` + return targets; closes editor if project deleted |
+| `:integration:navigation` | `IdeNavHost` — Onboarding / Projects / Files / Editor / Build / Settings; closes editor if project deleted |
 | `:app` | `AslApplication`, `MainActivity`, theme bridge, FileProvider / install permission |
 
 ```text

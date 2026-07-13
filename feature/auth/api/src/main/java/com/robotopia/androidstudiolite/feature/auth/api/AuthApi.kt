@@ -12,6 +12,9 @@ interface AuthSession {
 
     /** Configured build-provider display name for UI (e.g. Connect CTAs). */
     val providerDisplayName: String
+
+    /** OAuth access token for the connected build provider, or null when logged out. */
+    suspend fun accessToken(): String?
 }
 
 /**

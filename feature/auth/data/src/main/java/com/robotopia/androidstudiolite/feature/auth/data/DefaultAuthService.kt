@@ -27,6 +27,8 @@ class DefaultAuthService(
         store.clear()
     }
 
+    override suspend fun accessToken(): String? = store.accessToken()
+
     override fun connect(): Flow<ConnectProgress> = flow {
         val device = gitHubClient.requestDeviceCode(clientId)
         emit(
