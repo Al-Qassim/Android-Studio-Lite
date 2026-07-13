@@ -1,32 +1,34 @@
 ---
 name: design-review
 description: >-
-  Device-truth design review against Figma for mobile/Compose UI. Pull Figma
-  frames, capture live app screenshots, visually diff, fix with design-system
-  tokens, re-capture, host evidence outside git, and post a Before|Figma|After
-  PR comment. Use when finishing UI work, comparing screens to Figma, running
-  the Finish reviews design step, or when the user asks for a design review.
+  Device-truth design review against Figma. Screenshot comparison of running app
+  UI vs Figma reference is required. Fix gaps, re-capture, post Before|Figma|After.
+  Use when finishing UI work, before merge (Finish reviews), comparing screens to
+  Figma, or the user asks for a design review.
 ---
 
 # Design review
 
 Run this for any UI-facing change before calling the work finished. Prefer this skill over ad-hoc screenshot comments.
 
+**Required:** screenshot comparison between the **running app UI** and the **Figma design reference** is mandatory — not optional, not “code looks fine,” not Compose previews alone. Every relevant screen/state must have side-by-side app shot vs Figma (and after fixes, Before | Figma | After).
+
 **Default Figma (this repo):** [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) — also linked from `project/requierments.md` / `project/architecture.md`. Prefer `:designsystem` tokens/components when fixing gaps.
 
 ## Design review — steps
 
-Pull the source of truth — Figma frames for the feature (screenshots + design context), not code alone.
-Capture the live app — install/run on emulator/device; take real screenshots of each relevant state (empty, filled, dialogs, menus, edge cases).
-Diff visually — for each screen/state: app vs Figma (layout, spacing, colors, typography, copy, icons, system chrome/insets).
-Fix gaps in code — prefer design-system tokens/components; include system bars (enableEdgeToEdge + insets/scrims).
-Re-capture after — same states, same device framing.
-Publish evidence outside the repo — upload before/after (and Figma exports if needed) to a temporary release/gist; do not commit screenshots.
-Post a PR comment — one section per issue; equal-width table: Before | Figma | After; short note of what was wrong and what changed; link Figma frames; note the fix commit.
-Clean up — delete local screenshot dirs; optional: delete the temp release after review.
+1. Pull the source of truth — Figma frames for the feature (screenshots + design context), not code alone.
+2. Capture the live app — install/run on emulator/device; take real screenshots of each relevant state (empty, filled, dialogs, menus, edge cases).
+3. **Compare screenshots** — for each screen/state, place app UI next to the Figma reference and visually diff (layout, spacing, colors, typography, copy, icons, system chrome/insets). Do not skip this step.
+4. Fix gaps in code — prefer design-system tokens/components; include system bars (enableEdgeToEdge + insets/scrims).
+5. Re-capture after — same states, same device framing; compare again to Figma.
+6. Publish evidence outside the repo — upload before/after (and Figma exports if needed) to a temporary release/gist; do not commit screenshots.
+7. Post a PR comment — one section per issue; equal-width table: Before | Figma | After; short note of what was wrong and what changed; link Figma frames; note the fix commit.
+8. Clean up — delete local screenshot dirs; optional: delete the temp release after review.
 
 ## Principles
 
+**Screenshot comparison is necessary** — pass/fail is decided by app pixels vs Figma pixels, not by reading Compose or “I matched the tokens in code.”
 Device truth over code review — judge pixels from the running app, not Compose previews alone.
 Figma is the contract — match copy, hierarchy, colors, affordances (e.g. ⋮), and dialog button styles.
 System UI counts — status/nav bars and insets are part of the design review.

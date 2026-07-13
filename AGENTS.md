@@ -1,36 +1,15 @@
-# Agent guide
+# Agent router
 
-Short router only. For details, open the linked file or skill — do not duplicate rules here.
+1. **Orient:** read [`docs/agents/project-overview.md`](docs/agents/project-overview.md) when you need a brief picture of the product, tracker tools, or where code/docs live.
+2. **Skills:** inspect available skills under `.agents/skills/*/SKILL.md` (name + `description`). For each task, **open and follow every skill whose description matches** the work. Skip the rest. Prefer `/skill-name` when you already know which one applies.
+3. **Docs:** skills and overview point at longer contracts under `docs/` and `project/` — open those when a skill or the overview says to.
 
-## If you face this case → read this
+Do not invent alternate process paths when a matching skill or linked doc exists.
 
-| Case | Read / use |
-| --- | --- |
-| New ticket, branch, PR, push, or follow-up edits | `docs/agents/git-workflow.md` |
-| Keep open PR branches current after `main` updates | `docs/agents/git-workflow.md` → *Keep open branches current with `main`* |
-| PR merged — delete remote + local branch, board Done | `docs/agents/git-workflow.md` → *After a PR is merged* |
-| Issue tracker / Project board Status | `docs/agents/issue-tracker.md` |
-| Writing / generating ticket ACs (UI, system Back, affordances) | `docs/agents/writing-acceptance-criteria.md` (+ `/to-tickets`, `/to-spec`, triage) |
-| Triage labels | `docs/agents/triage-labels.md` |
-| Domain docs layout (`CONTEXT.md`, ADRs) | `docs/agents/domain.md` |
-| Feature screens / modules structure | `.agents/skills/structure-feature-code/SKILL.md` (also `.cursor/rules/`) |
-| Busy Compose screens (Screen Context) | `docs/agents/screen-context.md` |
-| Architecture / code review (before merge) | `/code-review` + `.agents/skills/structure-feature-code/SKILL.md` + `project/architecture.md` |
-| Test review (before merge) | `docs/agents/test-review.md` |
-| Design review (before merge) | `.agents/skills/design-review/SKILL.md` |
-| Creating / updating Figma flow pages (any “make a design” ask) | **Required:** `docs/figma-design.md` + `.cursor/rules/figma-design.mdc` |
-| Whole-project status (what’s done / left in v0.1) | `project/progress.md` |
+## User correction = system error
 
-## Finish reviews (required before merge / Done)
+Whenever the user corrects your work, treat that as a defect in **documents, skills, or rules** — not a one-off mistake to patch only in code.
 
-Run all three; fix findings; re-push via `docs/agents/git-workflow.md`. Do not mark Done until they pass or the human waives them.
-
-1. Architecture / code review — see table above  
-2. Test review — `docs/agents/test-review.md`  
-3. Design review — `.agents/skills/design-review/SKILL.md`
-
-## Defaults
-
-- Issues: GitHub via `gh`; external PRs are not a triage surface.
-- Domain: single-context (`CONTEXT.md` + `docs/adr/`).
-- Figma: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) — how to design in it: `docs/figma-design.md`
+1. Find the **root cause** of why the work was wrong the first time (missing instruction, wrong instruction, ambiguous router, skill not triggered, conflicting docs, etc.).
+2. **Edit** the relevant docs/skills/rules so the same failure is unlikely next time: add missing process, fix wrong process, or delete harmful/outdated process.
+3. Goal: **minimize future user corrections** by hardening the system, not only the immediate artifact.

@@ -1,6 +1,9 @@
 ---
-description: Incremental PR workflow — one focused commit, push, and PR comment at a time
-alwaysApply: true
+name: incremental-pr-delivery
+description: >-
+  Incremental PR delivery — one focused commit, push, then PR comment.
+  Use when working on an open PR branch, shipping review fixes, or the user asks
+  to commit/push/comment incrementally.
 ---
 
 # Incremental PR delivery

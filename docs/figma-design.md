@@ -1,6 +1,6 @@
 # Designing in Figma — Android Studio Lite
 
-**Mandatory** whenever anyone (human or agent) is asked to make or change a design in Figma for this project. Cursor enforces this via `.cursor/rules/figma-design.mdc` — read this file fully before editing Figma.
+**Mandatory** whenever anyone (human or agent) is asked to make or change a design in Figma for this project. Use the `/figma-design` skill — read this file fully before editing Figma.
 
 How to add or update UI in the [ASL Figma file](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) so flow pages stay consistent with the Design System and with Compose.
 
@@ -140,6 +140,7 @@ When an agent edits Figma:
 3. Screenshot after each meaningful pass; compare to Projects management / Files editor, not only to the previous broken frame.  
 4. One page switch per `use_figma` call; return created/mutated node IDs.  
 5. After layout work, audit for: duplicate labels, named frames, white fills, homemade buttons, demo banners, missing note boxes.
+6. **Before calling done:** take a fresh screenshot of the finished design, evaluate it, and improve anything that fails the checklist or looks worse than Projects management / Files editor. Repeat until the screenshot looks right.
 
 ---
 
@@ -154,7 +155,7 @@ When an agent edits Figma:
 - [ ] No nested frame title clutter; phone frame name blank if labeled in text  
 - [ ] No white fills on structural frames  
 - [ ] Copy and structure match Compose (or an explicit ADR if Figma leads)  
-- [ ] Screenshot the full page and one phone close-up before calling done  
+- [ ] **Screenshot finish pass:** capture the full page (and a phone close-up); evaluate vs Projects management / Files editor; fix gaps; re-screenshot until it looks right — do not skip 
 
 ---
 
@@ -162,5 +163,5 @@ When an agent edits Figma:
 
 - Figma file: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)  
 - Design review against device: `.agents/skills/design-review/SKILL.md`  
-- Compose screen conventions: `.cursor/rules/compose-screens.mdc`  
+- Compose screen conventions: `docs/agents/screen-context.md`  
 - Requirements / architecture: `project/requierments.md`, `project/architecture.md`
