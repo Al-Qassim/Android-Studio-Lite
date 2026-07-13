@@ -145,6 +145,7 @@ When an agent edits Figma:
    - **Flows index** auto-layout must `primaryAxisSizingMode = 'AUTO'` (hug content). A FIXED ~10px-tall index box means the list is clipped/invisible.
    - **Case subtitles** under side-by-side phones must be **≤ phone column width (~240)** — never leave 500px-wide text that overlaps the next case.
    - **Main action on a phone** = DS **`Button / primary`**. Do not use a homemade chip/rect for the primary CTA (e.g. “Open device page”).
+   - **Text must stay inside its card/box.** Do not paste long body copy into a small surface card; use a short subtitle (or grow the card). After text edits, check that `text.y + text.height` ≤ card bottom.
 7. **Before calling done:** take a fresh screenshot of the finished design, evaluate it, and improve anything that fails the checklist or looks worse than Projects management / Files editor. Repeat until the screenshot looks right.
 
 ---
@@ -158,6 +159,7 @@ When an agent edits Figma:
 - [ ] Buttons / top bars / status / icons are **DS instances**; main CTA is **primary**  
 - [ ] Run (and other icons) use **Icon / …** from Design System, correct tint  
 - [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
+- [ ] Text inside cards/boxes does not overflow the card bounds  
 - [ ] In-progress = dots; complete = check; failed step = ✕ + error copy  
 - [ ] No nested frame title clutter; phone frame name blank if labeled in text  
 - [ ] No white fills on structural frames  
