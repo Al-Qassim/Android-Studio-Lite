@@ -1,8 +1,10 @@
 package com.robotopia.androidstudiolite.feature.buildapk.data
 
+import com.robotopia.androidstudiolite.core.error.AppException
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -13,21 +15,29 @@ import java.util.zip.ZipOutputStream
 internal object ProjectZipper {
 
     fun zipProject(projectRoot: File, destinationZip: File) {
-        require(projectRoot.isDirectory) { "projectRoot must be a directory" }
-        destinationZip.parentFile?.mkdirs()
-        if (destinationZip.exists()) destinationZip.delete()
+        if (!projectRoot.isDirectory) {
+            throw AppException("Couldn't find the project files to upload.")
+        }
+        try {
+            destinationZip.parentFile?.mkdirs()
+            if (destinationZip.exists()) destinationZip.delete()
 
-        val ignore = loadIgnoreRules(projectRoot)
-        ZipOutputStream(BufferedOutputStream(FileOutputStream(destinationZip))).use { zos ->
-            projectRoot.walkTopDown()
-                .filter { it.isFile }
-                .forEach { file ->
-                    val relative = file.relativeTo(projectRoot).invariantSeparatorsPath
-                    if (shouldSkip(relative, ignore)) return@forEach
-                    zos.putNextEntry(ZipEntry(relative))
-                    file.inputStream().use { it.copyTo(zos) }
-                    zos.closeEntry()
-                }
+            val ignore = loadIgnoreRules(projectRoot)
+            ZipOutputStream(BufferedOutputStream(FileOutputStream(destinationZip))).use { zos ->
+                projectRoot.walkTopDown()
+                    .filter { it.isFile }
+                    .forEach { file ->
+                        val relative = file.relativeTo(projectRoot).invariantSeparatorsPath
+                        if (shouldSkip(relative, ignore)) return@forEach
+                        zos.putNextEntry(ZipEntry(relative))
+                        file.inputStream().use { it.copyTo(zos) }
+                        zos.closeEntry()
+                    }
+            }
+        } catch (e: AppException) {
+            throw e
+        } catch (e: IOException) {
+            throw AppException("Couldn't package project sources. Try again.", e)
         }
     }
 
