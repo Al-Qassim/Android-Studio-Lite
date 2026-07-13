@@ -25,7 +25,6 @@ import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.Conn
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectFailedBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectLoadingBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectShowCodeBody
-import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectWaitingBody
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
@@ -60,7 +59,6 @@ internal fun ConnectAccountScreen(
         onOpenVerificationUri = { uri ->
             openVerificationUri(
                 uri = uri,
-                uiState = viewModel.uiState,
                 openUri = uriHandler::openUri,
             )
         },
@@ -101,11 +99,6 @@ internal fun ConnectAccountScreen(
                 state = state,
                 onOpenVerificationUri = onOpenVerificationUri,
                 onCopyCode = onCopyCode,
-            )
-
-            is ConnectUiState.Waiting -> ConnectWaitingBody(
-                state = state,
-                onCancel = onCancel,
             )
 
             is ConnectUiState.Connected -> ConnectConnectedBody(

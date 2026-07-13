@@ -97,7 +97,7 @@ Ship real cloud APK builds on the user’s GitHub account:
 
 | Flow | Primary controls |
 | --- | --- |
-| Connect | **Open GitHub**, Cancel; waiting `•••`; Continue on success; Try again on fail |
+| Connect | **Open GitHub** + copy code stay on screen while polling; Continue on success; Try again on fail |
 | Onboarding | **Connect GitHub**, **Skip for now** |
 | Settings | **Connect GitHub** / **Log out** |
 | Build gate | Disabled Start build + **Connect GitHub** |

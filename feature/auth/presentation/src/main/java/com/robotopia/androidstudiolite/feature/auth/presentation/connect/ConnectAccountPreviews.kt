@@ -24,10 +24,6 @@ internal class ConnectAccountPreviewProvider : PreviewParameterProvider<ConnectA
             ),
         ),
         ConnectAccountPreviewCase(
-            "waiting",
-            ConnectUiState.Waiting(userCode = "WDJB-MJHT"),
-        ),
-        ConnectAccountPreviewCase(
             "connected",
             ConnectUiState.Connected(
                 account = AuthAccount(providerName = "GitHub", identity = "@alex-dev"),

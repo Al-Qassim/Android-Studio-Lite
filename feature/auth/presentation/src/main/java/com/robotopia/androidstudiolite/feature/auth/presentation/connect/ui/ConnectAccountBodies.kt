@@ -91,37 +91,6 @@ internal fun ConnectShowCodeBody(
 }
 
 @Composable
-internal fun ConnectWaitingBody(
-    state: ConnectUiState.Waiting,
-    onCancel: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            BasicText(
-                text = "Waiting for approval…",
-                style = Typography.Headline.copy(color = Colors.Text),
-            )
-            UserCodeCard(userCode = state.userCode)
-            WaitingDotsRow()
-            Button(
-                label = "Cancel",
-                onClick = onCancel,
-                modifier = Modifier.fillMaxWidth(),
-                variant = ButtonVariant.Secondary,
-            )
-        }
-    }
-}
-
-@Composable
 internal fun ConnectConnectedBody(
     state: ConnectUiState.Connected,
     onContinue: () -> Unit,
@@ -241,27 +210,6 @@ private fun UserCodeCopyRow(
 }
 
 @Composable
-private fun UserCodeCard(userCode: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Colors.Surface2)
-            .padding(horizontal = 14.dp, vertical = 14.dp),
-    ) {
-        BasicText(
-            text = userCode,
-            style = Typography.Headline.copy(
-                color = Colors.Text,
-                fontSize = 24.sp,
-                lineHeight = 30.sp,
-                letterSpacing = 1.5.sp,
-            ),
-        )
-    }
-}
-
-@Composable
 private fun AccountCard(account: AuthAccount) {
     Column(
         modifier = Modifier
@@ -279,22 +227,5 @@ private fun AccountCard(account: AuthAccount) {
             text = account.identity,
             style = Typography.Subtitle.copy(color = Colors.Text),
         )
-    }
-}
-
-@Composable
-private fun WaitingDotsRow() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        repeat(3) {
-            Box(
-                modifier = Modifier
-                    .size(6.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(Colors.Primary),
-            )
-        }
     }
 }

@@ -91,6 +91,7 @@ Mockups should show the **real UX** users will get when the feature is honest/pr
 
 - **Do not** put v0.1 / “demo APK” / “not from your sources” banners on screens. Demo honesty can live in notes or docs, not in the phone chrome.  
 - Prefer real-case copy: e.g. `Waiting in queue…`, `Uploading project sources…`, `Building APK remotely…`, `Downloading APK…`, `APK ready to install`.  
+- **Connect device flow:** keep the user-code + **Open provider** screen until Connected or Failed. Do **not** auto-advance to a separate “Waiting for approval” phone that removes copy/open actions. Poll in the background.  
 - **Name the build provider on phones.** Mockups and preview fixtures show the **concrete current provider** (today **GitHub**). Production Compose must still be **provider-agnostic**: interpolate API fields (`providerName` / `providerDisplayName` / `verificationUri`) — do not hardcode a vendor in identifiers or chrome. Do **not** leave vague “your provider” / “cloud account” wording on user-visible phone chrome when a concrete provider is shipping.  
 - Labels like **Install app** (not “Install demo APK”) unless the shipping UI truly says otherwise.  
 - Skip system-installer handoff screens — after **Install app**, Android’s package UI takes over; don’t mock that as case `4a`.
@@ -177,7 +178,8 @@ When an agent edits Figma:
 - [ ] Run / add / settings (and other icons) use **Icon / …** from Design System — **no homemade stand-ins** (circle+dot, emoji, freehand); if missing from DS, add from Compose drawable first  
 - [ ] Sibling top-bar icons match size/family/tint tokens  
 - [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
-- [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions) — same cut on Waiting / Connected / Failed / Settings / gate / onboarding  
+- [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions) — same cut on Connected / Failed / Settings / gate / onboarding  
+- [ ] Connect: code + open CTA stay until Connected/Failed (no intermediate Waiting phone that removes actions)  
 - [ ] After cutting copy, content + CTA is one tight group, vertically centered under the top bar on short instructional phones (no mid-band void, no dead lower half)  
 - [ ] Obvious actions (copy / more / back / run / add / settings) are **icon-only** — no redundant text label on the control; sibling top-bar actions match type  
 - [ ] Settings is a permanent Projects top-bar control (gear), not a transient text link  
