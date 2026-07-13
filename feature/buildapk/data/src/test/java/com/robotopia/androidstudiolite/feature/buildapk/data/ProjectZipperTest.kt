@@ -1,6 +1,8 @@
 package com.robotopia.androidstudiolite.feature.buildapk.data
 
+import com.robotopia.androidstudiolite.core.error.AppException
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +37,15 @@ class ProjectZipperTest {
             assertTrue(names.contains("app/src/main/AndroidManifest.xml"))
             assertFalse(names.any { it.startsWith("app/build/") })
             assertFalse(names.contains("secret.txt"))
+        }
+    }
+
+    @Test
+    fun zipProject_missingRoot_throwsAppException() {
+        val missing = File(tmp.root, "does-not-exist")
+        val zip = tmp.newFile("out.zip")
+        assertThrows(AppException::class.java) {
+            ProjectZipper.zipProject(missing, zip)
         }
     }
 }
