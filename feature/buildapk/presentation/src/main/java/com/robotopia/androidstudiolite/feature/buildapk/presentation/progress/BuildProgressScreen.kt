@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ internal fun BuildProgressScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(jobId, buildService) {
         buildService.observeBuild(jobId).collect { progress ->
@@ -39,5 +41,8 @@ internal fun BuildProgressScreen(
             onReadyToInstall(apkPath)
         },
         onRetry = onRetry,
+        onViewLog = { url ->
+            runCatching { uriHandler.openUri(url) }
+        },
     )
 }

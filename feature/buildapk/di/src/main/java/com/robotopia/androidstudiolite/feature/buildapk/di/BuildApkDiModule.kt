@@ -14,6 +14,12 @@ import org.koin.dsl.module
 val buildApkDiModule = module {
     single<BuildService> { FakeBuildService(context = androidContext()) }
     single<ApkInstaller> { DefaultApkInstaller(context = androidContext()) }
-    single<BuildScreens> { DefaultBuildScreens(buildService = get()) }
+    single<BuildScreens> {
+        DefaultBuildScreens(
+            buildService = get(),
+            authSession = get(),
+            authScreens = get(),
+        )
+    }
     viewModel { BuildProgressViewModel() }
 }

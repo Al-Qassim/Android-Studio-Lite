@@ -3,7 +3,7 @@ package com.robotopia.androidstudiolite.feature.buildapk.data
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
 
 /**
- * Pure timed phase sequence for the v0.1 fake build (~7s total).
+ * Pure timed phase sequence for the fake build (~8s total).
  * Real cloud builds will replace this; keep logic testable without Android.
  */
 internal object FakeBuildPhaseMachine {
@@ -14,16 +14,23 @@ internal object FakeBuildPhaseMachine {
         val message: String,
     )
 
+    const val PROVIDER_NAME = "GitHub"
+
     val timedPhases: List<TimedPhase> = listOf(
         TimedPhase(
-            phase = BuildPhase.Queued,
+            phase = BuildPhase.Preparing,
             durationMs = 1_000L,
-            message = "Waiting in queue…",
+            message = "Preparing workspace…",
         ),
         TimedPhase(
             phase = BuildPhase.Uploading,
             durationMs = 1_500L,
             message = "Uploading project sources…",
+        ),
+        TimedPhase(
+            phase = BuildPhase.Queued,
+            durationMs = 1_000L,
+            message = "Waiting in queue…",
         ),
         TimedPhase(
             phase = BuildPhase.Building,

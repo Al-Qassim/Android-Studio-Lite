@@ -46,8 +46,9 @@ class FakeBuildService(
         val progress = MutableStateFlow(
             BuildProgress(
                 jobId = jobId,
-                phase = BuildPhase.Queued,
-                message = FakeBuildPhaseMachine.messageForPhase(BuildPhase.Queued),
+                phase = BuildPhase.Preparing,
+                message = FakeBuildPhaseMachine.messageForPhase(BuildPhase.Preparing),
+                providerName = FakeBuildPhaseMachine.PROVIDER_NAME,
             ),
         )
         val runner = scope.launch {
@@ -78,6 +79,8 @@ class FakeBuildService(
                 it.copy(
                     phase = timed.phase,
                     message = timed.message,
+                    providerName = FakeBuildPhaseMachine.PROVIDER_NAME,
+                    logUrl = null,
                 )
             }
             var waited = 0L
@@ -95,7 +98,9 @@ class FakeBuildService(
                     it.copy(
                         phase = BuildPhase.Failed,
                         message = null,
-                        error = "Could not prepare demo APK",
+                        error = "The cloud build failed. Open the GitHub Actions log for details.",
+                        providerName = FakeBuildPhaseMachine.PROVIDER_NAME,
+                        logUrl = "https://github.com/",
                     )
                 }
                 jobs.remove(jobId)
@@ -107,6 +112,7 @@ class FakeBuildService(
                 phase = BuildPhase.ReadyToInstall,
                 message = FakeBuildPhaseMachine.messageForPhase(BuildPhase.ReadyToInstall),
                 apkLocalPath = apkPath,
+                providerName = FakeBuildPhaseMachine.PROVIDER_NAME,
             )
         }
     }

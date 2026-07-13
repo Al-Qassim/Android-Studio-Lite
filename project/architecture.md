@@ -44,6 +44,8 @@ feature/
   files/      model · api · data · presentation · di
   editor/     model · api · data · presentation · di
   buildapk/   model · api · data · presentation · di
+  auth/       model · api · data · presentation · di   # session + Connect account
+  github/     api · data · di                          # stateless GitHub helpers
 integration/
   database                  # Room assembly (feature entities/DAOs)
   di                        # aggregates feature + database Koin modules
@@ -157,7 +159,8 @@ Build ──► ApkInstaller (system UI) ; dismiss ──► returnTo
 | Project files | App-private FS; CRUD via `:feature:files:data` |
 | Editor buffer | Memory in `:feature:editor:data`; disk via files API |
 | Build artifacts | Local cache + demo asset in `:feature:buildapk:data` |
-| Remote CI | **None yet** |
+| Auth session | SharedPreferences in `:feature:auth:data` (stub device flow) |
+| Remote CI | **None yet** (real GHA = `#25`) |
 
 ---
 

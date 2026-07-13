@@ -19,11 +19,22 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
 
     override val values = sequenceOf(
         BuildProgressPreviewCase(
+            label = "preparing",
+            state = BuildProgressUiState(
+                phase = BuildPhase.Preparing,
+                message = "Preparing workspace…",
+                progressFraction = 0.05f,
+                providerName = "GitHub",
+            ),
+            onRetry = null,
+        ),
+        BuildProgressPreviewCase(
             label = "queued",
             state = BuildProgressUiState(
                 phase = BuildPhase.Queued,
                 message = "Waiting in queue…",
-                progressFraction = 0.05f,
+                progressFraction = 0.35f,
+                providerName = "GitHub",
             ),
             onRetry = null,
         ),
@@ -32,7 +43,8 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.Uploading,
                 message = "Uploading project sources…",
-                progressFraction = 0.25f,
+                progressFraction = 0.2f,
+                providerName = "GitHub",
             ),
             onRetry = null,
         ),
@@ -42,6 +54,7 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
                 phase = BuildPhase.Building,
                 message = "Building APK remotely…",
                 progressFraction = 0.55f,
+                providerName = "GitHub",
             ),
             onRetry = null,
         ),
@@ -51,6 +64,7 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
                 phase = BuildPhase.Downloading,
                 message = "Downloading APK…",
                 progressFraction = 0.85f,
+                providerName = "GitHub",
             ),
             onRetry = null,
         ),
@@ -61,45 +75,30 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
                 message = "APK ready to install",
                 progressFraction = 1f,
                 apkLocalPath = "/cache/demo.apk",
+                providerName = "GitHub",
             ),
             onRetry = null,
         ),
         BuildProgressPreviewCase(
-            label = "ready · install disabled",
-            state = BuildProgressUiState(
-                phase = BuildPhase.ReadyToInstall,
-                message = "APK ready to install",
-                progressFraction = 1f,
-                apkLocalPath = null,
-            ),
-            onRetry = null,
-        ),
-        BuildProgressPreviewCase(
-            label = "failed · building",
+            label = "failed · with log",
             state = BuildProgressUiState(
                 phase = BuildPhase.Failed,
-                error = "Building failed: Task :app:compileDebugKotlin failed with 2 errors.",
+                error = "The cloud build failed. Open the GitHub Actions log for details.",
                 failedAtPhase = BuildPhase.Building,
+                providerName = "GitHub",
+                logUrl = "https://github.com/",
             ),
             onRetry = {},
         ),
         BuildProgressPreviewCase(
-            label = "failed · downloading",
+            label = "failed · no log",
             state = BuildProgressUiState(
                 phase = BuildPhase.Failed,
-                error = "Could not prepare demo APK",
-                failedAtPhase = BuildPhase.Downloading,
+                error = "The cloud build failed. Open the GitHub Actions log for details.",
+                failedAtPhase = BuildPhase.Building,
+                providerName = "GitHub",
             ),
             onRetry = {},
-        ),
-        BuildProgressPreviewCase(
-            label = "failed · no retry",
-            state = BuildProgressUiState(
-                phase = BuildPhase.Failed,
-                error = "Build not found",
-                failedAtPhase = BuildPhase.Queued,
-            ),
-            onRetry = null,
         ),
         BuildProgressPreviewCase(
             label = "cancelled",
@@ -123,5 +122,6 @@ private fun BuildProgressPreview(
         onCancel = {},
         onInstall = {},
         onRetry = case.onRetry,
+        onViewLog = if (case.state.logUrl != null) ({}) else null,
     )
 }
