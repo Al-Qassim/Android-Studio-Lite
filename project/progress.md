@@ -4,7 +4,7 @@
 
 On-device Compose IDE: manage projects → browse/edit files → Run → build → install APK.
 
-## Status: v0.1 loop works; cloud-build UI in review
+## Status: v0.1 loop works; cloud-build Connect UI on main
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -16,16 +16,16 @@ On-device Compose IDE: manage projects → browse/edit files → Run → build �
 | IDE nav wiring | Done | `#11` · `:integration:navigation` `IdeNavHost` |
 | Parent plan | Done | `#5` · `project/architecture.md` · `project/v0.1-implementation-plan.md` |
 | Cloud-build PRD + design | Done | `#19`–`#21` · `project/cloud-build-prd.md` · Figma Connect / Settings / Onboarding / Run & build |
-| Connect + build UI | **In review** | `#22` + `#24` (+ Settings from `#23`) · Projects **⚙ Settings** → GitHub Connect / Log out; build gate; Preparing / via GitHub / View build log |
+| Connect + build UI | Done | `#22` + `#24` / [PR #26](https://github.com/Al-Qassim/Android-Studio-Lite/pull/26) · Settings Build account; build gate; Preparing / via provider / View build log |
 
 ## Product path (shipped)
 
-**Projects** → **Files** → **Editor** → **Run** → **Build** (logged-out: Connect GitHub gate → Connect account) → progress (Preparing…) → **Install app** (still fake APK until `#25`).
+**Projects** → **Files** → **Editor** → **Run** → **Build** (logged-out: Connect gate → Connect account) → progress (Preparing…) → **Install app** (still fake APK until `#25`).
 
 ## Not in v0.1 (by design)
 
-- Real GitHub Actions Gradle — `#25` (after Connect surfaces `#23`)
-- Settings / Onboarding Connect surfaces — `#23`
+- Real GitHub Actions Gradle — `#25`
+- Onboarding Connect surface — remaining `#23` (Settings + build gate already shipped in `#26`)
 - Git, AI, syntax highlighting
 - User Documents storage; Gradle wrapper jars in generated projects
 
