@@ -21,12 +21,14 @@ internal fun ConnectAccountScreen(
 ) {
     var attempt by remember { mutableIntStateOf(0) }
     var state by remember { mutableStateOf<ConnectUiState>(ConnectUiState.Loading) }
+    var lastUserCode by remember { mutableStateOf("") }
     val uriHandler = LocalUriHandler.current
 
     BackHandler(onBack = onCancel)
 
     LaunchedEffect(attempt) {
         state = ConnectUiState.Loading
+        lastUserCode = ""
         authService.connect()
             .catch {
                 state = ConnectUiState.Failed(
@@ -34,7 +36,24 @@ internal fun ConnectAccountScreen(
                 )
             }
             .collect { progress ->
-                state = progress.toUiState()
+                when (progress) {
+                    is ConnectProgress.ShowCode -> {
+                        lastUserCode = progress.userCode
+                        state = ConnectUiState.ShowCode(
+                            userCode = progress.userCode,
+                            verificationUri = progress.verificationUri,
+                        )
+                    }
+                    ConnectProgress.Waiting -> {
+                        state = ConnectUiState.Waiting(userCode = lastUserCode)
+                    }
+                    is ConnectProgress.Connected -> {
+                        state = ConnectUiState.Connected(account = progress.account)
+                    }
+                    is ConnectProgress.Failed -> {
+                        state = ConnectUiState.Failed(message = progress.message)
+                    }
+                }
             }
     }
 
@@ -45,27 +64,11 @@ internal fun ConnectAccountScreen(
             runCatching { uriHandler.openUri(uri) }
             val current = state
             if (current is ConnectUiState.ShowCode) {
-                state = ConnectUiState.Waiting(
-                    userCode = current.userCode,
-                    verificationUri = current.verificationUri,
-                )
+                state = ConnectUiState.Waiting(userCode = current.userCode)
             }
         },
         onCancel = onCancel,
         onContinue = onFinished,
         onTryAgain = { attempt += 1 },
     )
-}
-
-private fun ConnectProgress.toUiState(): ConnectUiState = when (this) {
-    is ConnectProgress.ShowCode -> ConnectUiState.ShowCode(
-        userCode = userCode,
-        verificationUri = verificationUri,
-    )
-    is ConnectProgress.Waiting -> ConnectUiState.Waiting(
-        userCode = userCode,
-        verificationUri = verificationUri,
-    )
-    is ConnectProgress.Connected -> ConnectUiState.Connected(account = account)
-    is ConnectProgress.Failed -> ConnectUiState.Failed(message = message)
 }

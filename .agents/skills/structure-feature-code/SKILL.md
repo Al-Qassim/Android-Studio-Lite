@@ -17,6 +17,7 @@ Reusable conventions for feature modules (mobile or similar layered apps). Adapt
 1. Split by role: **model** (types) · **api** (contracts) · **data** (impl) · **presentation** (UI) · **di** (bindings) — or the project’s equivalent.
 2. Each feature owns its **in-feature** navigation (e.g. list ↔ create).
 3. The app / integration navigator only wires **cross-feature** exits. No feature toasts, dialogs, or internal routes in the root host.
+4. **`:model` / `:api` do not shape themselves around UI layout.** Progress/result types carry domain facts the caller needs for the next action (e.g. challenge code + URI to open). Do not add fields only so a later screen can redraw chrome that the presentation layer can retain from an earlier emission. UI state may keep display data; the public model must not.
 
 ## 2. Errors
 
@@ -85,6 +86,7 @@ Do not grow a Content callback list past ~6–8 parameters — switch to Screen 
 ## 6. Checklist
 
 - [ ] Feature owns sub-navigation; root host stays thin
+- [ ] `:model` / `:api` carry domain facts only — not fields added solely for redrawing UI chrome
 - [ ] Validation only in data/domain; API exposed for UI
 - [ ] User-safe errors (UI message vs log-only unexpected)
 - [ ] State holder is state-only

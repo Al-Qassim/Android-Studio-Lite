@@ -8,15 +8,14 @@ data class AuthAccount(
 
 /** Live device-authorization progress for Connect account. */
 sealed interface ConnectProgress {
+    /** Challenge ready: caller may show [userCode] and open [verificationUri]. */
     data class ShowCode(
         val userCode: String,
         val verificationUri: String,
     ) : ConnectProgress
 
-    data class Waiting(
-        val userCode: String,
-        val verificationUri: String,
-    ) : ConnectProgress
+    /** Polling for authorization; no new domain payload. */
+    data object Waiting : ConnectProgress
 
     data class Connected(
         val account: AuthAccount,

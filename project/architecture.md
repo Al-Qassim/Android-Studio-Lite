@@ -56,10 +56,10 @@ Full include list: `settings.gradle.kts`.
 
 | Slice | Owns |
 | --- | --- |
-| `:model` | Immutable types / IDs |
+| `:model` | Immutable domain types / IDs — facts for callers, not UI layout bags |
 | `:api` | Service + `*Screens` interfaces |
 | `:data` | Persistence / FS / service impl |
-| `:presentation` | Compose UI (+ Screen Context for busy screens) |
+| `:presentation` | Compose UI (+ Screen Context for busy screens); may retain prior domain facts for display |
 | `:di` | Feature Koin bindings |
 
 ---

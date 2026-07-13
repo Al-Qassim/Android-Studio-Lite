@@ -38,12 +38,7 @@ class DefaultAuthService(
         delay(1_200)
         if (!currentCoroutineContext().isActive) return@flow
 
-        emit(
-            ConnectProgress.Waiting(
-                userCode = device.userCode,
-                verificationUri = device.verificationUri,
-            ),
-        )
+        emit(ConnectProgress.Waiting)
 
         val deadlineMs = System.currentTimeMillis() + device.expiresInSeconds * 1_000L
         val intervalMs = (device.intervalSeconds.coerceAtLeast(1)) * 1_000L

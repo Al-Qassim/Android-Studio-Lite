@@ -36,7 +36,6 @@ internal sealed interface ConnectUiState {
 
     data class Waiting(
         val userCode: String,
-        val verificationUri: String,
     ) : ConnectUiState
 
     data class Connected(
@@ -356,7 +355,6 @@ private fun ConnectWaitingPreview() {
     ConnectAccountContent(
         state = ConnectUiState.Waiting(
             userCode = "WDJB-MJHT",
-            verificationUri = "https://github.com/login/device",
         ),
         onBackClick = {},
         onOpenGitHub = {},
