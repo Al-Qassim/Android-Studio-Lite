@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,6 +26,7 @@ import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.Conn
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectLoadingBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectShowCodeBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectWaitingBody
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
 
@@ -41,7 +42,8 @@ internal fun ConnectAccountScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val connectAttempt by viewModel.connectAttempt.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
-    val clipboard = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
 
     BackHandler(onBack = onCancel)
 
@@ -63,8 +65,8 @@ internal fun ConnectAccountScreen(
             )
         },
         onCopyCode = { code ->
-            copyUserCode(code) { text ->
-                clipboard.setText(AnnotatedString(text))
+            scope.launch {
+                copyUserCode(code = code, clipboard = clipboard)
             }
         },
         onCancel = onCancel,

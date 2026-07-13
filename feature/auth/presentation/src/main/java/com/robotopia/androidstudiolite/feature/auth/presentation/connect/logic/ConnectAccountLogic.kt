@@ -1,5 +1,8 @@
 package com.robotopia.androidstudiolite.feature.auth.presentation.connect.logic
 
+import android.content.ClipData
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
 import com.robotopia.androidstudiolite.feature.auth.model.ConnectProgress
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ConnectUiState
@@ -56,9 +59,11 @@ internal fun openVerificationUri(
     }
 }
 
-internal fun copyUserCode(
+internal suspend fun copyUserCode(
     code: String,
-    setClipboardText: (String) -> Unit,
+    clipboard: Clipboard,
 ) {
-    setClipboardText(code)
+    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(CLIP_LABEL, code)))
 }
+
+private const val CLIP_LABEL = "device code"

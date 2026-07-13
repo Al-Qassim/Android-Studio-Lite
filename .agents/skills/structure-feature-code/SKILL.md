@@ -105,7 +105,15 @@ When the screen grows many components (list + menus + dialogs), **add** a `*Scre
 4. Comment on the PR for that slice.
 5. Repeat.
 
-## 6. Checklist
+## 6. Finish checks
+
+Before calling UI/code work done:
+
+1. Compile the touched modules (and install when the change is user-visible).
+2. Clear **deprecation / error diagnostics in files you touched** — prefer current public APIs over `@Deprecated` replacements the IDE already flags.
+3. Walk the changed flow on device when UX changed.
+
+## 7. Checklist
 
 - [ ] Provider-shaped screens: no vendor in presentation identifiers or hardcoded chrome; name/URI from API (previews may fixture the current provider)
 - [ ] Feature owns sub-navigation; root host stays thin
@@ -116,6 +124,7 @@ When the screen grows many components (list + menus + dialogs), **add** a `*Scre
 - [ ] Host builds context with `remember(…keys)` + VM; busy screen → Screen Context (`docs/agents/screen-context.md`); thin screen → small Screen/Content OK
 - [ ] No nested function declarations (helpers at file / private top level)
 - [ ] Multi-state previews (fixtures in `*Previews.kt`, thin stub on screen)
+- [ ] Touched files free of deprecation/error diagnostics; compile (+ install if UI) before done
 - [ ] Focused commit → push → PR comment (if on a PR)
 
 ## Portability
