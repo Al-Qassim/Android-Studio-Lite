@@ -141,13 +141,27 @@ class GitHubActionsBuildService(
             // cancelBuild owns Cancelled progress; do not flash Failed.
             throw e
         } catch (e: AppException) {
-            markFailed(progress = progress, error = e.uiMessage, logUrl = logUrl)
+            if (progress.value.phase != BuildPhase.Cancelled) {
+                progress.update {
+                    it.copy(
+                        phase = BuildPhase.Failed,
+                        message = null,
+                        error = e.uiMessage,
+                        logUrl = logUrl,
+                    )
+                }
+            }
         } catch (_: Exception) {
-            markFailed(
-                progress = progress,
-                error = "Build failed. Open the build log.",
-                logUrl = logUrl,
-            )
+            if (progress.value.phase != BuildPhase.Cancelled) {
+                progress.update {
+                    it.copy(
+                        phase = BuildPhase.Failed,
+                        message = null,
+                        error = "Build failed. Open the build log.",
+                        logUrl = logUrl,
+                    )
+                }
+            }
         } finally {
             val rel = release
             val r = repo
@@ -162,11 +176,14 @@ class GitHubActionsBuildService(
         token: String,
         progress: MutableStateFlow<BuildProgress>,
     ): GitHubRepoRef {
-        emitPhase(
-            progress = progress,
-            phase = BuildPhase.Preparing,
-            message = "Ensuring build sandbox…",
-        )
+        progress.update {
+            it.copy(
+                phase = BuildPhase.Preparing,
+                message = "Ensuring build sandbox…",
+                providerName = authSession.providerDisplayName,
+                error = null,
+            )
+        }
         val repo = gitHubClient.ensureSandboxRepo(token)
         jobs[jobId]?.repo = repo
         gitHubClient.ensureWorkflowFile(token, repo)
@@ -181,20 +198,26 @@ class GitHubActionsBuildService(
         repo: GitHubRepoRef,
         progress: MutableStateFlow<BuildProgress>,
     ): UploadedSources {
-        emitPhase(
-            progress = progress,
-            phase = BuildPhase.Uploading,
-            message = "Zipping project sources…",
-        )
+        progress.update {
+            it.copy(
+                phase = BuildPhase.Uploading,
+                message = "Zipping project sources…",
+                providerName = authSession.providerDisplayName,
+                error = null,
+            )
+        }
         val zipFile = File(appContext.cacheDir, "buildapk/project-$jobId.zip")
         ProjectZipper.zipProject(File(request.projectRoot.absolutePath), zipFile)
 
         val tag = "asl-build-$jobId"
-        emitPhase(
-            progress = progress,
-            phase = BuildPhase.Uploading,
-            message = "Uploading project sources…",
-        )
+        progress.update {
+            it.copy(
+                phase = BuildPhase.Uploading,
+                message = "Uploading project sources…",
+                providerName = authSession.providerDisplayName,
+                error = null,
+            )
+        }
         val release = gitHubClient.createRelease(token, repo, tag)
         gitHubClient.uploadReleaseAsset(token, release, zipFile, "project.zip")
         jobs[jobId]?.release = release
@@ -209,11 +232,14 @@ class GitHubActionsBuildService(
         releaseTag: String,
         progress: MutableStateFlow<BuildProgress>,
     ): String? {
-        emitPhase(
-            progress = progress,
-            phase = BuildPhase.Queued,
-            message = "Starting remote build…",
-        )
+        progress.update {
+            it.copy(
+                phase = BuildPhase.Queued,
+                message = "Starting remote build…",
+                providerName = authSession.providerDisplayName,
+                error = null,
+            )
+        }
         val dispatchAt = dispatchWorkflowWithRetry(token = token, repo = repo, releaseTag = releaseTag)
         val run = findWorkflowRun(
             token = token,
@@ -290,22 +316,28 @@ class GitHubActionsBuildService(
                 }
                 "queued", "waiting", "pending", "requested" -> {
                     if (progress.value.phase.ordinal < BuildPhase.Building.ordinal) {
-                        emitPhase(
-                            progress = progress,
-                            phase = BuildPhase.Queued,
-                            message = "Waiting in queue…",
-                            logUrl = logUrl,
-                        )
+                        progress.update {
+                            it.copy(
+                                phase = BuildPhase.Queued,
+                                message = "Waiting in queue…",
+                                providerName = authSession.providerDisplayName,
+                                logUrl = logUrl,
+                                error = null,
+                            )
+                        }
                     }
                     delay(RUN_POLL_MS)
                 }
                 else -> {
-                    emitPhase(
-                        progress = progress,
-                        phase = BuildPhase.Building,
-                        message = "Building APK remotely…",
-                        logUrl = logUrl,
-                    )
+                    progress.update {
+                        it.copy(
+                            phase = BuildPhase.Building,
+                            message = "Building APK remotely…",
+                            providerName = authSession.providerDisplayName,
+                            logUrl = logUrl,
+                            error = null,
+                        )
+                    }
                     delay(RUN_POLL_MS)
                 }
             }
@@ -321,12 +353,15 @@ class GitHubActionsBuildService(
         logUrl: String?,
         progress: MutableStateFlow<BuildProgress>,
     ) {
-        emitPhase(
-            progress = progress,
-            phase = BuildPhase.Downloading,
-            message = "Downloading APK…",
-            logUrl = logUrl,
-        )
+        progress.update {
+            it.copy(
+                phase = BuildPhase.Downloading,
+                message = "Downloading APK…",
+                providerName = authSession.providerDisplayName,
+                logUrl = logUrl,
+                error = null,
+            )
+        }
         val apkFile = File(appContext.cacheDir, "buildapk/asl-$jobId.apk")
         val assetUrl = gitHubClient.findReleaseApkAssetUrl(token, repo, releaseTag)
         gitHubClient.downloadAssetToFile(token, assetUrl, apkFile)
@@ -337,39 +372,6 @@ class GitHubActionsBuildService(
                 apkLocalPath = apkFile.absolutePath,
                 logUrl = logUrl,
                 error = null,
-            )
-        }
-    }
-
-    private fun emitPhase(
-        progress: MutableStateFlow<BuildProgress>,
-        phase: BuildPhase,
-        message: String,
-        logUrl: String? = progress.value.logUrl,
-    ) {
-        progress.update {
-            it.copy(
-                phase = phase,
-                message = message,
-                providerName = authSession.providerDisplayName,
-                logUrl = logUrl,
-                error = null,
-            )
-        }
-    }
-
-    private fun markFailed(
-        progress: MutableStateFlow<BuildProgress>,
-        error: String,
-        logUrl: String?,
-    ) {
-        if (progress.value.phase == BuildPhase.Cancelled) return
-        progress.update {
-            it.copy(
-                phase = BuildPhase.Failed,
-                message = null,
-                error = error,
-                logUrl = logUrl,
             )
         }
     }

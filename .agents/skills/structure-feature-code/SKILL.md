@@ -82,6 +82,10 @@ Rules (same as Screen Context, adapted):
 6. Design-system stays parameterized.
 7. Prefer this shape over a single Screen+Content file even when the screen is small (Connect, Settings hub, Build account).
 
+### Extract meaningful units
+
+Split long methods into **named steps that own a real phase of work** (prepare sandbox, upload, poll run). Do **not** extract tiny wrappers that only rename a single `update` / `catch` / one-liner — keep those inline at the call site.
+
 ### Kotlin control-flow traps
 
 In `repeat` / `forEach` / similar inline loops, `return@label` exits **only that iteration** (like `continue`), not the whole loop. To stop after success, use `for` + `break`, or `return@outer` from a wrapping `run { … }`. Mistaking this for `break` can fire side effects (e.g. `workflow_dispatch`) once per attempt.
