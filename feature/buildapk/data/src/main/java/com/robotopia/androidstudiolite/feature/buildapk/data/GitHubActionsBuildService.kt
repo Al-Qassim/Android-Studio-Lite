@@ -10,6 +10,7 @@ import com.robotopia.androidstudiolite.feature.buildapk.model.BuildRequest
 import com.robotopia.androidstudiolite.feature.github.api.GitHubClient
 import com.robotopia.androidstudiolite.feature.github.api.GitHubReleaseRef
 import com.robotopia.androidstudiolite.feature.github.api.GitHubRepoRef
+import com.robotopia.androidstudiolite.feature.github.api.GitHubWorkflowRun
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -111,143 +112,42 @@ class GitHubActionsBuildService(
         var repo: GitHubRepoRef? = null
         var logUrl: String? = null
         try {
-            progress.update {
-                it.copy(
-                    phase = BuildPhase.Preparing,
-                    message = "Ensuring build sandbox…",
-                    providerName = authSession.providerDisplayName,
-                )
-            }
-            val buildRepo = gitHubClient.ensureSandboxRepo(token)
-            repo = buildRepo
-            jobs[jobId]?.repo = buildRepo
-            gitHubClient.ensureWorkflowFile(token, buildRepo)
-            delay(2_000)
-
-            progress.update {
-                it.copy(phase = BuildPhase.Uploading, message = "Zipping project sources…")
-            }
-            val zipFile = File(appContext.cacheDir, "buildapk/project-$jobId.zip")
-            ProjectZipper.zipProject(File(request.projectRoot.absolutePath), zipFile)
-
-            val tag = "asl-build-$jobId"
-            progress.update {
-                it.copy(phase = BuildPhase.Uploading, message = "Uploading project sources…")
-            }
-            release = gitHubClient.createRelease(token, buildRepo, tag).also {
-                gitHubClient.uploadReleaseAsset(token, it, zipFile, "project.zip")
-                jobs[jobId]?.release = it
-            }
-            zipFile.delete()
-
-            progress.update {
-                it.copy(phase = BuildPhase.Queued, message = "Starting remote build…")
-            }
-            val dispatchAt = System.currentTimeMillis()
-            var lastError: Exception? = null
-            var dispatched = false
-            for (attempt in 0 until 8) {
-                try {
-                    gitHubClient.dispatchWorkflow(token, buildRepo, tag)
-                    dispatched = true
-                    break
-                } catch (e: Exception) {
-                    lastError = e
-                    delay(3_000L * (attempt + 1))
-                }
-            }
-            if (!dispatched) {
-                throw lastError ?: AppException("Couldn't start the remote build. Try again.")
-            }
-
-            var run = gitHubClient.findLatestWorkflowRun(token, buildRepo, dispatchAt)
-            for (attempt in 0 until 30) {
-                if (!coroutineContext.isActive) return
-                if (run != null) break
-                delay(2_000)
-                run = gitHubClient.findLatestWorkflowRun(token, buildRepo, dispatchAt)
-            }
-            val resolved = run
-                ?: throw AppException("Couldn't find the build run after starting it. Try again.")
-            jobs[jobId]?.runId = resolved.id
-            logUrl = resolved.htmlUrl
-
-            // Stay on Queued until GitHub reports in_progress; never regress to Queued after Building.
-            while (coroutineContext.isActive) {
-                val status = gitHubClient.getWorkflowRun(token, buildRepo, resolved.id)
-                logUrl = status.htmlUrl ?: logUrl
-                when (status.status) {
-                    "completed" -> {
-                        if (status.conclusion != "success") {
-                            throw AppException("Build failed. Open the build log.")
-                        }
-                        break
-                    }
-                    "queued", "waiting", "pending", "requested" -> {
-                        if (progress.value.phase.ordinal < BuildPhase.Building.ordinal) {
-                            progress.update {
-                                it.copy(
-                                    phase = BuildPhase.Queued,
-                                    message = "Waiting in queue…",
-                                    logUrl = logUrl,
-                                )
-                            }
-                        }
-                        delay(5_000)
-                    }
-                    else -> {
-                        // in_progress and any other active status
-                        progress.update {
-                            it.copy(
-                                phase = BuildPhase.Building,
-                                message = "Building APK remotely…",
-                                logUrl = logUrl,
-                            )
-                        }
-                        delay(5_000)
-                    }
-                }
-            }
+            repo = prepareSandbox(jobId = jobId, token = token, progress = progress)
+            val uploaded = uploadProject(
+                jobId = jobId,
+                request = request,
+                token = token,
+                repo = repo,
+                progress = progress,
+            )
+            release = uploaded.release
+            logUrl = awaitRemoteBuild(
+                jobId = jobId,
+                token = token,
+                repo = repo,
+                releaseTag = uploaded.tag,
+                progress = progress,
+            )
             if (!coroutineContext.isActive) return
-
-            progress.update {
-                it.copy(phase = BuildPhase.Downloading, message = "Downloading APK…")
-            }
-            val apkFile = File(appContext.cacheDir, "buildapk/asl-$jobId.apk")
-            val assetUrl = gitHubClient.findReleaseApkAssetUrl(token, buildRepo, tag)
-            gitHubClient.downloadAssetToFile(token, assetUrl, apkFile)
-
-            progress.update {
-                it.copy(
-                    phase = BuildPhase.ReadyToInstall,
-                    message = "APK ready to install",
-                    apkLocalPath = apkFile.absolutePath,
-                    logUrl = logUrl,
-                )
-            }
+            downloadReadyApk(
+                jobId = jobId,
+                token = token,
+                repo = repo,
+                releaseTag = uploaded.tag,
+                logUrl = logUrl,
+                progress = progress,
+            )
         } catch (e: CancellationException) {
             // cancelBuild owns Cancelled progress; do not flash Failed.
             throw e
         } catch (e: AppException) {
-            if (progress.value.phase == BuildPhase.Cancelled) return
-            progress.update {
-                it.copy(
-                    phase = BuildPhase.Failed,
-                    message = null,
-                    error = e.uiMessage,
-                    logUrl = logUrl,
-                )
-            }
+            markFailed(progress = progress, error = e.uiMessage, logUrl = logUrl)
         } catch (_: Exception) {
-            if (progress.value.phase == BuildPhase.Cancelled) return
-            progress.update {
-                it.copy(
-                    phase = BuildPhase.Failed,
-                    message = null,
-                    error = "Build failed. Open the build log.",
-                    logUrl = logUrl,
-                )
-            }
+            markFailed(
+                progress = progress,
+                error = "Build failed. Open the build log.",
+                logUrl = logUrl,
+            )
         } finally {
             val rel = release
             val r = repo
@@ -257,6 +157,228 @@ class GitHubActionsBuildService(
         }
     }
 
+    private suspend fun prepareSandbox(
+        jobId: String,
+        token: String,
+        progress: MutableStateFlow<BuildProgress>,
+    ): GitHubRepoRef {
+        emitPhase(
+            progress = progress,
+            phase = BuildPhase.Preparing,
+            message = "Ensuring build sandbox…",
+        )
+        val repo = gitHubClient.ensureSandboxRepo(token)
+        jobs[jobId]?.repo = repo
+        gitHubClient.ensureWorkflowFile(token, repo)
+        delay(WORKFLOW_REGISTER_DELAY_MS)
+        return repo
+    }
+
+    private suspend fun uploadProject(
+        jobId: String,
+        request: BuildRequest,
+        token: String,
+        repo: GitHubRepoRef,
+        progress: MutableStateFlow<BuildProgress>,
+    ): UploadedSources {
+        emitPhase(
+            progress = progress,
+            phase = BuildPhase.Uploading,
+            message = "Zipping project sources…",
+        )
+        val zipFile = File(appContext.cacheDir, "buildapk/project-$jobId.zip")
+        ProjectZipper.zipProject(File(request.projectRoot.absolutePath), zipFile)
+
+        val tag = "asl-build-$jobId"
+        emitPhase(
+            progress = progress,
+            phase = BuildPhase.Uploading,
+            message = "Uploading project sources…",
+        )
+        val release = gitHubClient.createRelease(token, repo, tag)
+        gitHubClient.uploadReleaseAsset(token, release, zipFile, "project.zip")
+        jobs[jobId]?.release = release
+        zipFile.delete()
+        return UploadedSources(tag = tag, release = release)
+    }
+
+    private suspend fun awaitRemoteBuild(
+        jobId: String,
+        token: String,
+        repo: GitHubRepoRef,
+        releaseTag: String,
+        progress: MutableStateFlow<BuildProgress>,
+    ): String? {
+        emitPhase(
+            progress = progress,
+            phase = BuildPhase.Queued,
+            message = "Starting remote build…",
+        )
+        val dispatchAt = dispatchWorkflowWithRetry(token = token, repo = repo, releaseTag = releaseTag)
+        val run = findWorkflowRun(
+            token = token,
+            repo = repo,
+            notBeforeEpochMs = dispatchAt,
+        )
+        jobs[jobId]?.runId = run.id
+        return pollUntilBuildSucceeds(
+            token = token,
+            repo = repo,
+            runId = run.id,
+            initialLogUrl = run.htmlUrl,
+            progress = progress,
+        )
+    }
+
+    private suspend fun dispatchWorkflowWithRetry(
+        token: String,
+        repo: GitHubRepoRef,
+        releaseTag: String,
+    ): Long {
+        val dispatchAt = System.currentTimeMillis()
+        var lastError: Exception? = null
+        for (attempt in 0 until DISPATCH_ATTEMPTS) {
+            try {
+                gitHubClient.dispatchWorkflow(token, repo, releaseTag)
+                return dispatchAt
+            } catch (e: Exception) {
+                lastError = e
+                delay(DISPATCH_RETRY_BASE_MS * (attempt + 1))
+            }
+        }
+        throw lastError ?: AppException("Couldn't start the remote build. Try again.")
+    }
+
+    private suspend fun findWorkflowRun(
+        token: String,
+        repo: GitHubRepoRef,
+        notBeforeEpochMs: Long,
+    ): GitHubWorkflowRun {
+        var run = gitHubClient.findLatestWorkflowRun(token, repo, notBeforeEpochMs)
+        for (attempt in 0 until FIND_RUN_ATTEMPTS) {
+            if (!coroutineContext.isActive) {
+                throw CancellationException()
+            }
+            if (run != null) return run
+            delay(FIND_RUN_POLL_MS)
+            run = gitHubClient.findLatestWorkflowRun(token, repo, notBeforeEpochMs)
+        }
+        throw AppException("Couldn't find the build run after starting it. Try again.")
+    }
+
+    /**
+     * Stay on Queued until GitHub reports in_progress; never regress to Queued after Building.
+     * @return latest log URL when the run succeeds
+     */
+    private suspend fun pollUntilBuildSucceeds(
+        token: String,
+        repo: GitHubRepoRef,
+        runId: Long,
+        initialLogUrl: String?,
+        progress: MutableStateFlow<BuildProgress>,
+    ): String? {
+        var logUrl = initialLogUrl
+        while (coroutineContext.isActive) {
+            val status = gitHubClient.getWorkflowRun(token, repo, runId)
+            logUrl = status.htmlUrl ?: logUrl
+            when (status.status) {
+                "completed" -> {
+                    if (status.conclusion != "success") {
+                        throw AppException("Build failed. Open the build log.")
+                    }
+                    return logUrl
+                }
+                "queued", "waiting", "pending", "requested" -> {
+                    if (progress.value.phase.ordinal < BuildPhase.Building.ordinal) {
+                        emitPhase(
+                            progress = progress,
+                            phase = BuildPhase.Queued,
+                            message = "Waiting in queue…",
+                            logUrl = logUrl,
+                        )
+                    }
+                    delay(RUN_POLL_MS)
+                }
+                else -> {
+                    emitPhase(
+                        progress = progress,
+                        phase = BuildPhase.Building,
+                        message = "Building APK remotely…",
+                        logUrl = logUrl,
+                    )
+                    delay(RUN_POLL_MS)
+                }
+            }
+        }
+        throw CancellationException()
+    }
+
+    private suspend fun downloadReadyApk(
+        jobId: String,
+        token: String,
+        repo: GitHubRepoRef,
+        releaseTag: String,
+        logUrl: String?,
+        progress: MutableStateFlow<BuildProgress>,
+    ) {
+        emitPhase(
+            progress = progress,
+            phase = BuildPhase.Downloading,
+            message = "Downloading APK…",
+            logUrl = logUrl,
+        )
+        val apkFile = File(appContext.cacheDir, "buildapk/asl-$jobId.apk")
+        val assetUrl = gitHubClient.findReleaseApkAssetUrl(token, repo, releaseTag)
+        gitHubClient.downloadAssetToFile(token, assetUrl, apkFile)
+        progress.update {
+            it.copy(
+                phase = BuildPhase.ReadyToInstall,
+                message = "APK ready to install",
+                apkLocalPath = apkFile.absolutePath,
+                logUrl = logUrl,
+                error = null,
+            )
+        }
+    }
+
+    private fun emitPhase(
+        progress: MutableStateFlow<BuildProgress>,
+        phase: BuildPhase,
+        message: String,
+        logUrl: String? = progress.value.logUrl,
+    ) {
+        progress.update {
+            it.copy(
+                phase = phase,
+                message = message,
+                providerName = authSession.providerDisplayName,
+                logUrl = logUrl,
+                error = null,
+            )
+        }
+    }
+
+    private fun markFailed(
+        progress: MutableStateFlow<BuildProgress>,
+        error: String,
+        logUrl: String?,
+    ) {
+        if (progress.value.phase == BuildPhase.Cancelled) return
+        progress.update {
+            it.copy(
+                phase = BuildPhase.Failed,
+                message = null,
+                error = error,
+                logUrl = logUrl,
+            )
+        }
+    }
+
+    private data class UploadedSources(
+        val tag: String,
+        val release: GitHubReleaseRef,
+    )
+
     private data class BuildJob(
         val progress: MutableStateFlow<BuildProgress>,
         val runner: Job,
@@ -264,4 +386,13 @@ class GitHubActionsBuildService(
         var runId: Long? = null,
         var release: GitHubReleaseRef? = null,
     )
+
+    private companion object {
+        const val WORKFLOW_REGISTER_DELAY_MS = 2_000L
+        const val DISPATCH_ATTEMPTS = 8
+        const val DISPATCH_RETRY_BASE_MS = 3_000L
+        const val FIND_RUN_ATTEMPTS = 30
+        const val FIND_RUN_POLL_MS = 2_000L
+        const val RUN_POLL_MS = 5_000L
+    }
 }
