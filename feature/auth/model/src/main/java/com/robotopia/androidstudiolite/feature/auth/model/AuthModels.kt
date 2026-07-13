@@ -14,7 +14,7 @@ sealed interface ConnectProgress {
         val verificationUri: String,
     ) : ConnectProgress
 
-    /** Polling for authorization; no new domain payload. */
+    /** Polling for authorization. */
     data object Waiting : ConnectProgress
 
     data class Connected(

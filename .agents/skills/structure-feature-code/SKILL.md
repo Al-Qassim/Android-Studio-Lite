@@ -18,6 +18,7 @@ Reusable conventions for feature modules (mobile or similar layered apps). Adapt
 2. Each feature owns its **in-feature** navigation (e.g. list ↔ create).
 3. The app / integration navigator only wires **cross-feature** exits. No feature toasts, dialogs, or internal routes in the root host.
 4. **`:model` / `:api` do not shape themselves around UI layout.** Progress/result types carry domain facts the caller needs for the next action (e.g. challenge code + URI to open). Do not add fields only so a later screen can redraw chrome that the presentation layer can retain from an earlier emission. UI state may keep display data; the public model must not.
+5. **Comments describe the present.** KDoc/comments say what the type or function is for now. Do not narrate removed fields, old mistakes, or “why we didn’t put X here.”
 
 ## 2. Errors
 
