@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +53,7 @@ internal fun ConnectShowCodeBody(
     onOpenVerificationUri: (uri: String) -> Unit,
     onCopyCode: (code: String) -> Unit,
 ) {
-    val verificationHost = android.net.Uri.parse(state.verificationUri).host
+    val verificationHost = Uri.parse(state.verificationUri).host
         ?.takeIf { it.isNotBlank() }
         ?: state.verificationUri
     Column(

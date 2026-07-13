@@ -111,7 +111,8 @@ Before calling UI/code work done:
 
 1. Compile the touched modules (and install when the change is user-visible).
 2. Clear **deprecation / error diagnostics in files you touched** — prefer current public APIs over `@Deprecated` replacements the IDE already flags.
-3. Walk the changed flow on device when UX changed.
+3. Match existing Kotlin style in the file/module: **import types** and use short names; avoid inline fully-qualified names (`android.net.Uri.parse(…)`) except when disambiguating a clash.
+4. Walk the changed flow on device when UX changed.
 
 ## 7. Checklist
 
@@ -125,6 +126,7 @@ Before calling UI/code work done:
 - [ ] No nested function declarations (helpers at file / private top level)
 - [ ] Multi-state previews (fixtures in `*Previews.kt`, thin stub on screen)
 - [ ] Touched files free of deprecation/error diagnostics; compile (+ install if UI) before done
+- [ ] Types imported (no unnecessary fully-qualified names in call sites)
 - [ ] Focused commit → push → PR comment (if on a PR)
 
 ## Portability
