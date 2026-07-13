@@ -83,7 +83,7 @@ Ship real cloud APK builds on the user’s GitHub account:
 | --- | --- |
 | Preparing | `ensureSandbox` — **public** repo `asl-builds-android-studio-lite` (README, version marker, workflow); upgrade known files in place; fail clearly if unrelated repo exists |
 | Uploading | Zip project via **`.gitignore`**; create ephemeral release `asl-build-<jobId>`; upload zip asset |
-| Queued | `workflow_dispatch` done; Actions run waiting for runner |
+| Queued | `workflow_dispatch` done; Actions run waiting for runner — UI stays Queued until `in_progress` (phases are **monotonic**; do not bounce back to Queued after Building) |
 | Building | Run `in_progress` until terminal |
 | Downloading | Fetch APK from same release |
 | ReadyToInstall | APK local; then delete release/tag (build station only) |

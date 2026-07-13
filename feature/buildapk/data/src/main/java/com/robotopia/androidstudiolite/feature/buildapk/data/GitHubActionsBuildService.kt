@@ -172,13 +172,7 @@ class GitHubActionsBuildService(
             jobs[jobId]?.runId = resolved.id
             logUrl = resolved.htmlUrl
 
-            progress.update {
-                it.copy(
-                    phase = BuildPhase.Building,
-                    message = "Building APK remotely…",
-                    logUrl = logUrl,
-                )
-            }
+            // Stay on Queued until GitHub reports in_progress; never regress to Queued after Building.
             while (coroutineContext.isActive) {
                 val status = gitHubClient.getWorkflowRun(token, buildRepo, resolved.id)
                 logUrl = status.htmlUrl ?: logUrl
@@ -189,17 +183,20 @@ class GitHubActionsBuildService(
                         }
                         break
                     }
-                    "queued", "waiting", "pending" -> {
-                        progress.update {
-                            it.copy(
-                                phase = BuildPhase.Queued,
-                                message = "Waiting in queue…",
-                                logUrl = logUrl,
-                            )
+                    "queued", "waiting", "pending", "requested" -> {
+                        if (progress.value.phase.ordinal < BuildPhase.Building.ordinal) {
+                            progress.update {
+                                it.copy(
+                                    phase = BuildPhase.Queued,
+                                    message = "Waiting in queue…",
+                                    logUrl = logUrl,
+                                )
+                            }
                         }
                         delay(5_000)
                     }
                     else -> {
+                        // in_progress and any other active status
                         progress.update {
                             it.copy(
                                 phase = BuildPhase.Building,
