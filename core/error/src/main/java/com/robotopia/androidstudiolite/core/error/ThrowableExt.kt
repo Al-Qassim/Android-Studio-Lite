@@ -8,7 +8,7 @@ import android.util.Log
  */
 fun Throwable.userMessageOrNull(tag: String): String? =
     when (this) {
-        is AppException -> uiMessage
+        is AppException -> uiMessage.also { Log.e(tag, it,cause) }
         else -> {
             Log.e(tag, "Unexpected error", this)
             null
