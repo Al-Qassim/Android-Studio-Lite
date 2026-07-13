@@ -51,7 +51,6 @@ internal fun ProjectsListContent(
     ) {
         TopBarTitleAction(
             title = "Projects",
-            actionLabel = "+ New",
             onActionClick = onCreateProject,
             onSettingsClick = onOpenSettings,
         )
@@ -113,7 +112,7 @@ private fun ProjectsListEmpty() {
     ) {
         EmptyState(
             title = "No projects yet",
-            hint = "Tap + New to create your first project.",
+            hint = "Tap + to create your first project.",
         )
     }
 }
@@ -215,7 +214,7 @@ private fun ProjectsListFooterHint() {
             ),
         )
         BasicText(
-            text = "or + New to create one",
+            text = "or + to create one",
             style = Typography.Caption.copy(
                 color = Colors.Muted2,
                 textAlign = TextAlign.Center,

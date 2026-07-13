@@ -1,7 +1,6 @@
 package com.robotopia.androidstudiolite.designsystem.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,7 +28,6 @@ import com.robotopia.androidstudiolite.designsystem.typography.Typography
 @Composable
 fun TopBarTitleAction(
     title: String,
-    actionLabel: String,
     onActionClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     onSettingsClick: (() -> Unit)? = null,
@@ -60,13 +58,11 @@ fun TopBarTitleAction(
                 icon = { tint, size -> IconSettings(tint = tint, size = size) },
             )
         }
-        BasicText(
-            text = actionLabel,
-            style = Typography.ButtonCompact.copy(color = Colors.Primary),
-            maxLines = 1,
-            modifier = Modifier
-                .clickable(onClick = onActionClick)
-                .padding(horizontal = 4.dp, vertical = 8.dp),
+        IconButton(
+            onClick = onActionClick,
+            variant = IconButtonVariant.Ghost,
+            modifier = Modifier.semantics { contentDescription = "New project" },
+            icon = { _, size -> IconAdd(tint = Colors.Primary, size = size) },
         )
     }
 }
@@ -227,7 +223,6 @@ fun TopBarEditorMore(
 private fun TopBarTitleActionPreview() {
     TopBarTitleAction(
         title = "Projects",
-        actionLabel = "+ New",
         onSettingsClick = {},
     )
 }
@@ -237,7 +232,6 @@ private fun TopBarTitleActionPreview() {
 private fun TopBarTitleActionLongPreview() {
     TopBarTitleAction(
         title = "Very Long Project List Title That Should Ellipsize",
-        actionLabel = "+ New",
     )
 }
 

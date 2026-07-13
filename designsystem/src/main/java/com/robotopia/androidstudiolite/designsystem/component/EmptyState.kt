@@ -49,6 +49,6 @@ fun EmptyState(
 private fun EmptyStatePreview() {
     EmptyState(
         title = "No projects yet",
-        hint = "Tap + New to create your first project.",
+        hint = "Tap + to create your first project.",
     )
 }

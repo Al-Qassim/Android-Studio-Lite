@@ -27,7 +27,8 @@ description: >-
 - **After cutting copy, re-layout** so content + CTA are one tight group, **vertically centered** under the top bar on short instructional phones (no mid-band void, no dead lower half; Settings lists stay top-aligned).
 - In-progress = **•••**; complete = check; failed = ✕ + clear error.
 - Blank phone frame names; notes in **boxes**.
-- **Obvious actions are icon-only** (copy, more, back, run, settings) — no redundant text labels on icon controls.
+- **Obvious actions are icon-only** (copy, more, back, run, add, settings) — no redundant text labels on icon controls. Sibling top-bar actions must match type (all icon buttons in the same cluster).
 - Permanent Settings entry lives on the **Projects** top bar (gear icon), not a one-off text link.
+- **App ↔ Figma stay in sync** whenever shipping UI changes (see `docs/figma-design.md` → Align Figma with Compose).
 
 Figma: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)

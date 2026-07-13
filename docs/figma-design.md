@@ -121,15 +121,18 @@ If a phone looks light on a dark page, inspect children: `Status` / `TopBar` / `
 
 ---
 
-## Align Figma with Compose
+## Align Figma with Compose (always stay in sync)
+
+**App implementation and Figma must stay in sync.** Adding, changing, or removing on-screen UI in Compose requires the same update in Figma (and the reverse when Figma leads). Do not ship one side without the other unless an ADR says which side leads temporarily.
 
 Before locking a screen:
 
 1. Read the real composable (e.g. `BuildProgressContent`, `TopBarEditorMore`, `ProjectMenu`).  
 2. Match **structure** (back title bar vs cancel-in-top-bar), **actions**, **phase names**, and **icons**.  
 3. Prefer Design System + `:designsystem` names over Main Screens copy if Main Screens is outdated.  
-4. **Obvious actions are icon-only** (copy, more, back, run): DS `IconButton` / icon — no “Copy”/“More” text beside an icon that already means that.  
-5. After Figma changes that affect shipping UI, expect a **design-review** pass (device screenshots vs Figma) — see `.agents/skills/design-review/SKILL.md`.
+4. **Obvious actions are icon-only** (copy, more, back, run, add, settings): DS `IconButton` / icon — no “Copy”/“More”/“+ New” text beside an icon that already means that.  
+5. **Sibling top-bar actions match type** — do not place a text label action next to an icon button in the same action cluster (e.g. Settings gear + “+ New” text); use icon buttons for both.  
+6. After either side changes shipping UI, expect a **design-review** pass (device screenshots vs Figma) — see `.agents/skills/design-review/SKILL.md`.
 
 ---
 
@@ -163,8 +166,9 @@ When an agent edits Figma:
 - [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
 - [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions) — same cut on Waiting / Connected / Failed / Settings / gate / onboarding  
 - [ ] After cutting copy, content + CTA is one tight group, vertically centered under the top bar on short instructional phones (no mid-band void, no dead lower half)  
-- [ ] Obvious actions (copy / more / back / run / settings) are **icon-only** — no redundant text label on the control  
+- [ ] Obvious actions (copy / more / back / run / add / settings) are **icon-only** — no redundant text label on the control; sibling top-bar actions match type  
 - [ ] Settings is a permanent Projects top-bar control (gear), not a transient text link  
+- [ ] App UI and Figma stay in sync for the change (or ADR says which side leads)  
 - [ ] Text inside cards/boxes does not overflow the card bounds  
 - [ ] In-progress = dots; complete = check; failed step = ✕ + error copy  
 - [ ] No nested frame title clutter; phone frame name blank if labeled in text  
