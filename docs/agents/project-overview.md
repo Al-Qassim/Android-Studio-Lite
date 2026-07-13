@@ -7,7 +7,7 @@ Brief orientation for this repo. Deeper detail lives in the linked files.
 **Android Studio Lite** — a native Kotlin / Jetpack Compose IDE that runs on the phone: create/list projects → browse/edit files → run a (currently fake) cloud build → install an APK.
 
 - **UI contract:** [Figma — Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) — how to design: `docs/figma-design.md`
-- **Architecture / modules:** `project/architecture.md` (includes how to read `local.properties` from `build.gradle.kts`)
+- **Architecture / modules:** `project/architecture.md`
 - **v0.1 status:** `project/progress.md`
 - **Requirements / plan:** `project/requierments.md`, `project/v0.1-implementation-plan.md`
 

@@ -10,7 +10,7 @@ Before coding UI/navigation work, read the ticket’s acceptance criteria agains
 
 **Keep app UI and Figma in sync.** When you add, change, or remove on-screen UI (controls, copy, screens, states), update the matching frames in the [ASL Figma file](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) in the same change set (follow `docs/figma-design.md` / `/figma-design`). Do not leave Compose ahead of Figma or Figma ahead of Compose unless an ADR explicitly says one leads.
 
-**Gradle / BuildConfig:** When reading keys from `local.properties` in a `build.gradle.kts`, follow `project/architecture.md` → *Reading local.properties from build.gradle.kts* (file `readLines`, **not** `java.util.Properties`). After editing any Gradle script, compile/sync that module before finishing — if sync breaks and you fix it, **also harden docs** in the same turn (see `AGENTS.md` → *User correction = system error*).
+**Verify before done.** After edits, run the checks that would catch the change class (Gradle sync/compile for build or Kotlin edits; install + walk the flow for UI; screenshot pass for Figma; tests for logic). If verification fails and you fix it, harden docs per `AGENTS.md` → *User correction = system error* (generalize the process — don’t only ban the one API that broke).
 
 Use /tdd where possible, at pre-agreed seams.
 
