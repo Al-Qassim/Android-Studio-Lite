@@ -6,10 +6,19 @@
 
 Do not invent alternate process paths when a matching skill or linked doc exists.
 
+## Commit after changes
+
+Do **not** leave local file edits uncommitted when you finish a turn of work.
+
+1. After you create or modify files in the repo, **commit** them before you stop (follow `docs/agents/git-workflow.md` and the commit protocol).
+2. Exception: skip only if the user explicitly said not to commit, or the only leftovers are secrets / generated junk that must not be committed.
+3. Prefer one focused commit per logical change; include the docs/skills/rules you hardened for the same correction in that commit when they belong together.
+
 ## User correction = system error
 
 Whenever the user corrects your work, treat that as a defect in **documents, skills, or rules** — not a one-off mistake to patch only in code.
 
-1. Find the **root cause** of why the work was wrong the first time (missing instruction, wrong instruction, ambiguous router, skill not triggered, conflicting docs, etc.).
-2. **Edit** the relevant docs/skills/rules so the same failure is unlikely next time: add missing process, fix wrong process, or delete harmful/outdated process.
-3. Goal: **minimize future user corrections** by hardening the system, not only the immediate artifact.
+1. **Review the latest work end-to-end** for the same class of mistakes (not only the one pointed-out spot). Fix everything that fails that review before moving on.
+2. Find the **root cause** of why the work was wrong the first time (missing instruction, wrong instruction, ambiguous router, skill not triggered, conflicting docs, etc.).
+3. **Edit** the relevant docs/skills/rules so the same failure is unlikely next time: add missing process, fix wrong process, or delete harmful/outdated process.
+4. Goal: **minimize future user corrections** by hardening the system, not only the immediate artifact.

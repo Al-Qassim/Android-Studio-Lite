@@ -2,7 +2,9 @@
 
 Confirm the app runs without crashing **and is functionally usable** for everything the PR claims to deliver. Run this as part of Finish reviews before asking the human to merge.
 
-Unit tests and a clean assemble are necessary but **not sufficient** when the change includes UI, navigation, or user-visible behavior. Device/emulator truth decides pass/fail for those flows.
+**You must run the app and test as a normal user.** Install/launch on an emulator or device, then walk the product the way a person would: open screens from the real entry points, tap the designed controls, complete (and fail) the flows by hand. Assembling an APK, watching logcat, or only driving UI from tests/scripts does **not** satisfy this review.
+
+Unit tests and a clean assemble are necessary but **not sufficient** when the change includes UI, navigation, or user-visible behavior. Device/emulator truth — from that hands-on session — decides pass/fail for those flows.
 
 Requirements for what belongs in ticket ACs (upstream of this review) live in `docs/agents/writing-acceptance-criteria.md`. If a PR’s linked issue omitted system Back or designed affordances but the PR ships that UI, still add those rows to the checklist here and fail if they break.
 
@@ -35,16 +37,18 @@ Explicitly mark rows **blocked** only when a dependency is documented in the PR 
 
 ## 3. Functional device check (required when UI/nav/actions are in scope)
 
-Install the debug APK on an emulator or device. Walk the checklist from §1 **in full**:
+**Run the app as a normal user** on an emulator or device (install the debug APK if needed, then launch from the launcher / Run configuration and use the UI by hand). Walk the checklist from §1 **in full**:
 
+- Enter features the way a user would (project list → open project → menus / Run / Settings / etc.) — not only by deep-link or preview harness unless that is the shipping entry.
 - Open every screen the PR owns or newly wires.
-- For each checklist row: perform the action and **verify the visible UI state** (list contents, path/title, dialogs, toasts/errors, destination screen).
+- For each checklist row: perform the action **yourself in the running app** and **verify the visible UI state** (list contents, path/title, dialogs, toasts/errors, destination screen).
 - Hierarchical UIs: open at least one child; confirm contents; go **back to parent with both** the in-app back control **and** system Back (nav bar button or gesture). Nested depth ≥2: system Back must climb one level at a time — it must **not** leave the app or jump to an unrelated screen while a parent folder/screen still exists.
 - Overlays (dialogs, menus, sheets): system Back dismisses the top overlay first; only then navigates.
 - Mutating actions named in the PR (create / rename / move / copy / delete / paste / save / …): do each at least once; confirm the listing or document updates afterward.
 - **Primary affordance check:** after starting an action, confirm the **designed** control is on screen (e.g. after Move/Copy, the bottom `MoveBar` with Cancel + Move here / Paste here — not only a hidden alternate like Paste buried under `+`). Passing via an undocumented workaround is a **fail**.
 - At least one failure or validation path if the PR/issue implies it (invalid name, conflict, etc.) — no crash; user-visible feedback when specified.
 - Do **not** stop after “app launched” or “root list appeared once.”
+- Do **not** treat “assembleDebug succeeded”, “unit tests passed”, or “I read the Compose preview” as a substitute for this session.
 
 If a checklist item cannot be reached because of a bug earlier in the flow, mark later items **blocked by prior fail** — the review still **fails**.
 
@@ -61,6 +65,7 @@ Post on the PR/issue:
 
 - Build succeeds for touched modules.
 - Relevant automated tests pass (or gaps are explicitly listed).
+- Reviewer **ran the app** and exercised the checklist **as a normal user** (hands-on UI), not only via build/tests/previews.
 - **Every** non-blocked checklist row from §1 is demonstrated on device/emulator **using the designed primary affordance**.
 - System Back / gesture back verified wherever the PR owns hierarchy or overlays (paired with in-app back when both exist).
 - No crash on those flows.
@@ -69,6 +74,7 @@ Post on the PR/issue:
 ## Fail criteria (examples)
 
 - Any checklist capability from the PR/issue was skipped or only unit-tested.
+- Reviewer did not run the app, or only validated via assemble / unit tests / Compose previews / logcat without a normal-user UI session.
 - Root list works but folder/child navigation does not update content.
 - Create/rename/move/copy/delete/paste claimed in the PR but not exercised on device.
 - Action runs but UI does not update.

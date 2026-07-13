@@ -80,6 +80,7 @@ Mockups should show the **real UX** users will get when the feature is honest/pr
 
 - **Do not** put v0.1 / “demo APK” / “not from your sources” banners on screens. Demo honesty can live in notes or docs, not in the phone chrome.  
 - Prefer real-case copy: e.g. `Waiting in queue…`, `Uploading project sources…`, `Building APK remotely…`, `Downloading APK…`, `APK ready to install`.  
+- **Name the build provider on phones.** UI is fed provider name/logo from the API (not hardcoded forever in Compose), but mockups must show the **concrete current provider** — today that is **GitHub** (`Connect GitHub`, `github.com/login/device`, `via GitHub`). Do **not** leave vague “your provider” / “cloud account” wording on user-visible phone chrome when GitHub is the only shipping provider.  
 - Labels like **Install app** (not “Install demo APK”) unless the shipping UI truly says otherwise.  
 - Skip system-installer handoff screens — after **Install app**, Android’s package UI takes over; don’t mock that as case `4a`.
 
@@ -140,7 +141,11 @@ When an agent edits Figma:
 3. Screenshot after each meaningful pass; compare to Projects management / Files editor, not only to the previous broken frame.  
 4. One page switch per `use_figma` call; return created/mutated node IDs.  
 5. After layout work, audit for: duplicate labels, named frames, white fills, homemade buttons, demo banners, missing note boxes.
-6. **Before calling done:** take a fresh screenshot of the finished design, evaluate it, and improve anything that fails the checklist or looks worse than Projects management / Files editor. Repeat until the screenshot looks right.
+6. **Layout sanity (catch these in the screenshot pass):**
+   - **Flows index** auto-layout must `primaryAxisSizingMode = 'AUTO'` (hug content). A FIXED ~10px-tall index box means the list is clipped/invisible.
+   - **Case subtitles** under side-by-side phones must be **≤ phone column width (~240)** — never leave 500px-wide text that overlaps the next case.
+   - **Main action on a phone** = DS **`Button / primary`**. Do not use a homemade chip/rect for the primary CTA (e.g. “Open device page”).
+7. **Before calling done:** take a fresh screenshot of the finished design, evaluate it, and improve anything that fails the checklist or looks worse than Projects management / Files editor. Repeat until the screenshot looks right.
 
 ---
 
@@ -148,9 +153,11 @@ When an agent edits Figma:
 
 - [ ] Cloned density/size from Projects management or Files editor (240×420)  
 - [ ] Flows index + case headers + notes in boxes  
-- [ ] Buttons / top bars / status / icons are **DS instances**  
+- [ ] Flows index height hugs content (not collapsed/clipped)  
+- [ ] Case subtitles do not overlap adjacent columns (≤ ~240 wide)  
+- [ ] Buttons / top bars / status / icons are **DS instances**; main CTA is **primary**  
 - [ ] Run (and other icons) use **Icon / …** from Design System, correct tint  
-- [ ] No demo/fake banners on phones  
+- [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
 - [ ] In-progress = dots; complete = check; failed step = ✕ + error copy  
 - [ ] No nested frame title clutter; phone frame name blank if labeled in text  
 - [ ] No white fills on structural frames  

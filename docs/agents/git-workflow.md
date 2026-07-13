@@ -4,6 +4,10 @@ The main checkout (`AndroidStudioLite/`) is reserved for the human. Agents must 
 
 **Every** implementation, PR, review-fix, or follow-up round uses the same rules (first push and later edits alike). Re-detect mode before each edit round.
 
+## Commit local edits
+
+Do not leave repo file changes uncommitted at the end of a turn. After creating or editing files, stage and commit them (see also `AGENTS.md` → *Commit after changes*). Skip only when the user said not to commit, or when leftovers are secrets / junk that must not be committed. Push only when the workflow or user asks for a push/PR.
+
 ## Shared-branch vs worktree
 
 1. **Choose mode by where the human is right now:**

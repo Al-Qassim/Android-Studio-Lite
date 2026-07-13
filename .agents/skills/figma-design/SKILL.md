@@ -15,12 +15,14 @@ description: >-
 2. Treat that doc as the project contract — do not invent alternate layout, button, or icon patterns.
 3. After edits, run the checklist at the end of `docs/figma-design.md`.
 4. **Finish with a screenshot pass (required):** take an image of the finished work (full page and/or key phones), **evaluate** it against Projects management / Files editor density and this doc’s non-negotiables, then **edit again** if anything looks weak, sparse, off-DS, or inconsistent. Do not call the design done until a fresh screenshot looks good.
+5. **If the user points out an error:** re-review the **whole latest design pass** (all new/edited pages) for the same failure class — collapsed index boxes, overlapping case subtitles, homemade CTAs, etc. — fix them all, then harden `docs/figma-design.md` / this skill if the checklist was missing the catch.
 
 ## Non-negotiables (summary)
 
 - Reuse **Design System** components/icons — never homemade `▶` or freehand buttons.
 - Match **Projects management** / **Files editor** density; flow phones **240×420**.
 - Real product UI — no v0.1/demo banners on phones.
+- Phone copy names the concrete provider (**GitHub** today); don’t leave vague “your provider” alone.
 - In-progress = **•••**; complete = check; failed = ✕ + clear error.
 - Blank phone frame names; notes in **boxes**.
 
