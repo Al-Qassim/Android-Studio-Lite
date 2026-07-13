@@ -158,7 +158,7 @@ private fun BuildFailedState(
                 title = "Build failed",
                 titleColor = Colors.Danger,
                 message = state.error ?: state.message
-                    ?: "The cloud build failed. Open the GitHub Actions log for details.",
+                    ?: "Build failed. Open the GitHub Actions log.",
                 providerName = state.providerName,
             )
             BuildPhaseList(

@@ -35,7 +35,7 @@ internal fun ConnectAccountScreen(
         authService.connect()
             .catch {
                 state = ConnectUiState.Failed(
-                    message = "Couldn't connect to GitHub. Try again.",
+                    message = "Couldn't connect. Try again.",
                 )
             }
             .collect { progress ->

@@ -161,15 +161,10 @@ private fun WaitingBody(
             text = "Waiting for approval…",
             style = Typography.Headline.copy(color = Colors.Text),
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        BasicText(
-            text = "Finish signing in on GitHub on the other device. This screen updates automatically.",
-            style = Typography.Body.copy(color = Colors.Muted),
-        )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         UserCodeCard(userCode = state.userCode)
         Spacer(modifier = Modifier.height(16.dp))
-        WaitingDotsRow(label = "Checking authorization…")
+        WaitingDotsRow(label = null)
         Spacer(modifier = Modifier.weight(1f))
         Button(
             label = "Cancel",
@@ -198,17 +193,11 @@ private fun ConnectedBody(
         )
         Spacer(modifier = Modifier.height(16.dp))
         BasicText(
-            text = "Account connected",
+            text = "Connected",
             style = Typography.Headline.copy(color = Colors.Text),
             modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        BasicText(
-            text = "Builds will use your GitHub Actions minutes. You can disconnect anytime in Settings.",
-            style = Typography.Body.copy(color = Colors.Muted),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         AccountCard(account = state.account)
         Spacer(modifier = Modifier.weight(1f))
         Button(
@@ -232,7 +221,7 @@ private fun FailedBody(
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         BasicText(
-            text = "Couldn't connect to GitHub",
+            text = "Couldn't connect",
             style = Typography.Headline.copy(color = Colors.Danger),
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -305,19 +294,14 @@ private fun UserCodeCard(userCode: String) {
             .clip(RoundedCornerShape(10.dp))
             .background(Colors.Surface2)
             .padding(horizontal = 14.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        BasicText(
-            text = "Your code",
-            style = Typography.Label.copy(color = Colors.Muted),
-        )
         BasicText(
             text = userCode,
             style = Typography.Headline.copy(
                 color = Colors.Text,
-                fontSize = 28.sp,
-                lineHeight = 34.sp,
-                letterSpacing = 2.sp,
+                fontSize = 24.sp,
+                lineHeight = 30.sp,
+                letterSpacing = 1.5.sp,
             ),
         )
     }
@@ -345,7 +329,7 @@ private fun AccountCard(account: AuthAccount) {
 }
 
 @Composable
-private fun WaitingDotsRow(label: String) {
+private fun WaitingDotsRow(label: String?) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -360,10 +344,12 @@ private fun WaitingDotsRow(label: String) {
                 )
             }
         }
-        BasicText(
-            text = label,
-            style = Typography.Body.copy(color = Colors.Muted),
-        )
+        if (!label.isNullOrBlank()) {
+            BasicText(
+                text = label,
+                style = Typography.Body.copy(color = Colors.Muted),
+            )
+        }
     }
 }
 
@@ -421,7 +407,7 @@ private fun ConnectConnectedPreview() {
 private fun ConnectFailedPreview() {
     ConnectAccountContent(
         state = ConnectUiState.Failed(
-            message = "Authorization expired or was denied. Generate a new code to try again.",
+            message = "Expired or denied. Try again.",
         ),
         onBackClick = {},
         onOpenGitHub = {},

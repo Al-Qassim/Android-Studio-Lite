@@ -23,7 +23,7 @@ description: >-
 - Match **Projects management** / **Files editor** density; flow phones **240×420**.
 - Real product UI — no v0.1/demo banners on phones.
 - Phone copy names the concrete provider (**GitHub** today); don’t leave vague “your provider” alone.
-- **Instructional phones stay short:** prefer two short lines (what to do + where) + one primary CTA. Do not stack a headline, long body, and a third sentence that all say the same thing (device-flow Connect is the reference).
+- **Instructional phones stay short:** prefer two short lines (what to do + where) + one primary CTA. Do not stack a headline, long body, and a third sentence that all say the same thing (device-flow Connect is the reference). Apply the same cut across **all new flow phones** (Waiting / Connected / Failed / Settings / gate / onboarding) — status + one action is enough when the control already says what to do.
 - In-progress = **•••**; complete = check; failed = ✕ + clear error.
 - Blank phone frame names; notes in **boxes**.
 - **Obvious actions are icon-only** (copy, more, back, run) — no redundant text labels on icon controls.

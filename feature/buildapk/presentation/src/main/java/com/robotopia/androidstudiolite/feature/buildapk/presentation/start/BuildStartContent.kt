@@ -49,13 +49,6 @@ internal fun BuildStartContent(
                 projectName = projectName,
                 packageName = packageName,
             )
-            if (!signedIn) {
-                Spacer(modifier = Modifier.height(16.dp))
-                BasicText(
-                    text = "Connect GitHub to run cloud builds on your Actions minutes.",
-                    style = Typography.Body.copy(color = Colors.Muted),
-                )
-            }
             Spacer(modifier = Modifier.weight(1f))
             if (signedIn) {
                 Button(

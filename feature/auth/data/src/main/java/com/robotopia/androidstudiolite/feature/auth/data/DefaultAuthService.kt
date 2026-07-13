@@ -47,7 +47,7 @@ class DefaultAuthService(
             if (System.currentTimeMillis() >= deadlineMs) {
                 emit(
                     ConnectProgress.Failed(
-                        message = "Authorization expired or was denied. Generate a new code to try again.",
+                        message = "Expired or denied. Try again.",
                     ),
                 )
                 return@flow
@@ -68,7 +68,7 @@ class DefaultAuthService(
                 -> {
                     emit(
                         ConnectProgress.Failed(
-                            message = "Authorization expired or was denied. Generate a new code to try again.",
+                            message = "Expired or denied. Try again.",
                         ),
                     )
                     return@flow

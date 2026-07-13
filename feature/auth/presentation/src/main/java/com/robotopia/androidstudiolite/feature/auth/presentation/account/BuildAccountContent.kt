@@ -47,16 +47,7 @@ internal fun BuildAccountContent(
                 text = "GitHub",
                 style = Typography.Headline.copy(color = Colors.Text),
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            BasicText(
-                text = if (account == null) {
-                    "Connect your GitHub account to run builds. Minutes come from your GitHub Actions usage."
-                } else {
-                    "Builds use your GitHub Actions minutes."
-                },
-                style = Typography.Body.copy(color = Colors.Muted),
-            )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             AccountStatusCard(account = account)
             Spacer(modifier = Modifier.weight(1f))
             if (account == null) {
@@ -93,17 +84,13 @@ private fun AccountStatusCard(account: AuthAccount?) {
                 text = "Not connected",
                 style = Typography.Subtitle.copy(color = Colors.Text),
             )
-            BasicText(
-                text = "Required to start a cloud build",
-                style = Typography.Body.copy(color = Colors.Muted),
-            )
         } else {
             BasicText(
                 text = account.providerName,
                 style = Typography.Subtitle.copy(color = Colors.Text),
             )
             BasicText(
-                text = "${account.identity} · Connected",
+                text = account.identity,
                 style = Typography.Body.copy(color = Colors.Muted),
             )
         }
