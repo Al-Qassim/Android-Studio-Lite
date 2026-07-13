@@ -26,6 +26,7 @@ Reusable conventions for feature modules (mobile or similar layered apps). Adapt
 2. UI shows **only** that UI message (or a fixed generic string after a user action).
 3. Unexpected errors: **log** for debugging; never show raw `Throwable.message` / exception text to the user.
 4. Mutating operations: **succeed or throw**. On failure, roll back partial side effects (e.g. restore DB row if file delete fails). No silent no-ops for “must work” actions.
+5. **Cancellation is not failure.** When a coroutine is cancelled (`CancellationException`), do not map it to a user-facing Failed/error state. Re-throw or return; let the cancel path set Cancelled (or equivalent). Catch `CancellationException` before broad `catch (Exception)`.
 
 ## 3. Validation
 

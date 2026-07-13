@@ -13,6 +13,7 @@ import com.robotopia.androidstudiolite.feature.github.api.GitHubRepoRef
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -227,7 +228,11 @@ class GitHubActionsBuildService(
                     logUrl = logUrl,
                 )
             }
+        } catch (e: CancellationException) {
+            // cancelBuild owns Cancelled progress; do not flash Failed.
+            throw e
         } catch (e: AppException) {
+            if (progress.value.phase == BuildPhase.Cancelled) return
             progress.update {
                 it.copy(
                     phase = BuildPhase.Failed,
@@ -237,6 +242,7 @@ class GitHubActionsBuildService(
                 )
             }
         } catch (_: Exception) {
+            if (progress.value.phase == BuildPhase.Cancelled) return
             progress.update {
                 it.copy(
                     phase = BuildPhase.Failed,
