@@ -65,7 +65,9 @@ class GitHubActionsBuildService(
                 providerName = authSession.providerDisplayName,
             ),
         )
-        val runner = scope.launch {
+        val buildJob = BuildJob(progress = progress)
+        jobs[jobId] = buildJob
+        buildJob.runner = scope.launch {
             runCloudBuild(
                 jobId = jobId,
                 request = request,
@@ -73,7 +75,6 @@ class GitHubActionsBuildService(
                 progress = progress,
             )
         }
-        jobs[jobId] = BuildJob(progress = progress, runner = runner)
         return jobId
     }
 
@@ -108,24 +109,20 @@ class GitHubActionsBuildService(
         token: String,
         progress: MutableStateFlow<BuildProgress>,
     ) {
-        var release: GitHubReleaseRef? = null
-        var repo: GitHubRepoRef? = null
-        var logUrl: String? = null
         try {
-            repo = prepareSandbox(jobId = jobId, token = token, progress = progress)
-            val uploaded = uploadProject(
+            val repo = prepareSandbox(jobId = jobId, token = token, progress = progress)
+            val releaseTag = uploadProject(
                 jobId = jobId,
                 request = request,
                 token = token,
                 repo = repo,
                 progress = progress,
             )
-            release = uploaded.release
-            logUrl = awaitRemoteBuild(
+            awaitRemoteBuild(
                 jobId = jobId,
                 token = token,
                 repo = repo,
-                releaseTag = uploaded.tag,
+                releaseTag = releaseTag,
                 progress = progress,
             )
             if (!coroutineContext.isActive) return
@@ -133,8 +130,7 @@ class GitHubActionsBuildService(
                 jobId = jobId,
                 token = token,
                 repo = repo,
-                releaseTag = uploaded.tag,
-                logUrl = logUrl,
+                releaseTag = releaseTag,
                 progress = progress,
             )
         } catch (e: CancellationException) {
@@ -147,7 +143,6 @@ class GitHubActionsBuildService(
                         phase = BuildPhase.Failed,
                         message = null,
                         error = e.uiMessage,
-                        logUrl = logUrl,
                     )
                 }
             }
@@ -158,15 +153,15 @@ class GitHubActionsBuildService(
                         phase = BuildPhase.Failed,
                         message = null,
                         error = "Build failed. Open the build log.",
-                        logUrl = logUrl,
                     )
                 }
             }
         } finally {
-            val rel = release
-            val r = repo
-            if (rel != null && r != null) {
-                runCatching { gitHubClient.deleteRelease(token, r, rel.id, rel.tag) }
+            val job = jobs[jobId]
+            val repo = job?.repo
+            val release = job?.release
+            if (repo != null && release != null) {
+                runCatching { gitHubClient.deleteRelease(token, repo, release.id, release.tag) }
             }
         }
     }
@@ -197,7 +192,7 @@ class GitHubActionsBuildService(
         token: String,
         repo: GitHubRepoRef,
         progress: MutableStateFlow<BuildProgress>,
-    ): UploadedSources {
+    ): String {
         progress.update {
             it.copy(
                 phase = BuildPhase.Uploading,
@@ -222,7 +217,7 @@ class GitHubActionsBuildService(
         gitHubClient.uploadReleaseAsset(token, release, zipFile, "project.zip")
         jobs[jobId]?.release = release
         zipFile.delete()
-        return UploadedSources(tag = tag, release = release)
+        return tag
     }
 
     private suspend fun awaitRemoteBuild(
@@ -231,7 +226,7 @@ class GitHubActionsBuildService(
         repo: GitHubRepoRef,
         releaseTag: String,
         progress: MutableStateFlow<BuildProgress>,
-    ): String? {
+    ) {
         progress.update {
             it.copy(
                 phase = BuildPhase.Queued,
@@ -247,7 +242,7 @@ class GitHubActionsBuildService(
             notBeforeEpochMs = dispatchAt,
         )
         jobs[jobId]?.runId = run.id
-        return pollUntilBuildSucceeds(
+        pollUntilBuildSucceeds(
             token = token,
             repo = repo,
             runId = run.id,
@@ -294,7 +289,6 @@ class GitHubActionsBuildService(
 
     /**
      * Stay on Queued until GitHub reports in_progress; never regress to Queued after Building.
-     * @return latest log URL when the run succeeds
      */
     private suspend fun pollUntilBuildSucceeds(
         token: String,
@@ -302,7 +296,7 @@ class GitHubActionsBuildService(
         runId: Long,
         initialLogUrl: String?,
         progress: MutableStateFlow<BuildProgress>,
-    ): String? {
+    ) {
         var logUrl = initialLogUrl
         while (coroutineContext.isActive) {
             val status = gitHubClient.getWorkflowRun(token, repo, runId)
@@ -312,7 +306,7 @@ class GitHubActionsBuildService(
                     if (status.conclusion != "success") {
                         throw AppException("Build failed. Open the build log.")
                     }
-                    return logUrl
+                    return
                 }
                 "queued", "waiting", "pending", "requested" -> {
                     if (progress.value.phase.ordinal < BuildPhase.Building.ordinal) {
@@ -350,9 +344,9 @@ class GitHubActionsBuildService(
         token: String,
         repo: GitHubRepoRef,
         releaseTag: String,
-        logUrl: String?,
         progress: MutableStateFlow<BuildProgress>,
     ) {
+        val logUrl = progress.value.logUrl
         progress.update {
             it.copy(
                 phase = BuildPhase.Downloading,
@@ -376,18 +370,14 @@ class GitHubActionsBuildService(
         }
     }
 
-    private data class UploadedSources(
-        val tag: String,
-        val release: GitHubReleaseRef,
-    )
-
-    private data class BuildJob(
+    private class BuildJob(
         val progress: MutableStateFlow<BuildProgress>,
-        val runner: Job,
-        var repo: GitHubRepoRef? = null,
-        var runId: Long? = null,
-        var release: GitHubReleaseRef? = null,
-    )
+    ) {
+        lateinit var runner: Job
+        var repo: GitHubRepoRef? = null
+        var runId: Long? = null
+        var release: GitHubReleaseRef? = null
+    }
 
     private companion object {
         const val WORKFLOW_REGISTER_DELAY_MS = 2_000L
