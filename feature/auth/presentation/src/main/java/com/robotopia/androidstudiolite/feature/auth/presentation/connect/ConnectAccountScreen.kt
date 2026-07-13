@@ -8,7 +8,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
 import com.robotopia.androidstudiolite.feature.auth.model.ConnectProgress
 import kotlinx.coroutines.flow.catch
@@ -23,6 +25,7 @@ internal fun ConnectAccountScreen(
     var state by remember { mutableStateOf<ConnectUiState>(ConnectUiState.Loading) }
     var lastUserCode by remember { mutableStateOf("") }
     val uriHandler = LocalUriHandler.current
+    val clipboard = LocalClipboardManager.current
 
     BackHandler(onBack = onCancel)
 
@@ -66,6 +69,9 @@ internal fun ConnectAccountScreen(
             if (current is ConnectUiState.ShowCode) {
                 state = ConnectUiState.Waiting(userCode = current.userCode)
             }
+        },
+        onCopyCode = { code ->
+            clipboard.setText(AnnotatedString(code))
         },
         onCancel = onCancel,
         onContinue = onFinished,

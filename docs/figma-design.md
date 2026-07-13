@@ -159,6 +159,7 @@ When an agent edits Figma:
 - [ ] Buttons / top bars / status / icons are **DS instances**; main CTA is **primary**  
 - [ ] Run (and other icons) use **Icon / …** from Design System, correct tint  
 - [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
+- [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions)  
 - [ ] Text inside cards/boxes does not overflow the card bounds  
 - [ ] In-progress = dots; complete = check; failed step = ✕ + error copy  
 - [ ] No nested frame title clutter; phone frame name blank if labeled in text  

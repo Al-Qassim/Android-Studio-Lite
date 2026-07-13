@@ -1,6 +1,7 @@
 package com.robotopia.androidstudiolite.feature.auth.presentation.connect
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +24,10 @@ import androidx.compose.ui.unit.sp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
+import com.robotopia.androidstudiolite.designsystem.component.IconButton
+import com.robotopia.androidstudiolite.designsystem.component.IconButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
+import com.robotopia.androidstudiolite.designsystem.icon.IconCopy
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.auth.model.AuthAccount
@@ -54,6 +58,7 @@ internal fun ConnectAccountContent(
     state: ConnectUiState,
     onBackClick: () -> Unit,
     onOpenGitHub: (uri: String) -> Unit,
+    onCopyCode: (code: String) -> Unit,
     onCancel: () -> Unit,
     onContinue: () -> Unit,
     onTryAgain: () -> Unit,
@@ -83,7 +88,7 @@ internal fun ConnectAccountContent(
             is ConnectUiState.ShowCode -> ShowCodeBody(
                 state = state,
                 onOpenGitHub = onOpenGitHub,
-                onCancel = onCancel,
+                onCopyCode = onCopyCode,
             )
 
             is ConnectUiState.Waiting -> WaitingBody(
@@ -109,7 +114,7 @@ internal fun ConnectAccountContent(
 private fun ShowCodeBody(
     state: ConnectUiState.ShowCode,
     onOpenGitHub: (uri: String) -> Unit,
-    onCancel: () -> Unit,
+    onCopyCode: (code: String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -117,19 +122,17 @@ private fun ShowCodeBody(
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         BasicText(
-            text = "Connect GitHub",
-            style = Typography.Headline.copy(color = Colors.Text),
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        BasicText(
-            text = "Builds run on your GitHub account. Enter this code at github.com/login/device.",
+            text = "Copy the code below",
             style = Typography.Body.copy(color = Colors.Muted),
         )
-        Spacer(modifier = Modifier.height(20.dp))
-        UserCodeCard(userCode = state.userCode)
+        Spacer(modifier = Modifier.height(16.dp))
+        UserCodeCopyRow(
+            userCode = state.userCode,
+            onCopyCode = onCopyCode,
+        )
         Spacer(modifier = Modifier.height(12.dp))
         BasicText(
-            text = "Open GitHub's device page and enter the code above.",
+            text = "Paste it at github.com/login/device",
             style = Typography.Body.copy(color = Colors.Muted),
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -138,13 +141,6 @@ private fun ShowCodeBody(
             onClick = { onOpenGitHub(state.verificationUri) },
             modifier = Modifier.fillMaxWidth(),
             variant = ButtonVariant.Primary,
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Button(
-            label = "Cancel",
-            onClick = onCancel,
-            modifier = Modifier.fillMaxWidth(),
-            variant = ButtonVariant.Secondary,
         )
     }
 }
@@ -264,6 +260,41 @@ private fun FailedBody(
 }
 
 @Composable
+private fun UserCodeCopyRow(
+    userCode: String,
+    onCopyCode: (code: String) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(Colors.Surface2)
+            .padding(horizontal = 10.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        BasicText(
+            text = userCode,
+            style = Typography.Headline.copy(
+                color = Colors.Text,
+                fontSize = 24.sp,
+                lineHeight = 30.sp,
+                letterSpacing = 1.5.sp,
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .clickable { onCopyCode(userCode) }
+                .padding(horizontal = 4.dp, vertical = 6.dp),
+        )
+        IconButton(
+            onClick = { onCopyCode(userCode) },
+            variant = IconButtonVariant.Ghost,
+            icon = { tint, size -> IconCopy(tint = tint, size = size) },
+        )
+    }
+}
+
+@Composable
 private fun UserCodeCard(userCode: String) {
     Column(
         modifier = Modifier
@@ -343,6 +374,7 @@ private fun ConnectShowCodePreview() {
         ),
         onBackClick = {},
         onOpenGitHub = {},
+        onCopyCode = {},
         onCancel = {},
         onContinue = {},
         onTryAgain = {},
@@ -358,6 +390,7 @@ private fun ConnectWaitingPreview() {
         ),
         onBackClick = {},
         onOpenGitHub = {},
+        onCopyCode = {},
         onCancel = {},
         onContinue = {},
         onTryAgain = {},
@@ -373,6 +406,7 @@ private fun ConnectConnectedPreview() {
         ),
         onBackClick = {},
         onOpenGitHub = {},
+        onCopyCode = {},
         onCancel = {},
         onContinue = {},
         onTryAgain = {},
@@ -388,6 +422,7 @@ private fun ConnectFailedPreview() {
         ),
         onBackClick = {},
         onOpenGitHub = {},
+        onCopyCode = {},
         onCancel = {},
         onContinue = {},
         onTryAgain = {},
