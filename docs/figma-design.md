@@ -147,7 +147,7 @@ When an agent edits Figma:
    - **Case subtitles** under side-by-side phones must be **≤ phone column width (~240)** — never leave 500px-wide text that overlaps the next case.
    - **Main action on a phone** = DS **`Button / primary`**. Do not use a homemade chip/rect for the primary CTA (e.g. “Open device page”).
    - **Text must stay inside its card/box.** Do not paste long body copy into a small surface card; use a short subtitle (or grow the card). After text edits, check that `text.y + text.height` ≤ card bottom.
-   - **After cutting copy, re-layout.** Short phones must not leave a huge empty band with the CTA stuck to the bottom. Keep content + primary actions as one tight stack under the top bar (~12–24dp gaps); do not `weight`/`spacer` the button to the phone footer unless the screen still has dense mid content.
+   - **After cutting copy, re-layout.** Short phones must not leave a huge empty band with the CTA stuck to the bottom, **and** must not leave a top-cramped stack with a dead lower half. Keep content + primary actions as **one tight group**, then **vertically center that group** in the space below the top bar (auth / device-code / empty states). Do not `weight`/`spacer` the button to the phone footer unless the screen still has dense mid content. Settings-style list screens stay top-aligned.
 7. **Before calling done:** take a fresh screenshot of the finished design, evaluate it, and improve anything that fails the checklist or looks worse than Projects management / Files editor. Repeat until the screenshot looks right.
 
 ---
@@ -162,7 +162,7 @@ When an agent edits Figma:
 - [ ] Run (and other icons) use **Icon / …** from Design System, correct tint  
 - [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
 - [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions) — same cut on Waiting / Connected / Failed / Settings / gate / onboarding  
-- [ ] After cutting copy, CTA sits in a tight stack under content (no huge empty mid-band)  
+- [ ] After cutting copy, content + CTA is one tight group, vertically centered under the top bar on short instructional phones (no mid-band void, no dead lower half)  
 - [ ] Obvious actions (copy / more / back / run / settings) are **icon-only** — no redundant text label on the control  
 - [ ] Settings is a permanent Projects top-bar control (gear), not a transient text link  
 - [ ] Text inside cards/boxes does not overflow the card bounds  

@@ -121,28 +121,34 @@ private fun ShowCodeBody(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BasicText(
-            text = "Copy the code below",
-            style = Typography.Body.copy(color = Colors.Muted),
-        )
-        UserCodeCopyRow(
-            userCode = state.userCode,
-            onCopyCode = onCopyCode,
-        )
-        BasicText(
-            text = "Paste it at github.com/login/device",
-            style = Typography.Body.copy(color = Colors.Muted),
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Button(
-            label = "Open GitHub",
-            onClick = { onOpenGitHub(state.verificationUri) },
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            variant = ButtonVariant.Primary,
-        )
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            BasicText(
+                text = "Copy the code below",
+                style = Typography.Body.copy(color = Colors.Muted),
+            )
+            UserCodeCopyRow(
+                userCode = state.userCode,
+                onCopyCode = onCopyCode,
+            )
+            BasicText(
+                text = "Paste it at github.com/login/device",
+                style = Typography.Body.copy(color = Colors.Muted),
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Button(
+                label = "Open GitHub",
+                onClick = { onOpenGitHub(state.verificationUri) },
+                modifier = Modifier.fillMaxWidth(),
+                variant = ButtonVariant.Primary,
+            )
+        }
     }
 }
 
@@ -154,22 +160,26 @@ private fun WaitingBody(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.Center,
     ) {
-        BasicText(
-            text = "Waiting for approval…",
-            style = Typography.Headline.copy(color = Colors.Text),
-        )
-        UserCodeCard(userCode = state.userCode)
-        WaitingDotsRow(label = null)
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            label = "Cancel",
-            onClick = onCancel,
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            variant = ButtonVariant.Secondary,
-        )
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            BasicText(
+                text = "Waiting for approval…",
+                style = Typography.Headline.copy(color = Colors.Text),
+            )
+            UserCodeCard(userCode = state.userCode)
+            WaitingDotsRow(label = null)
+            Button(
+                label = "Cancel",
+                onClick = onCancel,
+                modifier = Modifier.fillMaxWidth(),
+                variant = ButtonVariant.Secondary,
+            )
+        }
     }
 }
 
@@ -181,28 +191,32 @@ private fun ConnectedBody(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        IconSuccess(
-            tint = Colors.Primary,
-            size = 48.dp,
-        )
-        BasicText(
-            text = "Connected",
-            style = Typography.Headline.copy(color = Colors.Text),
+        Column(
             modifier = Modifier.fillMaxWidth(),
-        )
-        AccountCard(account = state.account)
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            label = "Continue",
-            onClick = onContinue,
-            modifier = Modifier.fillMaxWidth(),
-            variant = ButtonVariant.Primary,
-        )
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            IconSuccess(
+                tint = Colors.Primary,
+                size = 48.dp,
+            )
+            BasicText(
+                text = "Connected",
+                style = Typography.Headline.copy(color = Colors.Text),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            AccountCard(account = state.account)
+            Button(
+                label = "Continue",
+                onClick = onContinue,
+                modifier = Modifier.fillMaxWidth(),
+                variant = ButtonVariant.Primary,
+            )
+        }
     }
 }
 
@@ -215,34 +229,39 @@ private fun FailedBody(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.Center,
     ) {
-        BasicText(
-            text = "Couldn't connect",
-            style = Typography.Headline.copy(color = Colors.Danger),
-        )
-        BasicText(
-            text = state.message,
-            style = Typography.Body.copy(color = Colors.Muted),
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Button(
-                label = "Cancel",
-                onClick = onCancel,
-                modifier = Modifier.weight(1f),
-                variant = ButtonVariant.Secondary,
+            BasicText(
+                text = "Couldn't connect",
+                style = Typography.Headline.copy(color = Colors.Danger),
             )
-            Button(
-                label = "Try again",
-                onClick = onTryAgain,
-                modifier = Modifier.weight(1f),
-                variant = ButtonVariant.Primary,
+            BasicText(
+                text = state.message,
+                style = Typography.Body.copy(color = Colors.Muted),
             )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Button(
+                    label = "Cancel",
+                    onClick = onCancel,
+                    modifier = Modifier.weight(1f),
+                    variant = ButtonVariant.Secondary,
+                )
+                Button(
+                    label = "Try again",
+                    onClick = onTryAgain,
+                    modifier = Modifier.weight(1f),
+                    variant = ButtonVariant.Primary,
+                )
+            }
         }
     }
 }
