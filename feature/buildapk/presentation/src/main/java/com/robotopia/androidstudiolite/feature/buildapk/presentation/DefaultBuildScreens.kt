@@ -44,12 +44,13 @@ class DefaultBuildScreens(
                     projectName = request.projectName,
                     packageName = request.packageName,
                     signedIn = account != null,
+                    providerDisplayName = authSession.providerDisplayName,
                     onBackClick = onDismiss,
                     onStartBuild = {
                         val jobId = buildService.startBuild(request)
                         route = BuildRoute.Progress(jobId)
                     },
-                    onConnectGitHubClick = {
+                    onConnectAccountClick = {
                         route = BuildRoute.Connect
                     },
                 )

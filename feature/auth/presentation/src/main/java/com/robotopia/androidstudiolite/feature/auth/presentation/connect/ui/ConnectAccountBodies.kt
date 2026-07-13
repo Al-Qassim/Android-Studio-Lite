@@ -49,9 +49,12 @@ internal fun ConnectLoadingBody() {
 @Composable
 internal fun ConnectShowCodeBody(
     state: ConnectUiState.ShowCode,
-    onOpenGitHub: (uri: String) -> Unit,
+    onOpenVerificationUri: (uri: String) -> Unit,
     onCopyCode: (code: String) -> Unit,
 ) {
+    val verificationHost = android.net.Uri.parse(state.verificationUri).host
+        ?.takeIf { it.isNotBlank() }
+        ?: state.verificationUri
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -72,13 +75,13 @@ internal fun ConnectShowCodeBody(
                 onCopyCode = onCopyCode,
             )
             BasicText(
-                text = "Paste it at github.com/login/device",
+                text = "Paste it at $verificationHost",
                 style = Typography.Body.copy(color = Colors.Muted),
             )
             Spacer(modifier = Modifier.height(4.dp))
             Button(
-                label = "Open GitHub",
-                onClick = { onOpenGitHub(state.verificationUri) },
+                label = "Open ${state.providerName}",
+                onClick = { onOpenVerificationUri(state.verificationUri) },
                 modifier = Modifier.fillMaxWidth(),
                 variant = ButtonVariant.Primary,
             )

@@ -47,6 +47,7 @@ internal fun SettingsScreen(
             BackHandler(onBack = { route = SettingsRoute.Home })
             BuildAccountContent(
                 account = account,
+                providerDisplayName = authService.providerDisplayName,
                 onBackClick = { route = SettingsRoute.Home },
                 onConnectClick = { route = SettingsRoute.Connect },
                 onLogOutClick = {

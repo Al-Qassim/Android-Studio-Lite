@@ -27,9 +27,10 @@ internal fun BuildStartContent(
     packageName: String,
     starting: Boolean,
     signedIn: Boolean,
+    providerDisplayName: String,
     onBackClick: () -> Unit,
     onStartBuildClick: () -> Unit,
-    onConnectGitHubClick: () -> Unit,
+    onConnectAccountClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -68,8 +69,8 @@ internal fun BuildStartContent(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
-                    label = "Connect GitHub",
-                    onClick = onConnectGitHubClick,
+                    label = "Connect $providerDisplayName",
+                    onClick = onConnectAccountClick,
                     modifier = Modifier.fillMaxWidth(),
                     variant = ButtonVariant.Primary,
                 )
@@ -110,9 +111,10 @@ private fun BuildStartContentSignedInPreview() {
         packageName = "com.example.hellocompose",
         starting = false,
         signedIn = true,
+        providerDisplayName = "GitHub",
         onBackClick = {},
         onStartBuildClick = {},
-        onConnectGitHubClick = {},
+        onConnectAccountClick = {},
     )
 }
 
@@ -124,8 +126,9 @@ private fun BuildStartContentGatePreview() {
         packageName = "com.example.hellocompose",
         starting = false,
         signedIn = false,
+        providerDisplayName = "GitHub",
         onBackClick = {},
         onStartBuildClick = {},
-        onConnectGitHubClick = {},
+        onConnectAccountClick = {},
     )
 }

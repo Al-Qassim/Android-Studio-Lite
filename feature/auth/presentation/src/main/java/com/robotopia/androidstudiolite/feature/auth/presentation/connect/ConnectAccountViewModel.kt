@@ -8,6 +8,7 @@ sealed interface ConnectUiState {
     data class ShowCode(
         val userCode: String,
         val verificationUri: String,
+        val providerName: String,
     ) : ConnectUiState
 
     data class Waiting(

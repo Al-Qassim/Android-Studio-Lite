@@ -83,7 +83,7 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             label = "failed · with log",
             state = BuildProgressUiState(
                 phase = BuildPhase.Failed,
-                error = "Build failed. Open the GitHub Actions log.",
+                error = "Build failed. Open the build log.",
                 failedAtPhase = BuildPhase.Building,
                 providerName = "GitHub",
                 logUrl = "https://github.com/",
@@ -94,7 +94,7 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             label = "failed · no log",
             state = BuildProgressUiState(
                 phase = BuildPhase.Failed,
-                error = "Build failed. Open the GitHub Actions log.",
+                error = "Build failed. Open the build log.",
                 failedAtPhase = BuildPhase.Building,
                 providerName = "GitHub",
             ),

@@ -25,6 +25,7 @@ internal suspend fun collectConnectProgress(
                     uiState.value = ConnectUiState.ShowCode(
                         userCode = progress.userCode,
                         verificationUri = progress.verificationUri,
+                        providerName = progress.providerName,
                     )
                 }
 
@@ -43,7 +44,7 @@ internal suspend fun collectConnectProgress(
         }
 }
 
-internal fun openGitHubDevicePage(
+internal fun openVerificationUri(
     uri: String,
     uiState: MutableStateFlow<ConnectUiState>,
     openUri: (String) -> Unit,

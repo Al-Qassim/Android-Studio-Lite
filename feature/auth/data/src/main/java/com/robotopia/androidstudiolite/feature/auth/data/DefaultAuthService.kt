@@ -17,6 +17,8 @@ class DefaultAuthService(
     private val clientId: String,
 ) : AuthService {
 
+    override val providerDisplayName: String = PROVIDER_NAME
+
     override fun observeAccount(): Flow<AuthAccount?> = store.account
 
     override suspend fun currentAccount(): AuthAccount? = store.account.value
@@ -31,6 +33,7 @@ class DefaultAuthService(
             ConnectProgress.ShowCode(
                 userCode = device.userCode,
                 verificationUri = device.verificationUri,
+                providerName = PROVIDER_NAME,
             ),
         )
 

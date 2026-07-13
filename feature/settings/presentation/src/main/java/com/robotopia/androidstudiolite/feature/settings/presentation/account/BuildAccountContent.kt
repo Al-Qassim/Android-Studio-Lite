@@ -25,6 +25,7 @@ import com.robotopia.androidstudiolite.feature.auth.model.AuthAccount
 @Composable
 internal fun BuildAccountContent(
     account: AuthAccount?,
+    providerDisplayName: String,
     onBackClick: () -> Unit,
     onConnectClick: () -> Unit,
     onLogOutClick: () -> Unit,
@@ -45,14 +46,14 @@ internal fun BuildAccountContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             BasicText(
-                text = "GitHub",
+                text = account?.providerName ?: providerDisplayName,
                 style = Typography.Headline.copy(color = Colors.Text),
             )
             AccountStatusCard(account = account)
             Spacer(modifier = Modifier.height(8.dp))
             if (account == null) {
                 Button(
-                    label = "Connect account",
+                    label = "Connect $providerDisplayName",
                     onClick = onConnectClick,
                     modifier = Modifier.fillMaxWidth(),
                     variant = ButtonVariant.Primary,
@@ -102,6 +103,7 @@ private fun AccountStatusCard(account: AuthAccount?) {
 private fun BuildAccountLoggedOutPreview() {
     BuildAccountContent(
         account = null,
+        providerDisplayName = "GitHub",
         onBackClick = {},
         onConnectClick = {},
         onLogOutClick = {},
@@ -113,6 +115,7 @@ private fun BuildAccountLoggedOutPreview() {
 private fun BuildAccountConnectedPreview() {
     BuildAccountContent(
         account = AuthAccount(providerName = "GitHub", identity = "@alex-dev"),
+        providerDisplayName = "GitHub",
         onBackClick = {},
         onConnectClick = {},
         onLogOutClick = {},

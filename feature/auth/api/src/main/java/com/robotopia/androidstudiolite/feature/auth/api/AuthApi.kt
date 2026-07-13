@@ -9,6 +9,9 @@ interface AuthSession {
     fun observeAccount(): Flow<AuthAccount?>
     suspend fun currentAccount(): AuthAccount?
     suspend fun clearAccount()
+
+    /** Configured build-provider display name for UI (e.g. Connect CTAs). */
+    val providerDisplayName: String
 }
 
 /**

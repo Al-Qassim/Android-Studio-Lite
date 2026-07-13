@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -19,13 +20,12 @@ import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.logic.collectConnectProgress
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.logic.copyUserCode
-import com.robotopia.androidstudiolite.feature.auth.presentation.connect.logic.openGitHubDevicePage
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.logic.openVerificationUri
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectConnectedBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectFailedBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectLoadingBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectShowCodeBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectWaitingBody
-import androidx.compose.runtime.LaunchedEffect
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
 
@@ -55,8 +55,8 @@ internal fun ConnectAccountScreen(
     ConnectAccountScreen(
         state = state,
         onBackClick = onCancel,
-        onOpenGitHub = { uri ->
-            openGitHubDevicePage(
+        onOpenVerificationUri = { uri ->
+            openVerificationUri(
                 uri = uri,
                 uiState = viewModel.uiState,
                 openUri = uriHandler::openUri,
@@ -77,7 +77,7 @@ internal fun ConnectAccountScreen(
 internal fun ConnectAccountScreen(
     state: ConnectUiState,
     onBackClick: () -> Unit,
-    onOpenGitHub: (uri: String) -> Unit,
+    onOpenVerificationUri: (uri: String) -> Unit,
     onCopyCode: (code: String) -> Unit,
     onCancel: () -> Unit,
     onContinue: () -> Unit,
@@ -97,7 +97,7 @@ internal fun ConnectAccountScreen(
 
             is ConnectUiState.ShowCode -> ConnectShowCodeBody(
                 state = state,
-                onOpenGitHub = onOpenGitHub,
+                onOpenVerificationUri = onOpenVerificationUri,
                 onCopyCode = onCopyCode,
             )
 
@@ -128,7 +128,7 @@ private fun ConnectAccountScreenPreview(
     ConnectAccountScreen(
         state = preview.state,
         onBackClick = {},
-        onOpenGitHub = {},
+        onOpenVerificationUri = {},
         onCopyCode = {},
         onCancel = {},
         onContinue = {},

@@ -20,6 +20,7 @@ internal class ConnectAccountPreviewProvider : PreviewParameterProvider<ConnectA
             ConnectUiState.ShowCode(
                 userCode = "WDJB-MJHT",
                 verificationUri = "https://github.com/login/device",
+                providerName = "GitHub",
             ),
         ),
         ConnectAccountPreviewCase(

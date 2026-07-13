@@ -63,6 +63,8 @@ Full include list: `settings.gradle.kts`.
 | `:presentation` | Compose UI (+ Screen Context for busy screens); may retain prior domain facts for display |
 | `:di` | Feature Koin bindings |
 
+**Provider-shaped UI:** presentation (and feature `:api` / `:model` names) stay **provider-agnostic**. Vendor strings (e.g. “GitHub”) and vendor URIs come from **data** / `:feature:github` via API fields (`providerName`, `providerDisplayName`, `verificationUri`). Do not hardcode a vendor in Compose identifiers (`openGitHubDevicePage`, `onConnectGitHubClick`) or chrome templates — render `"Open $providerName"`, `"Connect $providerDisplayName"`, host from `verificationUri`. Previews and Figma may still show the concrete current provider as fixture copy.
+
 ---
 
 ## 4. Dependency rules

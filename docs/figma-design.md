@@ -91,7 +91,7 @@ Mockups should show the **real UX** users will get when the feature is honest/pr
 
 - **Do not** put v0.1 / “demo APK” / “not from your sources” banners on screens. Demo honesty can live in notes or docs, not in the phone chrome.  
 - Prefer real-case copy: e.g. `Waiting in queue…`, `Uploading project sources…`, `Building APK remotely…`, `Downloading APK…`, `APK ready to install`.  
-- **Name the build provider on phones.** UI is fed provider name/logo from the API (not hardcoded forever in Compose), but mockups must show the **concrete current provider** — today that is **GitHub** (`Connect GitHub`, `github.com/login/device`, `via GitHub`). Do **not** leave vague “your provider” / “cloud account” wording on user-visible phone chrome when GitHub is the only shipping provider.  
+- **Name the build provider on phones.** Mockups and preview fixtures show the **concrete current provider** (today **GitHub**). Production Compose must still be **provider-agnostic**: interpolate API fields (`providerName` / `providerDisplayName` / `verificationUri`) — do not hardcode a vendor in identifiers or chrome. Do **not** leave vague “your provider” / “cloud account” wording on user-visible phone chrome when a concrete provider is shipping.  
 - Labels like **Install app** (not “Install demo APK”) unless the shipping UI truly says otherwise.  
 - Skip system-installer handoff screens — after **Install app**, Android’s package UI takes over; don’t mock that as case `4a`.
 

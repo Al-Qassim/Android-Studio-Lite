@@ -80,6 +80,15 @@ Rules (same as Screen Context, adapted):
 6. Design-system stays parameterized.
 7. Prefer this shape over a single Screen+Content file even when the screen is small (Connect, Settings hub, Build account).
 
+### Provider-agnostic presentation
+
+When a feature can swap backends (auth, cloud build):
+
+1. **Identifiers and APIs** in `:presentation` / feature `:api` / `:model` use generic names (`openVerificationUri`, `providerDisplayName`, `ConnectAccount`) — not a vendor (`openGitHub…`, `onConnectGitHubClick`).
+2. **User-visible chrome** interpolates API-supplied fields (`"Open ${state.providerName}"`, paste host from `verificationUri`). Do not bake a vendor into production Compose strings.
+3. **Vendor lives in** `:data` and dedicated vendor modules (e.g. `:feature:github`). They emit the concrete display name / URIs.
+4. **Previews / Figma** may use the current provider as fixture copy so phones look real.
+
 When the screen grows many components (list + menus + dialogs), **add** a `*ScreenContext` and turn `ui/` / `logic/` into context extensions — see `docs/agents/screen-context.md`.
 
 ### ViewModel / state holder
@@ -98,6 +107,7 @@ When the screen grows many components (list + menus + dialogs), **add** a `*Scre
 
 ## 6. Checklist
 
+- [ ] Provider-shaped screens: no vendor in presentation identifiers or hardcoded chrome; name/URI from API (previews may fixture the current provider)
 - [ ] Feature owns sub-navigation; root host stays thin
 - [ ] `:model` / `:api` carry domain facts only — not fields added solely for redrawing UI chrome
 - [ ] Validation only in data/domain; API exposed for UI

@@ -98,7 +98,7 @@ class FakeBuildService(
                     it.copy(
                         phase = BuildPhase.Failed,
                         message = null,
-                        error = "Build failed. Open the GitHub Actions log.",
+                        error = "Build failed. Open the build log.",
                         providerName = FakeBuildPhaseMachine.PROVIDER_NAME,
                         logUrl = "https://github.com/",
                     )
