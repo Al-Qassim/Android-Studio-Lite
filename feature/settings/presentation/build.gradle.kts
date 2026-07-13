@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.robotopia.androidstudiolite.integration.navigation"
+    namespace = "com.robotopia.androidstudiolite.feature.settings.presentation"
     compileSdk {
         version = release(37)
     }
@@ -24,16 +24,18 @@ android {
 }
 
 dependencies {
-    api(project(":feature:projects:api"))
-    api(project(":feature:projects:model"))
-    api(project(":feature:files:api"))
-    api(project(":feature:files:model"))
-    api(project(":feature:editor:api"))
-    api(project(":feature:buildapk:api"))
     api(project(":feature:settings:api"))
-    implementation(libs.koin.androidx.compose)
-    implementation(libs.kotlinx.coroutines.core)
+    implementation(project(":feature:auth:api"))
+    implementation(project(":feature:auth:model"))
+    implementation(project(":designsystem"))
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.coroutines.core)
 }

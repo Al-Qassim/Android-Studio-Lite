@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.auth.presentation.account
+package com.robotopia.androidstudiolite.feature.settings.presentation.account
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
@@ -8,8 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
-import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ConnectAccountScreen
 import kotlinx.coroutines.launch
 
 private sealed interface BuildAccountRoute {
@@ -20,6 +20,7 @@ private sealed interface BuildAccountRoute {
 @Composable
 internal fun BuildAccountScreen(
     authService: AuthService,
+    authScreens: AuthScreens,
     onDismiss: () -> Unit,
 ) {
     var route by remember { mutableStateOf<BuildAccountRoute>(BuildAccountRoute.Settings) }
@@ -40,8 +41,7 @@ internal fun BuildAccountScreen(
         }
 
         BuildAccountRoute.Connect -> {
-            ConnectAccountScreen(
-                authService = authService,
+            authScreens.ConnectAccount(
                 onFinished = { route = BuildAccountRoute.Settings },
                 onCancel = { route = BuildAccountRoute.Settings },
             )

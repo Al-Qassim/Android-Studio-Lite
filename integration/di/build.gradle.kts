@@ -25,6 +25,7 @@ dependencies {
     implementation(project(":feature:editor:di"))
     implementation(project(":feature:buildapk:di"))
     implementation(project(":feature:auth:di"))
+    implementation(project(":feature:settings:di"))
     implementation(project(":feature:github:di"))
     implementation(project(":integration:database"))
     implementation(libs.koin.android)

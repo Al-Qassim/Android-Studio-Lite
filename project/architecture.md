@@ -44,7 +44,8 @@ feature/
   files/      model · api · data · presentation · di
   editor/     model · api · data · presentation · di
   buildapk/   model · api · data · presentation · di
-  auth/       model · api · data · presentation · di   # session + Connect account
+  auth/       model · api · data · presentation · di   # session + Connect (login) only
+  settings/   api · presentation · di                  # Settings · Build account (uses auth)
   github/     api · data · di                          # stateless GitHub helpers
 integration/
   database                  # Room assembly (feature entities/DAOs)
@@ -180,5 +181,7 @@ Locked product decisions: `project/v0.1-implementation-plan.md` (and grilling no
 | Files | `:feature:files:api` | Sandboxed FS |
 | Editor | `:feature:editor:api` | Session + files API |
 | Build | `:feature:buildapk:api` | Fake service + demo APK |
+| Auth | `:feature:auth:api` | Session + Connect (login) only |
+| Settings | `:feature:settings:api` | Build account settings UI (uses auth) |
 | Nav / DI / DB | `:integration:*` | Wire only |
 | UI kit / errors | `:designsystem`, `:core:error` | Shared |

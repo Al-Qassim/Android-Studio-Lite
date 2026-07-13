@@ -6,6 +6,7 @@ import com.robotopia.androidstudiolite.feature.editor.di.editorDiModule
 import com.robotopia.androidstudiolite.feature.files.di.filesDiModule
 import com.robotopia.androidstudiolite.feature.github.di.gitHubDiModule
 import com.robotopia.androidstudiolite.feature.projects.di.projectsDiModule
+import com.robotopia.androidstudiolite.feature.settings.di.settingsDiModule
 import com.robotopia.androidstudiolite.integration.database.databaseDiModule
 import org.koin.dsl.module
 
@@ -18,6 +19,7 @@ val integrationDiModule = module {
         editorDiModule,
         gitHubDiModule,
         authDiModule,
+        settingsDiModule,
         buildApkDiModule,
     )
 }

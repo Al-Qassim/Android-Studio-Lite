@@ -20,15 +20,6 @@ interface AuthService : AuthSession {
 }
 
 interface AuthScreens {
-    /**
-     * Settings · Build account — connect / log out.
-     * Owns in-feature navigation to [ConnectAccount].
-     */
-    @Composable
-    fun BuildAccount(
-        onDismiss: () -> Unit,
-    )
-
     @Composable
     fun ConnectAccount(
         onFinished: () -> Unit,

@@ -61,6 +61,10 @@ include(":feature:auth:data")
 include(":feature:auth:presentation")
 include(":feature:auth:di")
 
+include(":feature:settings:api")
+include(":feature:settings:presentation")
+include(":feature:settings:di")
+
 include(":feature:github:api")
 include(":feature:github:data")
 include(":feature:github:di")

@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.auth.presentation.account
+package com.robotopia.androidstudiolite.feature.settings.presentation.account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
