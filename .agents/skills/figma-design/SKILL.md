@@ -26,5 +26,6 @@ description: >-
 - **Instructional phones stay short:** prefer two short lines (what to do + where) + one primary CTA. Do not stack a headline, long body, and a third sentence that all say the same thing (device-flow Connect is the reference).
 - In-progress = **•••**; complete = check; failed = ✕ + clear error.
 - Blank phone frame names; notes in **boxes**.
+- **Obvious actions are icon-only** (copy, more, back, run) — no redundant text labels on icon controls.
 
 Figma: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)

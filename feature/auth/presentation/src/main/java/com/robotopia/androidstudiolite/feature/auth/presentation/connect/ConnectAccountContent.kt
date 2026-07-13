@@ -18,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -288,8 +290,9 @@ private fun UserCodeCopyRow(
         )
         IconButton(
             onClick = { onCopyCode(userCode) },
+            modifier = Modifier.semantics { contentDescription = "Copy code" },
             variant = IconButtonVariant.Ghost,
-            icon = { tint, size -> IconCopy(tint = tint, size = size) },
+            icon = { _, size -> IconCopy(tint = Colors.Primary, size = size) },
         )
     }
 }

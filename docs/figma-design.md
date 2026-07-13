@@ -128,7 +128,8 @@ Before locking a screen:
 1. Read the real composable (e.g. `BuildProgressContent`, `TopBarEditorMore`, `ProjectMenu`).  
 2. Match **structure** (back title bar vs cancel-in-top-bar), **actions**, **phase names**, and **icons**.  
 3. Prefer Design System + `:designsystem` names over Main Screens copy if Main Screens is outdated.  
-4. After Figma changes that affect shipping UI, expect a **design-review** pass (device screenshots vs Figma) — see `.agents/skills/design-review/SKILL.md`.
+4. **Obvious actions are icon-only** (copy, more, back, run): DS `IconButton` / icon — no “Copy”/“More” text beside an icon that already means that.  
+5. After Figma changes that affect shipping UI, expect a **design-review** pass (device screenshots vs Figma) — see `.agents/skills/design-review/SKILL.md`.
 
 ---
 
@@ -160,6 +161,7 @@ When an agent edits Figma:
 - [ ] Run (and other icons) use **Icon / …** from Design System, correct tint  
 - [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
 - [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions)  
+- [ ] Obvious actions (copy / more / back / run) are **icon-only** — no redundant text label on the control  
 - [ ] Text inside cards/boxes does not overflow the card bounds  
 - [ ] In-progress = dots; complete = check; failed step = ✕ + error copy  
 - [ ] No nested frame title clutter; phone frame name blank if labeled in text  
