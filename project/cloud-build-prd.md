@@ -18,8 +18,10 @@ v0.1 “builds” use a fake `BuildService` and a bundled demo APK. Users cannot
 Ship real cloud APK builds on the user’s GitHub account:
 
 1. **Connect GitHub** once via OAuth **device flow** (shared from onboarding / settings / build gate).
-2. On **Start build**, the app prepares a single private sandbox repo, uploads a project zip, dispatches a workflow, downloads the APK, then cleans up the ephemeral release.
+2. On **Start build**, the app prepares a single **public** sandbox repo, uploads a project zip, dispatches a workflow, downloads the APK, then cleans up the ephemeral release.
 3. UI stays **provider-shaped** (name/logo and optional log URL from API). **GitHub is the first and currently only provider** — phone copy must say GitHub, not vague “provider.”
+
+**Sandbox visibility:** public by default (free Actions for public repos). Optional private choice is backlog ([#27](https://github.com/Al-Qassim/Android-Studio-Lite/issues/27)).
 
 **Shipping sequence (locked):**
 
@@ -79,9 +81,9 @@ Ship real cloud APK builds on the user’s GitHub account:
 
 | Phase | Meaning |
 | --- | --- |
-| Preparing | `ensureSandbox` — private repo `asl-builds-android-studio-lite` (README, version marker, workflow); upgrade known files in place; fail clearly if unrelated repo exists |
+| Preparing | `ensureSandbox` — **public** repo `asl-builds-android-studio-lite` (README, version marker, workflow); upgrade known files in place; fail clearly if unrelated repo exists |
 | Uploading | Zip project via **`.gitignore`**; create ephemeral release `asl-build-<jobId>`; upload zip asset |
-| Queued | `workflow_dispatch` done; Actions run waiting for runner |
+| Queued | `workflow_dispatch` done; Actions run waiting for runner — UI stays Queued until `in_progress` (phases are **monotonic**; do not bounce back to Queued after Building) |
 | Building | Run `in_progress` until terminal |
 | Downloading | Fetch APK from same release |
 | ReadyToInstall | APK local; then delete release/tag (build station only) |
@@ -95,7 +97,7 @@ Ship real cloud APK builds on the user’s GitHub account:
 
 | Flow | Primary controls |
 | --- | --- |
-| Connect | **Open GitHub**, Cancel; waiting `•••`; Continue on success; Try again on fail |
+| Connect | **Open GitHub** + copy code stay on screen while polling; Continue on success; Try again on fail |
 | Onboarding | **Connect GitHub**, **Skip for now** |
 | Settings | **Connect GitHub** / **Log out** |
 | Build gate | Disabled Start build + **Connect GitHub** |

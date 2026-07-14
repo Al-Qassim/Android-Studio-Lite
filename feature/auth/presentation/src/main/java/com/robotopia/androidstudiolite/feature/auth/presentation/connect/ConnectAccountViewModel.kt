@@ -11,10 +11,6 @@ sealed interface ConnectUiState {
         val providerName: String,
     ) : ConnectUiState
 
-    data class Waiting(
-        val userCode: String,
-    ) : ConnectUiState
-
     data class Connected(
         val account: AuthAccount,
     ) : ConnectUiState

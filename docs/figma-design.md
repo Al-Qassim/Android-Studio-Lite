@@ -1,6 +1,8 @@
 # Designing in Figma — Android Studio Lite
 
-**Mandatory** whenever anyone (human or agent) is asked to make or change a design in Figma for this project. Use the `/figma-design` skill — read this file fully before editing Figma.
+**Mandatory** whenever anyone (human or agent) is asked to make or change a design in Figma for this project.
+
+**Process:** use `/figma-design` (general workflow). **This file** is the ASL-specific contract — read it fully before editing Figma.
 
 How to add or update UI in the [ASL Figma file](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) so flow pages stay consistent with the Design System and with Compose.
 
@@ -19,7 +21,7 @@ Use this when creating a new feature page (e.g. **Run & build**), extending an e
 
 **File:** `M2LGyXHC5YYJekr3Fq3oiP`
 
-Before drawing anything new, open a strong existing page (**Projects management** or **Files editor**) and match its density, phone size, dark theme, and note style.
+**Reference density:** before drawing anything new, open **Projects management** or **Files editor** and match its density, phone size, dark theme, and note style.
 
 ---
 
@@ -85,15 +87,20 @@ If a Design System control is still a plain Frame (not a Component), **promote i
 
 ---
 
-## Design for the real product, not the fake
+## ASL product / copy rules
 
 Mockups should show the **real UX** users will get when the feature is honest/production-shaped:
 
 - **Do not** put v0.1 / “demo APK” / “not from your sources” banners on screens. Demo honesty can live in notes or docs, not in the phone chrome.  
 - Prefer real-case copy: e.g. `Waiting in queue…`, `Uploading project sources…`, `Building APK remotely…`, `Downloading APK…`, `APK ready to install`.  
+- **Connect device flow:** keep the user-code + **Open provider** screen until Connected or Failed. Do **not** auto-advance to a separate “Waiting for approval” phone that removes copy/open actions. Poll in the background.  
 - **Name the build provider on phones.** Mockups and preview fixtures show the **concrete current provider** (today **GitHub**). Production Compose must still be **provider-agnostic**: interpolate API fields (`providerName` / `providerDisplayName` / `verificationUri`) — do not hardcode a vendor in identifiers or chrome. Do **not** leave vague “your provider” / “cloud account” wording on user-visible phone chrome when a concrete provider is shipping.  
 - Labels like **Install app** (not “Install demo APK”) unless the shipping UI truly says otherwise.  
 - Skip system-installer handoff screens — after **Install app**, Android’s package UI takes over; don’t mock that as case `4a`.
+- **Instructional phones stay short:** prefer two short lines (what to do + where) + one primary CTA. Do not stack a headline, long body, and a third sentence that all say the same thing (device-flow Connect is the reference). Apply the same cut across **all new flow phones** (Connected / Failed / Settings / gate / onboarding) — status + one action is enough when the control already says what to do.
+- **After cutting copy, re-layout** so content + CTA are one tight group, **vertically centered** under the top bar on short instructional phones (no mid-band void, no dead lower half; Settings lists stay top-aligned).
+- **Obvious actions are icon-only** (copy, more, back, run, add, settings) — no redundant text labels on icon controls. Sibling top-bar actions must match type (all icon buttons in the same cluster) and use **DS icon glyphs** at matching size.
+- Permanent Settings entry lives on the **Projects** top bar (gear icon from DS), not a one-off text link.
 
 ---
 
@@ -147,23 +154,21 @@ Before locking a screen:
 
 ---
 
-## Working with agents / MCP
+## Working with agents / MCP (ASL extras)
 
-When an agent edits Figma:
+The general MCP order lives in `/figma-design`. For this file, also audit for ASL-specific traps:
 
-1. Load **figma-use** (and **figma-generate-design** when assembling screens from the DS).  
-2. **`search_design_system` / list Design System Components** before drawing buttons or icons.  
-3. Screenshot after each meaningful pass; compare to Projects management / Files editor, not only to the previous broken frame.  
-4. One page switch per `use_figma` call; return created/mutated node IDs.  
-5. After layout work, audit for: duplicate labels, named frames, white fills, homemade buttons, demo banners, missing note boxes.
-6. **Layout sanity (catch these in the screenshot pass):**
+1. Screenshot after each meaningful pass; compare to Projects management / Files editor, not only to the previous broken frame.  
+2. One page switch per `use_figma` call; return created/mutated node IDs.  
+3. After layout work, audit for: duplicate labels, named frames, white fills, homemade buttons, demo banners, missing note boxes.
+4. **Layout sanity (catch these in the screenshot pass):**
    - **Flows index** auto-layout must `primaryAxisSizingMode = 'AUTO'` (hug content). A FIXED ~10px-tall index box means the list is clipped/invisible.
    - **Case subtitles** under side-by-side phones must be **≤ phone column width (~240)** — never leave 500px-wide text that overlaps the next case.
    - **Main action on a phone** = DS **`Button / primary`**. Do not use a homemade chip/rect for the primary CTA (e.g. “Open device page”).
    - **Text must stay inside its card/box.** Do not paste long body copy into a small surface card; use a short subtitle (or grow the card). After text edits, check that `text.y + text.height` ≤ card bottom.
    - **No homemade icons.** Every glyph on a phone must be a Design System `icon/…` / `Icon / …` (or clone of `svg/…`). Ban ellipse/circle+dot stand-ins, emoji gears, and freehand icons. If the icon is missing from DS, add it from Compose drawable first, then instance it. Screenshot fail if settings looks like a target or add is raw “+” text while `svg/add` exists.
    - **After cutting copy, re-layout.** Short phones must not leave a huge empty band with the CTA stuck to the bottom, **and** must not leave a top-cramped stack with a dead lower half. Keep content + primary actions as **one tight group**, then **vertically center that group** in the space below the top bar (auth / device-code / empty states). Do not `weight`/`spacer` the button to the phone footer unless the screen still has dense mid content. Settings-style list screens stay top-aligned.
-7. **Before calling done:** take a fresh screenshot of the finished design, evaluate it, and improve anything that fails the checklist or looks worse than Projects management / Files editor. Repeat until the screenshot looks right.
+5. **Before calling done:** take a fresh screenshot of the finished design, evaluate it, and improve anything that fails the checklist or looks worse than Projects management / Files editor. Repeat until the screenshot looks right.
 
 ---
 
@@ -177,7 +182,8 @@ When an agent edits Figma:
 - [ ] Run / add / settings (and other icons) use **Icon / …** from Design System — **no homemade stand-ins** (circle+dot, emoji, freehand); if missing from DS, add from Compose drawable first  
 - [ ] Sibling top-bar icons match size/family/tint tokens  
 - [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
-- [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions) — same cut on Waiting / Connected / Failed / Settings / gate / onboarding  
+- [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions) — same cut on Connected / Failed / Settings / gate / onboarding  
+- [ ] Connect: code + open CTA stay until Connected/Failed (no intermediate Waiting phone that removes actions)  
 - [ ] After cutting copy, content + CTA is one tight group, vertically centered under the top bar on short instructional phones (no mid-band void, no dead lower half)  
 - [ ] Obvious actions (copy / more / back / run / add / settings) are **icon-only** — no redundant text label on the control; sibling top-bar actions match type  
 - [ ] Settings is a permanent Projects top-bar control (gear), not a transient text link  
@@ -193,6 +199,7 @@ When an agent edits Figma:
 
 ## Related
 
+- Process skill (portable): `.agents/skills/figma-design/SKILL.md`  
 - Figma file: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)  
 - Design review against device: `.agents/skills/design-review/SKILL.md`  
 - Compose screen conventions: `docs/agents/screen-context.md`  

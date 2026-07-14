@@ -31,6 +31,7 @@ dependencies {
     api(project(":feature:editor:api"))
     api(project(":feature:buildapk:api"))
     api(project(":feature:settings:api"))
+    api(project(":feature:onboarding:api"))
     implementation(libs.koin.androidx.compose)
     implementation(libs.kotlinx.coroutines.core)
     implementation(platform(libs.androidx.compose.bom))

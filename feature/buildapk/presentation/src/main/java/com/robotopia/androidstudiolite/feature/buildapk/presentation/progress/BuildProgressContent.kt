@@ -81,14 +81,14 @@ private fun BuildProgressBody(
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         when {
+            state.phase == BuildPhase.Cancelled -> BuildCancelledState(
+                message = state.message,
+            )
             state.error != null || state.phase == BuildPhase.Failed -> BuildFailedState(
                 state = state,
                 onRetry = onRetry,
                 onDismiss = onDismiss,
                 onViewLog = onViewLog,
-            )
-            state.phase == BuildPhase.Cancelled -> BuildCancelledState(
-                message = state.message,
             )
             else -> BuildActiveState(
                 state = state,

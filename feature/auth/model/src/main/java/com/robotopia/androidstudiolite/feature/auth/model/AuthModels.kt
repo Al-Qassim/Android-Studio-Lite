@@ -15,9 +15,6 @@ sealed interface ConnectProgress {
         val providerName: String,
     ) : ConnectProgress
 
-    /** Polling for authorization. */
-    data object Waiting : ConnectProgress
-
     data class Connected(
         val account: AuthAccount,
     ) : ConnectProgress

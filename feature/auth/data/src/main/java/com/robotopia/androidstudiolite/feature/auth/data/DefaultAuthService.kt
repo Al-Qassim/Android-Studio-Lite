@@ -27,6 +27,8 @@ class DefaultAuthService(
         store.clear()
     }
 
+    override suspend fun accessToken(): String? = store.accessToken()
+
     override fun connect(): Flow<ConnectProgress> = flow {
         val device = gitHubClient.requestDeviceCode(clientId)
         emit(
@@ -36,12 +38,6 @@ class DefaultAuthService(
                 providerName = PROVIDER_NAME,
             ),
         )
-
-        // Brief moment on the code screen, then waiting chrome while we poll.
-        delay(1_200)
-        if (!currentCoroutineContext().isActive) return@flow
-
-        emit(ConnectProgress.Waiting)
 
         val deadlineMs = System.currentTimeMillis() + device.expiresInSeconds * 1_000L
         val intervalMs = (device.intervalSeconds.coerceAtLeast(1)) * 1_000L

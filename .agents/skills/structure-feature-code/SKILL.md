@@ -26,6 +26,8 @@ Reusable conventions for feature modules (mobile or similar layered apps). Adapt
 2. UI shows **only** that UI message (or a fixed generic string after a user action).
 3. Unexpected errors: **log** for debugging; never show raw `Throwable.message` / exception text to the user.
 4. Mutating operations: **succeed or throw**. On failure, roll back partial side effects (e.g. restore DB row if file delete fails). No silent no-ops for “must work” actions.
+5. **Cancellation is not failure.** When a coroutine is cancelled (`CancellationException`), do not map it to a user-facing Failed/error state. Re-throw or return; let the cancel path set Cancelled (or equivalent). Catch `CancellationException` before broad `catch (Exception)`.
+6. On user-facing / product paths, throw the shared app error type — not `require` / `check` / `IllegalArgumentException` whose messages are not UI-safe.
 
 ## 3. Validation
 
@@ -80,7 +82,15 @@ Rules (same as Screen Context, adapted):
 6. Design-system stays parameterized.
 7. Prefer this shape over a single Screen+Content file even when the screen is small (Connect, Settings hub, Build account).
 
-### Provider-agnostic presentation
+### Extract meaningful units
+
+Split long methods into **named steps that own a real phase of work** (prepare sandbox, upload, poll run). Do **not** extract tiny wrappers that only rename a single `update` / `catch` / one-liner — keep those inline at the call site.
+
+### Kotlin control-flow traps
+
+In `repeat` / `forEach` / similar inline loops, `return@label` exits **only that iteration** (like `continue`), not the whole loop. To stop after success, use `for` + `break`, or `return@outer` from a wrapping `run { … }`. Mistaking this for `break` can fire side effects (e.g. `workflow_dispatch`) once per attempt.
+
+When the screen grows many components (list + menus + dialogs), **add** a `*ScreenContext` and turn `ui/` / `logic/` into context extensions — see `docs/agents/screen-context.md`.
 
 When a feature can swap backends (auth, cloud build):
 

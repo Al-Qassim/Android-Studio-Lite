@@ -68,3 +68,8 @@ include(":feature:settings:di")
 include(":feature:github:api")
 include(":feature:github:data")
 include(":feature:github:di")
+
+include(":feature:onboarding:api")
+include(":feature:onboarding:data")
+include(":feature:onboarding:presentation")
+include(":feature:onboarding:di")

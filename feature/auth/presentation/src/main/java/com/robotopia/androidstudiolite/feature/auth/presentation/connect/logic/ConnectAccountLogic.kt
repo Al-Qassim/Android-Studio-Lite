@@ -13,7 +13,6 @@ internal suspend fun collectConnectProgress(
     authService: AuthService,
     uiState: MutableStateFlow<ConnectUiState>,
 ) {
-    var lastUserCode = ""
     uiState.value = ConnectUiState.Loading
     authService.connect()
         .catch {
@@ -24,16 +23,11 @@ internal suspend fun collectConnectProgress(
         .collect { progress ->
             when (progress) {
                 is ConnectProgress.ShowCode -> {
-                    lastUserCode = progress.userCode
                     uiState.value = ConnectUiState.ShowCode(
                         userCode = progress.userCode,
                         verificationUri = progress.verificationUri,
                         providerName = progress.providerName,
                     )
-                }
-
-                ConnectProgress.Waiting -> {
-                    uiState.value = ConnectUiState.Waiting(userCode = lastUserCode)
                 }
 
                 is ConnectProgress.Connected -> {
@@ -49,14 +43,9 @@ internal suspend fun collectConnectProgress(
 
 internal fun openVerificationUri(
     uri: String,
-    uiState: MutableStateFlow<ConnectUiState>,
     openUri: (String) -> Unit,
 ) {
     runCatching { openUri(uri) }
-    val current = uiState.value
-    if (current is ConnectUiState.ShowCode) {
-        uiState.value = ConnectUiState.Waiting(userCode = current.userCode)
-    }
 }
 
 internal suspend fun copyUserCode(
