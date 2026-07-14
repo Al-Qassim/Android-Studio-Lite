@@ -115,6 +115,12 @@
       "skillPath": "skills/engineering/triage/SKILL.md",
       "computedHash": "b77ea99c2e6e97815b373cc476ad4cc1835d3e736867b764602147be71f6c131"
     },
+    "ui-refactor": {
+      "source": "LovroPodobnik/refactoring-ui-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-refactor/SKILL.md",
+      "computedHash": "0b94bd62d8e648aa371199f4c7ac482c9bb457239fe0e9fdba339e0adcaf19bc"
+    },
     "wayfinder": {
       "source": "mattpocock/skills",
       "sourceType": "github",
