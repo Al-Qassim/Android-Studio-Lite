@@ -50,7 +50,9 @@ tokens, copy, and product rules live in the repo’s design contract — not her
 6. **Screenshot finish pass (required).** Capture the finished work (full page
    and/or key frames). Evaluate against the project contract and the reference
    screens. Fix gaps; re-screenshot. Do not call the design done until a fresh
-   screenshot looks right.
+   screenshot looks right. When the work is tracked by an issue/ticket, **post
+   those screenshots inline in the ticket comments** (rendered images, not
+   links-only) before calling Ready.
 
 7. **User correction = harden the contract.** If the user points out an error,
    re-review the **whole latest design pass** for the same failure class, fix
@@ -66,6 +68,7 @@ Done when all of the following hold:
 - [ ] New/changed UI uses DS instances (or DS was extended first)
 - [ ] Contract checklist (if any) passes
 - [ ] Fresh screenshot evaluated and gaps fixed
+- [ ] Screenshots posted inline on the tracking issue/ticket when one exists
 - [ ] Project contract updated if a new failure class was discovered
 
 ## Agent / MCP tips (general)
