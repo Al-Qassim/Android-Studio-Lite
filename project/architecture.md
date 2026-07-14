@@ -46,7 +46,7 @@ feature/
   buildapk/   model · api · data · presentation · di
   auth/       model · api · data · presentation · di   # session + Connect (login) only
   settings/   api · presentation · di                  # Settings hub + Build account (uses auth)
-  onboarding/ api · presentation · di                  # first-launch Connect / Skip
+  onboarding/ api · data · presentation · di           # first-launch Connect / Skip
   github/     api · data · di                          # stateless GitHub helpers (device + build REST)
 integration/
   database                  # Room assembly (feature entities/DAOs)
@@ -171,6 +171,7 @@ Build ──► ApkInstaller (system UI) ; dismiss ──► returnTo
 | Editor buffer | Memory in `:feature:editor:data`; disk via files API |
 | Build artifacts | Local cache + demo asset in `:feature:buildapk:data` |
 | Auth session | SharedPreferences in `:feature:auth:data` (stub device flow) |
+| Onboarding completion | SharedPreferences in `:feature:onboarding:data` |
 | GitHub OAuth client id | `github.oauth.clientId` in gitignored `local.properties` → `auth:data` `BuildConfig.GITHUB_OAUTH_CLIENT_ID` (see `local.properties.example`) |
 | Remote CI | **None yet** (real GHA = `#25`) |
 

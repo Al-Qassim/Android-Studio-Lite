@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.robotopia.androidstudiolite.feature.onboarding.di"
+    namespace = "com.robotopia.androidstudiolite.feature.onboarding.data"
     compileSdk {
         version = release(37)
     }
@@ -21,8 +21,5 @@ android {
 
 dependencies {
     api(project(":feature:onboarding:api"))
-    implementation(project(":feature:onboarding:data"))
-    implementation(project(":feature:onboarding:presentation"))
-    implementation(project(":feature:auth:api"))
-    implementation(libs.koin.android)
+    implementation(libs.androidx.core.ktx)
 }
