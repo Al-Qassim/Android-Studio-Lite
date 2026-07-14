@@ -202,7 +202,8 @@ The general MCP order lives in `/figma-design`. For this file, also audit for AS
 - [ ] No nested frame title clutter; phone frame name blank if labeled in text  
 - [ ] No white fills on structural frames  
 - [ ] Copy and structure match Compose (or an explicit ADR if Figma leads)  
-- [ ] **Screenshot finish pass:** capture the full page (and a phone close-up); evaluate vs Projects management / Files editor; fix gaps; re-screenshot until it looks right — do not skip 
+- [ ] **Screenshot finish pass:** capture the full page (and a phone close-up); evaluate vs Projects management / Files editor; fix gaps; re-screenshot until it looks right — do not skip
+- [ ] **Post screenshots on the GitHub design issue** (inline in comments as rendered images, not links-only) before calling Ready
 
 ---
 
