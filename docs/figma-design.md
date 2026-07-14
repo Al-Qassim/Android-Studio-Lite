@@ -23,6 +23,15 @@ Use this when creating a new feature page (e.g. **Run & build**), extending an e
 
 **Reference density:** before drawing anything new, open **Projects management** or **Files editor** and match its density, phone size, dark theme, and note style.
 
+### Redesign ambition (when asked to redesign)
+
+Incremental “moved 8px” polish is a **fail**. Aim for a **stunning, rich, modern, vibrant** dark-IDE look that still keeps **one obvious primary action** per screen.
+
+- Enrich ASL’s existing language (Primary green, dark surfaces) — depth, accent glow on key CTAs, richer cards, pleasing empty/progress moments. Do **not** invent a generic purple AI aesthetic.
+- Apply `/ui-refactor` **systems** (spacing/type scales, hierarchy) so richness stays coherent — systems are not an excuse for austerity.
+- Add short **animation notes** under phones when redesigning (enter/exit, progress pulse, success settle) so Compose can implement motion later.
+- Don’t overdo: no clutter, no competing CTAs, content still wins on Editor.
+
 ---
 
 ## Page structure (flow pages)
