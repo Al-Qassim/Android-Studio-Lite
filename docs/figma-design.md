@@ -23,6 +23,16 @@ Use this when creating a new feature page (e.g. **Run & build**), extending an e
 
 **Reference density:** before drawing anything new, open **Projects management** or **Files editor** and match its density, phone size, dark theme, and note style.
 
+### Locked visual direction (wave 3+)
+
+**North star:** JetBrains New UI / Islands (Android Studio family).
+
+- Skill: `/jetbrains-new-ui` (`.agents/skills/jetbrains-new-ui/SKILL.md`)
+- Working Int UI Kit copy: https://www.figma.com/design/6whxXz3bbL8FG7dr83Oi4u/Int-UI-Kit--Community- (`fileKey=6whxXz3bbL8FG7dr83Oi4u`, entry `7884:49935`)
+- Community source: https://www.figma.com/community/file/1227732692272811382/int-ui-kit
+
+Follow `/jetbrains-new-ui` whenever redesigning. Still obey phone size, DS instance, and screenshot-on-issue rules above.
+
 ### Redesign ambition (when asked to redesign)
 
 Do **not** ship near-noop polish (“moved 8px”). Do **not** overshoot into generic “AI shiny” either (purple gradients, neon glow on everything, glass everywhere).
