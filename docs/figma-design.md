@@ -25,12 +25,18 @@ Use this when creating a new feature page (e.g. **Run & build**), extending an e
 
 ### Redesign ambition (when asked to redesign)
 
-Incremental “moved 8px” polish is a **fail**. Aim for a **stunning, rich, modern, vibrant** dark-IDE look that still keeps **one obvious primary action** per screen.
+Do **not** ship near-noop polish (“moved 8px”). Do **not** overshoot into generic “AI shiny” either (purple gradients, neon glow on everything, glass everywhere).
 
-- Enrich ASL’s existing language (Primary green, dark surfaces) — depth, accent glow on key CTAs, richer cards, pleasing empty/progress moments. Do **not** invent a generic purple AI aesthetic.
-- Apply `/ui-refactor` **systems** (spacing/type scales, hierarchy) so richness stays coherent — systems are not an excuse for austerity.
-- Add short **animation notes** under phones when redesigning (enter/exit, progress pulse, success settle) so Compose can implement motion later.
-- Don’t overdo: no clutter, no competing CTAs, content still wins on Editor.
+**Required process — references before pixels:**
+
+1. **Gather design references** first (real products + curated shots): dark IDEs, mobile code tools, calm modern productivity apps. Capture links + short notes on *why* each fits (hierarchy, density, accent use, motion).
+2. **Lock a direction with the human** (pick 2–4 references as the north star) before rewriting Figma.
+3. Only then redesign — match that locked vibe: rich and modern, but **usable and clear** (one primary action; content wins on Editor).
+4. Apply `/ui-refactor` **systems** (spacing/type scales, hierarchy). Use ASL’s green/dark language; accents are sparse, not wallpaper.
+5. Add short **animation notes** under phones when useful.
+6. Post **inline screenshots on the design issue** before Ready.
+
+A redesign that ignores step 1–2 is incomplete.
 
 ---
 

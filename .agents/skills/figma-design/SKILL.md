@@ -26,6 +26,9 @@ tokens, copy, and product rules live in the repo’s design contract — not her
    - Follow that contract for size, density, pages, DS component names, and
      product-specific UI rules. Do not invent alternate patterns when the
      contract already states them.
+   - **If this is a redesign:** follow the contract’s references-first rule
+     (gather refs → human locks direction → then Figma). Do not invent a new
+     vibe from scratch after a rejected pass.
 
 2. **Orient in Figma.** Resolve `fileKey` / `node-id` from the user URL or the
    contract. Open a strong existing screen/page the contract names as the
