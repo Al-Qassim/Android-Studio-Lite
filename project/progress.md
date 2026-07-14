@@ -1,10 +1,10 @@
 # Android Studio Lite — Progress (brief)
 
-**As of:** 2026-07-13 · **Track:** cloud build (post-v0.1)
+**As of:** 2026-07-14 · **Track:** cloud build (post-v0.1)
 
 On-device Compose IDE: manage projects → browse/edit files → Run → build → install APK.
 
-## Status: real GitHub Actions builds in progress
+## Status: real GitHub Actions builds shipped
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -17,7 +17,7 @@ On-device Compose IDE: manage projects → browse/edit files → Run → build �
 | Parent plan | Done | `#5` · `project/architecture.md` · `project/v0.1-implementation-plan.md` |
 | Cloud-build PRD + design | Done | `#19`–`#21` · `project/cloud-build-prd.md` · Figma Connect / Settings / Onboarding / Run & build |
 | Connect + build UI | Done | `#22` + `#24` / [PR #26](https://github.com/Al-Qassim/Android-Studio-Lite/pull/26) |
-| Onboarding + real GHA | **In progress** | `#23` + `#25` · `feature/real-cloud-build` · public sandbox; private choice backlog `#27` |
+| Onboarding + real GHA | Done | `#23` + `#25` / [PR #28](https://github.com/Al-Qassim/Android-Studio-Lite/pull/28) · public sandbox; private choice backlog `#27` |
 
 ## Product path (shipping)
 

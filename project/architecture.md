@@ -13,10 +13,10 @@ On-device Kotlin / Jetpack Compose IDE:
 | Create / list / open / delete projects (Compose template) | Yes |
 | Browse & manage files under project root (sandboxed) | Yes |
 | Edit source files (basic editor) | Yes |
-| Run → build progress → install APK | Yes (**fake** local build + bundled demo APK today) |
-| Edit → rebuild → reinstall loop | Yes (same fake path) |
+| Run → build progress → install APK | Yes (GitHub Actions + APK to Downloads; `FakeBuildService` for tests) |
+| Edit → rebuild → reinstall loop | Yes (same product path) |
 
-**Not in v0.1:** real cloud/GHA Gradle (tracked in [`cloud-build-prd.md`](cloud-build-prd.md) / issues #19–#25), Git, AI assistant, syntax highlighting.
+**Not in v0.1:** Git, AI assistant, syntax highlighting. Optional private sandbox: `#27`.
 
 Foundation: `:designsystem`, `:core:error` (`AppException`).
 
@@ -28,7 +28,7 @@ Foundation: `:designsystem`, `:core:error` (`AppException`).
 2. **Public surface is thin** — outside a feature, depend on `:api` (+ `:model` as needed), never `:data` / `:presentation`.
 3. **Integration wires only** — no domain logic in `:integration:*` or `:app`.
 4. **`:app` stays thin** — Application, Koin start, `IdeNavHost`, permissions, install intents.
-5. **Replaceable build backend** — one `BuildService` API; fake today, real cloud later.
+5. **Replaceable build backend** — one `BuildService` API; product = GitHub Actions, fake retained for tests.
 6. **Safe file sandbox** — file ops stay under the project root.
 
 ---
@@ -173,7 +173,7 @@ Build ──► ApkInstaller (system UI) ; dismiss ──► returnTo
 | Auth session | SharedPreferences in `:feature:auth:data` (stub device flow) |
 | Onboarding completion | SharedPreferences in `:feature:onboarding:data` |
 | GitHub OAuth client id | `github.oauth.clientId` in gitignored `local.properties` → `auth:data` `BuildConfig.GITHUB_OAUTH_CLIENT_ID` (see `local.properties.example`) |
-| Remote CI | **None yet** (real GHA = `#25`) |
+| Remote CI | GitHub Actions via `:feature:github` + `GitHubActionsBuildService` (`#25`) |
 
 ### `local.properties` → `BuildConfig`
 
@@ -183,7 +183,7 @@ Build ──► ApkInstaller (system UI) ; dismiss ──► returnTo
 
 ## 8. Out of scope / later
 
-Git, AI assistant, syntax highlighting, real cloud/GHA Gradle (same `BuildService` surface), Documents storage, Gradle wrappers in generated projects.
+Git, AI assistant, syntax highlighting, optional private sandbox (`#27`), Documents storage, Gradle wrappers in generated projects.
 
 Locked product decisions: `project/v0.1-implementation-plan.md` (and grilling notes under `project/` when relevant).
 
@@ -196,7 +196,7 @@ Locked product decisions: `project/v0.1-implementation-plan.md` (and grilling no
 | Projects | `:feature:projects:api` | Room + template FS |
 | Files | `:feature:files:api` | Sandboxed FS |
 | Editor | `:feature:editor:api` | Session + files API |
-| Build | `:feature:buildapk:api` | Fake service + demo APK |
+| Build | `:feature:buildapk:api` | GHA product path; fake + demo APK for tests |
 | Auth | `:feature:auth:api` | Session + Connect (login) only |
 | Settings | `:feature:settings:api` | Settings hub; Build account section (uses auth) |
 | Nav / DI / DB | `:integration:*` | Wire only |
