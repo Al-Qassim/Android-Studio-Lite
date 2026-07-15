@@ -1,232 +1,95 @@
 # Designing in Figma — Android Studio Lite
 
-**Mandatory** whenever anyone (human or agent) is asked to make or change a design in Figma for this project.
+**Mandatory** for Figma work on this project. Process: `/figma-design`. Visual direction: `/jetbrains-new-ui`. **Ready gate:** `/design-verify` (critic ≠ author) → human accept → implement.
 
-**Process:** use `/figma-design` (general workflow). **This file** is the ASL-specific contract — read it fully before editing Figma.
+**File:** [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) (`M2LGyXHC5YYJekr3Fq3oiP`)
 
-How to add or update UI in the [ASL Figma file](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) so flow pages stay consistent with the Design System and with Compose.
+| Layer | Role |
+| --- | --- |
+| **Design System** | Shared tokens/components (default for non-pilot flows) |
+| **Feature flow pages** | Cases + phones — implement contract |
+| **Compose** | What ships; Figma stays in sync |
 
-Use this when creating a new feature page (e.g. **Run & build**), extending an existing flow page, or fixing mockups that look “empty”, washed-out, or out of sync with code.
+**Kit (visual oracle):** [Int UI Kit](https://www.figma.com/design/6whxXz3bbL8FG7dr83Oi4u/Int-UI-Kit--Community-) `6whxXz3bbL8FG7dr83Oi4u`
 
----
+### Design System first (after kit-local pilots)
 
-## Source of truth
+Build / Connect / Settings may be kit-local on their pages. **Before Editor / Projects / Files:** redesign the **Design System** page from Int UI Kit (`/jetbrains-new-ui`), critic PASS (zoomed, ≤5 comps/shot), human accept — then those flows instance ASL DS.
 
-| Layer | Where | Role |
-| --- | --- | --- |
-| Tokens & components | **Design System** page | Colors, type, icons, buttons, top bars, menus |
-| Happy-path screens | **Main Screens** | Product overview (may lag real features) |
-| Feature flows | **Projects management**, **Files editor**, **Loading & error states**, **Run & build**, … | Cases, steps, notes — the contract for implementation |
-| Compose | `:designsystem` + feature modules | What ships; Figma should match real UI, not demos |
+### Design System page (lean + reviewable)
 
-**File:** `M2LGyXHC5YYJekr3Fq3oiP`
+**Fewer components, not the whole kit.** Promote only what ASL flows need. Delete old/unused DS components and wave leftovers (glow, duplicate buttons, dead icons).
 
-**Reference density:** before drawing anything new, open **Projects management** or **Files editor** and match its density, phone size, dark theme, and note style.
+**The DS page itself must look good** — dark canvas, clear labeled sections, consistent gaps, no scrap piles. Default white frames, random white cards, and unlabeled orphans are not “optional extras”: **delete them** or restyle into a proper dark section. If it’s on the page, it’s in scope for `/design-verify`.
 
-### Locked visual direction (wave 3+)
+**Clear sections** on the page (labeled), for example:
 
-**North star:** JetBrains New UI / Islands (Android Studio family).
+1. Color / type tokens  
+2. Buttons (primary, secondary, danger-text)  
+3. Fields / code well  
+4. Chrome (status, top bars)  
+5. Lists / rows / project card  
+6. Progress / phases / banners  
+7. Dialogs / menus  
+8. Identity / chips / group header  
+9. Icons (only icons we ship)
 
-- Skill: `/jetbrains-new-ui` (`.agents/skills/jetbrains-new-ui/SKILL.md`)
-- Working Int UI Kit copy: https://www.figma.com/design/6whxXz3bbL8FG7dr83Oi4u/Int-UI-Kit--Community- (`fileKey=6whxXz3bbL8FG7dr83Oi4u`, entry `7884:49935`)
-- Community source: https://www.figma.com/community/file/1227732692272811382/int-ui-kit
+**Critic:** `/design-verify` is an **audit** — inventory every on-page unit first, Pass A cleanliness, Pass B Kit|ASL with **fileKey + nodeId** on both sides (never DS↔DS). Fail-closed: missing rows or missing kit node ids cannot PASS.
 
-Follow `/jetbrains-new-ui` whenever redesigning. Still obey phone size, DS instance, and screenshot-on-issue rules above.
-
-### Redesign ambition (when asked to redesign)
-
-Do **not** ship near-noop polish (“moved 8px”). Do **not** overshoot into generic “AI shiny” either (purple gradients, neon glow on everything, glass everywhere).
-
-**Required process — references before pixels:**
-
-1. **Gather design references** first (real products + curated shots): dark IDEs, mobile code tools, calm modern productivity apps. Capture links + short notes on *why* each fits (hierarchy, density, accent use, motion).
-2. **Lock a direction with the human** (pick 2–4 references as the north star) before rewriting Figma.
-3. Only then redesign — match that locked vibe: rich and modern, but **usable and clear** (one primary action; content wins on Editor).
-4. Apply `/ui-refactor` **systems** (spacing/type scales, hierarchy). Use ASL’s green/dark language; accents are sparse, not wallpaper.
-5. Add short **animation notes** under phones when useful.
-6. Post **inline screenshots on the design issue** before Ready.
-
-A redesign that ignores step 1–2 is incomplete.
+**Author self-check (Design System tokens):** Before Kit | Candidate, for every token block (color, space, radius, type) verify **title copy = body copy = sample labels = bound variable values** (one coherent scale — no stale Wave leftovers). Turn **Clip content off** on token sample rows and set the row to hug so every sample is fully visible in a zoomed shot. **Do not trust `clipsContent=false` alone:** if a child’s right/bottom edge exceeds the row (absolute `x`/`width` overflow), the zoomed shot still clips — use horizontal auto-layout (label · sample · spec) so every column fits inside the row. Sample text must be **readable on the section surface** (light on dark; never near-black `#0D140F`-class on island). Scan the full page for solid white / near-white structural fills and remove or restyle them.
 
 ---
 
 ## Page structure (flow pages)
 
-Follow the same skeleton as Projects management / Run & build:
+1. Title + one-line subtitle  
+2. Flows index  
+3. Case headers (`1 · …`)  
+4. Phones **240 × 420** (arrows when order matters)  
+5. Notes under phones in a box — **never** put author/anim notes inside the phone chrome (that is a `/design-verify` FAIL)
 
-1. **Title** + one-line subtitle  
-2. **Flows index** — short numbered list of cases on the page  
-3. **Case headers** — `1 · …`, `2 · …` with a one-line description  
-4. **Phone mockups** in a row (and arrows `→` when order matters)  
-5. **Notes under each phone** — title + subtitle, inside a **box**  
-6. Optional later cases (outcomes, errors) — same pattern
+Canvas dark (`#0F1217`-class). Prefer blank phone frame names; no white fills on structural frames; no nested frame title clutter.
 
-Keep the canvas dark (`#0F1217`-class). Phones use ASL bg (`#12171C`).
+**No full-phone / near-full-phone gray islands.** Do not wrap empty/list/form/**editor** bodies in a large rounded gray panel under the top bar — including a `#2B2D30` “code card” that fills most of the phone with 8px margins (same human reject as Projects). Shell bg + flush top bar + content on the shell. Tight islands only for cards, dialogs, menus, toasts, error cards — not a second screen inside the phone.
 
-### Phone size
+**Dark phone surfaces — no solid white fills.** On dark phones, identity cards, group headers, action rows, and similar chrome must stay kit-dark (island `#2B2D30`-class, or transparent label+rule). A solid `#FFFFFF` / near-white plate on those surfaces is a `/design-verify` FAIL — match kit shelf (`Kit / Identity card`, `Kit / Group header`) and Build dark islands, not a light Material card.
 
-| Page type | Size | Examples |
-| --- | --- | --- |
-| Flow / cases | **240 × 420** | Projects management, Files editor, Run & build |
-| Dense state gallery | **320 × 640** | Loading & error states (acceptable there only) |
-
-On a mixed flow page, **do not** mix 240×420 entry phones with 320×640 build phones — it looks sparse and inconsistent. Prefer **240 × 420** everywhere on flow pages.
+**Author self-check (before Kit | Candidate):** for every phone, scan on-chrome text for `Anim:`, `kit …`, motion timings, or implementation asides — those belong only in the notes box. Also scan outcome phones for leftover progress tracks (full-bleed bars between banner and phase list). Before posting evidence, scan candidate phones for solid near-white fills on identity/headers/rows (not button label glyphs).
 
 ---
 
-## Reuse the Design System — do not invent UI
+## Components
 
-### Always instance these (do not redraw)
+**Default:** instance ASL Design System (buttons, top bars, icons, menus). Promote missing icons from drawables/kit before inventing glyphs.
 
-From the **Design System → Components** section (promoted to real Components where needed):
+**Kit-local:** clone/instance from Int UI Kit onto the flow page; homemade controls that don’t read as kit family fail `/design-verify`.
 
-- **Buttons:** `Button / primary`, `Button / secondary` (and other variants as needed)  
-- **Chrome:** `Status bar`, `TopBar / back+title`, `TopBar / title+action`, path/editor bars  
-- **Icons:** e.g. `Icon / run` (`svg/run`) — never substitute `▶` text or a hand-drawn triangle  
-- **Menus / cards / fields / dialogs** when the screen needs them  
-
-### How to place buttons
-
-1. Create an **instance** of `Button / primary` or `Button / secondary`.  
-2. Override the label text only (`Cancel`, `Install app`, `Retry`, …).  
-3. Prefer not resizing instances unless the 240-wide phone forces a slight scale; avoid homemade rounded rects + text.
-
-### Icons (example: Run)
-
-- Editor top bar Run = **ghost** control + **`Icon / run`** tinted **Primary** (`#38B873`) — matches `TopBarEditorMore` + `IconRun` in Compose.  
-- Do **not** use a green filled chip with a black play glyph unless the Design System / Compose `IconButton` variant actually does that.  
-- Clone or instance from **Design System → Icons**, then tint strokes to the token color.
-
-### Missing icons — never invent stand-ins
-
-If Compose has an icon (`IconSettings` / `ic_settings.xml`) but Figma Design System does **not**:
-
-1. **Add it to Design System first** — `createNodeFromSvg` from the drawable path (or clone the `icon/add` row pattern), name it `icon/settings` + promote `Icon / settings` as a Component.  
-2. **Then** instance that component on phones.  
-3. **Never** ship placeholders: ellipse/circle+dot “gears”, emoji (`⚙`), freehand scribbles, or a lone `+` text glyph when `svg/add` exists.  
-4. Screenshot fail: if the glyph does not read as the real icon (settings looks like a target / bullseye), the pass **fails** — fix before calling done.
-
-Sibling top-bar icons must share the **same DS icon family and size** (~18–20 on 240-wide phones), with token tints (e.g. Settings = Text, Add = Primary).
-
-If a Design System control is still a plain Frame (not a Component), **promote it to a Component on the Design System page first**, then instance it on flow pages so updates stay linked.
+Primary CTA reads as primary. Sibling top-bar icons match size/family. Obvious actions are icon-only.
 
 ---
 
-## ASL product / copy rules
+## Product / copy
 
-Mockups should show the **real UX** users will get when the feature is honest/production-shaped:
+- No demo/v0.1 banners on phone chrome.  
+- Build copy: real phase titles + short status lines matching product (`Preparing workspace…`, `Waiting in queue…`, `Uploading…` / sources line, `Building…`, `Downloading…`, `APK ready to install`). Subtitles on progress phones are user copy only — not author notes. Provider on phones = **GitHub** today; Compose stays provider-agnostic.  
+- **Connect:** code + Open stay until Connected/Failed (no Waiting phone that strips actions).  
+- Instructional phones: two short lines + one CTA; content+CTA one tight centered group under the top bar.  
+- Settings gear on Projects top bar. Labels like **Install app**. Skip system installer as a mock case.  
+- Progress: complete = check; in progress = dots (`•••`); failed = ✕ + error; keep steps on failure.
 
-- **Do not** put v0.1 / “demo APK” / “not from your sources” banners on screens. Demo honesty can live in notes or docs, not in the phone chrome.  
-- Prefer real-case copy: e.g. `Waiting in queue…`, `Uploading project sources…`, `Building APK remotely…`, `Downloading APK…`, `APK ready to install`.  
-- **Connect device flow:** keep the user-code + **Open provider** screen until Connected or Failed. Do **not** auto-advance to a separate “Waiting for approval” phone that removes copy/open actions. Poll in the background.  
-- **Name the build provider on phones.** Mockups and preview fixtures show the **concrete current provider** (today **GitHub**). Production Compose must still be **provider-agnostic**: interpolate API fields (`providerName` / `providerDisplayName` / `verificationUri`) — do not hardcode a vendor in identifiers or chrome. Do **not** leave vague “your provider” / “cloud account” wording on user-visible phone chrome when a concrete provider is shipping.  
-- Labels like **Install app** (not “Install demo APK”) unless the shipping UI truly says otherwise.  
-- Skip system-installer handoff screens — after **Install app**, Android’s package UI takes over; don’t mock that as case `4a`.
-- **Instructional phones stay short:** prefer two short lines (what to do + where) + one primary CTA. Do not stack a headline, long body, and a third sentence that all say the same thing (device-flow Connect is the reference). Apply the same cut across **all new flow phones** (Connected / Failed / Settings / gate / onboarding) — status + one action is enough when the control already says what to do.
-- **After cutting copy, re-layout** so content + CTA are one tight group, **vertically centered** under the top bar on short instructional phones (no mid-band void, no dead lower half; Settings lists stay top-aligned).
-- **Obvious actions are icon-only** (copy, more, back, run, add, settings) — no redundant text labels on icon controls. Sibling top-bar actions must match type (all icon buttons in the same cluster) and use **DS icon glyphs** at matching size.
-- Permanent Settings entry lives on the **Projects** top bar (gear icon from DS), not a one-off text link.
+Match Compose structure/actions before locking a screen. After implement: `/design-review` (app vs Figma).
 
 ---
 
-## Progress & status patterns
+## Done (author)
 
-For multi-step progress (build, sync, long jobs):
-
-| State | Indicator |
-| --- | --- |
-| Complete | Green check (Design System success treatment) |
-| **In progress** | **Rotating / animated dots (`•••`)** next to the step — **not** a solid green circle |
-| Upcoming | Muted empty/disabled dot |
-| Failed step | Danger **✕** + step label in danger color |
-
-Failed outcomes should **keep the steps box**, mark which step failed, and show a **clear error message** (what failed and why).  
-
-Cancelled can be minimal (message + back); **no** obligatory primary action if dismiss-via-back is enough.
-
----
-
-## Frames, rectangles, and canvas clutter
-
-Figma draws **frame names** on the canvas. That caused most of the “ghosting / overlap” problems on Run & build.
-
-### Rules
-
-1. **Phone shell** — one outer frame (for clip + size) is enough. Prefer blank name `" "` so the canvas doesn’t repeat `2a · Queued` next to a text label.  
-2. **Inside the phone** — prefer **rectangles + text** (and DS **instances**) over nested named frames (`Status`, `Body`, `PhaseList`, …). Nested frames litter titles and often get **default white fills** (washed-out phones).  
-3. **Structural auto-layout frames** — if you must use them, set **`fills = []`** immediately. Never leave the default white fill.  
-4. **Labels** — put case labels (`2a · Queued`) as **page text above** the phone. Do **not** also name the phone frame the same string (double title).  
-5. **Notes** — title + subtitle text sitting in a **rounded rect box** (surface + light border), same as other flow pages. Don’t leave bare floating captions only.
-
-### White-fill checklist
-
-If a phone looks light on a dark page, inspect children: `Status` / `TopBar` / `Body` with `fills: white` is the usual bug. Clear fills or rebuild with rectangles.
-
----
-
-## Align Figma with Compose (always stay in sync)
-
-**App implementation and Figma must stay in sync.** Adding, changing, or removing on-screen UI in Compose requires the same update in Figma (and the reverse when Figma leads). Do not ship one side without the other unless an ADR says which side leads temporarily.
-
-Before locking a screen:
-
-1. Read the real composable (e.g. `BuildProgressContent`, `TopBarEditorMore`, `ProjectMenu`).  
-2. Match **structure** (back title bar vs cancel-in-top-bar), **actions**, **phase names**, and **icons**.  
-3. Prefer Design System + `:designsystem` names over Main Screens copy if Main Screens is outdated.  
-4. **Obvious actions are icon-only** (copy, more, back, run, add, settings): DS `IconButton` / icon — no “Copy”/“More”/“+ New” text beside an icon that already means that.  
-5. **Sibling top-bar actions match type** — do not place a text label action next to an icon button in the same action cluster (e.g. Settings gear + “+ New” text); use icon buttons for both.  
-6. After either side changes shipping UI, expect a **design-review** pass (device screenshots vs Figma) — see `.agents/skills/design-review/SKILL.md`.
-
----
-
-## Working with agents / MCP (ASL extras)
-
-The general MCP order lives in `/figma-design`. For this file, also audit for ASL-specific traps:
-
-1. Screenshot after each meaningful pass; compare to Projects management / Files editor, not only to the previous broken frame.  
-2. One page switch per `use_figma` call; return created/mutated node IDs.  
-3. After layout work, audit for: duplicate labels, named frames, white fills, homemade buttons, demo banners, missing note boxes.
-4. **Layout sanity (catch these in the screenshot pass):**
-   - **Flows index** auto-layout must `primaryAxisSizingMode = 'AUTO'` (hug content). A FIXED ~10px-tall index box means the list is clipped/invisible.
-   - **Case subtitles** under side-by-side phones must be **≤ phone column width (~240)** — never leave 500px-wide text that overlaps the next case.
-   - **Main action on a phone** = DS **`Button / primary`**. Do not use a homemade chip/rect for the primary CTA (e.g. “Open device page”).
-   - **Text must stay inside its card/box.** Do not paste long body copy into a small surface card; use a short subtitle (or grow the card). After text edits, check that `text.y + text.height` ≤ card bottom.
-   - **No homemade icons.** Every glyph on a phone must be a Design System `icon/…` / `Icon / …` (or clone of `svg/…`). Ban ellipse/circle+dot stand-ins, emoji gears, and freehand icons. If the icon is missing from DS, add it from Compose drawable first, then instance it. Screenshot fail if settings looks like a target or add is raw “+” text while `svg/add` exists.
-   - **After cutting copy, re-layout.** Short phones must not leave a huge empty band with the CTA stuck to the bottom, **and** must not leave a top-cramped stack with a dead lower half. Keep content + primary actions as **one tight group**, then **vertically center that group** in the space below the top bar (auth / device-code / empty states). Do not `weight`/`spacer` the button to the phone footer unless the screen still has dense mid content. Settings-style list screens stay top-aligned.
-5. **Before calling done:** take a fresh screenshot of the finished design, evaluate it, and improve anything that fails the checklist or looks worse than Projects management / Files editor. Repeat until the screenshot looks right.
-
----
-
-## Quick checklist (new flow page)
-
-- [ ] Cloned density/size from Projects management or Files editor (240×420)  
-- [ ] Flows index + case headers + notes in boxes  
-- [ ] Flows index height hugs content (not collapsed/clipped)  
-- [ ] Case subtitles do not overlap adjacent columns (≤ ~240 wide)  
-- [ ] Buttons / top bars / status / icons are **DS instances**; main CTA is **primary**  
-- [ ] Run / add / settings (and other icons) use **Icon / …** from Design System — **no homemade stand-ins** (circle+dot, emoji, freehand); if missing from DS, add from Compose drawable first  
-- [ ] Sibling top-bar icons match size/family/tint tokens  
-- [ ] Phone copy names the concrete provider (**GitHub** today) — not vague “provider” / “cloud account” only  
-- [ ] Instructional screens stay short (two short lines + primary CTA; no triple-repeated instructions) — same cut on Connected / Failed / Settings / gate / onboarding  
-- [ ] Connect: code + open CTA stay until Connected/Failed (no intermediate Waiting phone that removes actions)  
-- [ ] After cutting copy, content + CTA is one tight group, vertically centered under the top bar on short instructional phones (no mid-band void, no dead lower half)  
-- [ ] Obvious actions (copy / more / back / run / add / settings) are **icon-only** — no redundant text label on the control; sibling top-bar actions match type  
-- [ ] Settings is a permanent Projects top-bar control (gear), not a transient text link  
-- [ ] App UI and Figma stay in sync for the change (or ADR says which side leads)  
-- [ ] Text inside cards/boxes does not overflow the card bounds  
-- [ ] In-progress = dots; complete = check; failed step = ✕ + error copy  
-- [ ] No nested frame title clutter; phone frame name blank if labeled in text  
-- [ ] No white fills on structural frames  
-- [ ] Copy and structure match Compose (or an explicit ADR if Figma leads)  
-- [ ] **Screenshot finish pass:** capture the full page (and a phone close-up); evaluate vs Projects management / Files editor; fix gaps; re-screenshot until it looks right — do not skip
-- [ ] **Post screenshots on the GitHub design issue** (inline in comments as rendered images, not links-only) before calling Ready
-
----
+- [ ] Kit studied; page matches contract skeleton + product rules  
+- [ ] Self-check passed: no notes/Anim on phone chrome; no stray progress chrome on Ready/Failed  
+- [ ] Kit \| Candidate screenshots on the issue  
+- [ ] Status left at **make ui/ux design**; comment **Awaiting critic**  
+- [ ] Did **not** set Ready (critic does that via `/design-verify`)
 
 ## Related
 
-- Process skill (portable): `.agents/skills/figma-design/SKILL.md`  
-- Figma file: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)  
-- Design review against device: `.agents/skills/design-review/SKILL.md`  
-- Compose screen conventions: `docs/agents/screen-context.md`  
-- Requirements / architecture: `project/requierments.md`, `project/architecture.md`
+- `/figma-design` · `/jetbrains-new-ui` · `/design-verify` · `/design-review`  
+- `docs/agents/screen-context.md` · `project/requierments.md`

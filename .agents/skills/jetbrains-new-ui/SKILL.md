@@ -8,74 +8,53 @@ description: >-
 
 # JetBrains New UI (ASL)
 
-Locked visual north star for Android Studio Lite redesigns: **JetBrains New UI / Islands** — serious IDE chrome that is modern and clear, **not** flat-boring and **not** glow-shiny.
+North star: **JetBrains New UI / Islands** — calm, clear, compact. Not empty polish, not glow-shiny.
 
-## Mandatory sources (open before drawing)
+**Ready is not yours.** After you finish, a **different** agent must `/design-verify` (Kit | Candidate). Only that critic may set Ready. Then human accepts before implement.
 
-1. **Int UI Kit (working copy)** — primary component bible  
-   - File: https://www.figma.com/design/6whxXz3bbL8FG7dr83Oi4u/Int-UI-Kit--Community-  
-   - `fileKey`: `6whxXz3bbL8FG7dr83Oi4u`  
-   - Pages: **Getting started** (`6222:73687`), **Components** (`6204:73431`)  
-   - Community entry node: `7884:49935` (if present in your copy; prefer the pages above)  
-2. **Int UI Icons** — https://www.figma.com/community/file/1227729570033544559/int-ui-icons  
-3. **Product principles** — [New UI](https://www.jetbrains.com/help/idea/new-ui.html), [Islands theme](https://blog.jetbrains.com/platform/2025/12/meet-the-islands-theme-the-new-default-look-for-jetbrains-ides/), [UI themes](https://www.jetbrains.com/help/idea/user-interface-themes.html)  
-4. **ASL contract** — `docs/figma-design.md` + `/figma-design` (phone size, DS instance rules, screenshots on issues)  
-5. **Systems** — `/ui-refactor` for spacing/type/hierarchy scales (no arbitrary values)
+## Sources (open before drawing)
 
-Also load `/figma-use` before any `use_figma` call.
+1. **Int UI Kit** — `fileKey=6whxXz3bbL8FG7dr83Oi4u`  
+   Pages: Getting started `6222:73687`, Components `6204:73431`  
+   https://www.figma.com/design/6whxXz3bbL8FG7dr83Oi4u/Int-UI-Kit--Community-
+2. Principles — [New UI](https://www.jetbrains.com/help/idea/new-ui.html), [Islands](https://blog.jetbrains.com/platform/2025/12/meet-the-islands-theme-the-new-default-look-for-jetbrains-ides/)
+3. ASL contract — `docs/figma-design.md` + `/figma-design` (phones, product copy, page skeleton)
+4. `/ui-refactor` for spacing/type systems  
+5. `/figma-use` before `use_figma`
 
-## What “optimal use” means
+## Kit-local vs Design System
 
-### Do
+- **kit-local** (ticket says so): redesign **on that flow page only** from Int UI Kit. ASL DS need not lead.
+- **Design System (#36):** promote a **lean** kit-inspired set into the ASL Design System page — clear labeled sections; **delete** old/unused components. Not a full kit dump. Critic reviews via inventory audit. After DS is accepted, later flows **instance ASL DS** (not page-local kit shelves), unless the ticket still says kit-local.
 
-- **Study the kit first.** Screenshot/orient: color styles, type, buttons, toolbars, lists, dialogs, tabs, icons. Prefer **instancing or cloning kit components** into ASL’s Design System page, then instance those ASL components on phones.
-- **Islands grammar on phone:** clear separation between chrome (top bar / panels) and the **content island** (editor, list, instructional card). Soft rounded content surfaces; balanced spacing; active tab/selection easy to spot.
-- **Compact density** for phone (ASL **240×420** flow phones). JetBrains Compact Mode inspiration: tighter bars, smaller icons — still legible.
-- **Sparse accents.** One primary action color (map JetBrains accent → ASL Primary green family). Selection / focus / success use restrained tokens — not neon wallpaper.
-- **Progressive disclosure.** Hide secondary actions in ⋮ / menus; keep toolbar simple (New UI principle).
-- **Iconography.** Prefer Int UI Icons shapes (distinguishable, balanced). Promote missing icons into ASL DS from the kit/drawables — no homemade glyphs.
-- **Motion notes** under phones: short, calm (fade/slide 150–250ms), never flashy glow pulses.
+## Do / Don’t
 
-### Don’t
+**Do:** study kit screenshots first; **tight** islands only where they earn it (cards, dialogs, small tool panels) — not a second full-screen gray sheet; 240×420 density; sparse kit-blue accent; progressive disclosure; short motion notes. Editor code sits on **shell** under a flush top bar (gutter wash OK); do not promote the code area into a large rounded panel.
 
-- Don’t paste desktop IDE chrome 1:1 (multi tool-window stripes, huge sidebars).
-- Don’t invent purple AI / glass / glow-on-everything (wave 2 failure).
-- Don’t ship near-noop “moved 8px” polish (wave 1 failure).
-- Don’t bypass ASL Design System — kit informs DS; phones instance **ASL** components after promotion.
-- Don’t hardcode vendor strings in production Compose; Figma fixtures may show GitHub.
+**Don’t:** wrap the whole phone body — or **most of the phone under the top bar** — in a large rounded gray “content island” / code card (looks like a card stuffed into the screen — human reject on Projects **and** Editor). Put list/empty/form/**editor code** on the **page shell bg** under the top bar; use smaller surfaces for rows/fields/dialogs/menus. A near-full-phone `#2B2D30` rounded frame (even if the top bar is outside it) still **FAIL**s Pass A. Don’t: desktop IDE 1:1; purple/glow/glass; near-noop 8px moves; mark board Ready yourself; invent icons when kit/drawables exist.
 
-## Mapping JetBrains → ASL surfaces
+## Mapping
 
-| JetBrains New UI | ASL phone treatment |
+| JetBrains | Phone |
 | --- | --- |
-| Main toolbar / window header | Top bar (back + title + icon actions) |
-| Editor island | Code buffer / main content card |
-| Tool window | Secondary panel (file list, build phases) with distinct bg vs content |
-| Tabs | Segmented or tab strip; active tab clearly stronger |
-| Dialogs / balloons | Modal cards + scrim; primary + secondary buttons from kit language |
-| Status bar | Thin footer status / provider line when needed |
-| Notifications | Toast / inline banner — quiet |
+| Window header | Top bar on shell bg |
+| Main area | Content on shell — **not** a full-bleed / near-full-phone inset gray panel |
+| Editor code | Flat on shell (optional muted gutter) — **not** a large rounded code card |
+| Tool / dialog island | Small raised surface only (menus, dialogs, toasts, error cards) |
+| Dialogs | Modal + scrim, kit button language |
 
-## Workflow (every redesign ticket)
+## Author workflow
 
-1. Open Int UI Kit (`6whxXz3bbL8FG7dr83Oi4u`) + ASL file (`M2LGyXHC5YYJekr3Fq3oiP`).  
-2. Update **Design System** page first (tokens + components inspired by Int UI).  
-3. Redesign flow phones by **instancing ASL DS** (after kit → DS promotion).  
-4. Match ASL page structure (index, cases, notes, 240×420).  
-5. Screenshot finish pass; **post images inline on the GitHub issue**.  
-6. Comment ACs for implement + short animation notes.
-
-## Completion criteria
-
-- [ ] Int UI Kit consulted (not redesigned from memory)  
-- [ ] ASL DS updated/aligned before or with the flow  
-- [ ] Phones read as JetBrains New UI / Islands on mobile — calm, clear islands, sparse accent  
-- [ ] No glow spam / purple AI / empty sparse chrome  
-- [ ] Screenshots inline on the tracking issue  
-- [ ] Functionality/affordances unchanged (redesign only)
+1. Orient kit (screenshot components you will reuse).  
+2. Redesign the flow page (kit-local if ticket says so).  
+3. Keep ASL page skeleton + product rules from `docs/figma-design.md`.  
+4. Self-check: phone chrome = product copy only; author/anim notes only in the notes box; no stray progress bars on Ready.  
+5. Post **Kit | Candidate** evidence on the issue (same shape as `/design-verify`).  
+6. Comment **Awaiting critic** — Status stays **make ui/ux design**. Stop.  
+7. Do **not** set Ready. Do **not** implement.
 
 ## Related
 
-- ASL Figma file: https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite  
-- Process: `/figma-design`, `docs/figma-design.md`  
-- Community source: https://www.figma.com/community/file/1227732692272811382/int-ui-kit  
+- Critic: `/design-verify`  
+- ASL file: `M2LGyXHC5YYJekr3Fq3oiP`  
+- Community kit: https://www.figma.com/community/file/1227732692272811382/int-ui-kit
