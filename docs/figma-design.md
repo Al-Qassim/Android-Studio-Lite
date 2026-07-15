@@ -48,7 +48,13 @@ Build / Connect / Settings may be kit-local on their pages. **Before Editor / Pr
 4. Phones **240 × 420** (arrows when order matters)  
 5. Notes under phones in a box — **never** put author/anim notes inside the phone chrome (that is a `/design-verify` FAIL)
 
+**One page per flow — redesign in place.** If the file already has a flow page (e.g. `Files editor`, `Run & build`), **edit that page**. Do **not** `createPage` a parallel `Editor` / `Build v2` / renamed twin and leave the old page intact. After a redesign, delete superseded pages/frames the same pass. Duplicate flow pages are a `/design-verify` Pass A FAIL.
+
 Canvas dark (`#0F1217`-class). Prefer blank phone frame names; no white fills on structural frames; no nested frame title clutter.
+
+**No full-phone / near-full-phone gray islands.** Do not wrap empty/list/form/**editor**/**build phase list** bodies in a large rounded gray panel under the top bar — including a `#2B2D30` “code card” or tall phase card that fills most of the phone with 8px margins (same human reject as Projects / Build). Shell bg + flush top bar + content on the shell. Tight islands only for cards, dialogs, menus, toasts, error cards — not a second screen inside the phone. On phase/step lists, do not paint muddy full-row active washes — active = icon + type weight only.
+
+**Phone shell ≠ island fill.** The phone frame fill must match chrome shell (`#12151A`-class, same as Projects Status/TopBar) — **not** field/island gray (`#1E1F22` / `#2B2D30`). A lighter full-phone fill under a darker top bar still reads as a stuffed gray slab even when Body has no fill.
 
 **Dark phone surfaces — no solid white fills.** On dark phones, identity cards, group headers, action rows, and similar chrome must stay kit-dark (island `#2B2D30`-class, or transparent label+rule). A solid `#FFFFFF` / near-white plate on those surfaces is a `/design-verify` FAIL — match kit shelf (`Kit / Identity card`, `Kit / Group header`) and Build dark islands, not a light Material card.
 
