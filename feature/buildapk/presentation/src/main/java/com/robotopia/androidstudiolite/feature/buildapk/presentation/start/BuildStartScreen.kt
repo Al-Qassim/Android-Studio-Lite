@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.feature.buildapk.presentation.start
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +21,8 @@ internal fun BuildStartScreen(
 ) {
     val scope = rememberCoroutineScope()
     var starting by remember { mutableStateOf(false) }
+
+    BackHandler(onBack = onBackClick)
 
     BuildStartContent(
         projectName = projectName,

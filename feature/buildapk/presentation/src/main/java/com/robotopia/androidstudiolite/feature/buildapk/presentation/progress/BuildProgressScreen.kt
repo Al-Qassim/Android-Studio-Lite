@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.feature.buildapk.presentation.progress
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,6 +26,8 @@ internal fun BuildProgressScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
+
+    BackHandler(onBack = onDismiss)
 
     LaunchedEffect(jobId, buildService) {
         buildService.observeBuild(jobId).collect { progress ->
