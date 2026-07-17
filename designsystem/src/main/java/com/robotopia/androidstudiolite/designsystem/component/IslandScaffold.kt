@@ -27,7 +27,7 @@ private val IslandEdge = 8.dp
 
 private const val CanvasGlowCenterXFraction = 0.2f
 private const val CanvasGlowAlpha = 0.5f
-private const val CanvasGlowRadiusFraction = 0.95f
+private const val CanvasGlowRadiusFraction = 0.55f
 
 /**
  * Islands-style screen chrome (Android Studio New UI).
