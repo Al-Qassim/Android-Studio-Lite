@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
+import com.robotopia.androidstudiolite.designsystem.modifier.insetClickable
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 /**

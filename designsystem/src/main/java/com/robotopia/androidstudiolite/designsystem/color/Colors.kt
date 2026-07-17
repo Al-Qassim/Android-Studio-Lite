@@ -68,6 +68,12 @@ object Colors {
 
     val CodeString = Color(0xFF6AAB73)
     val CodeAnnotation = Color(0xFF57AAF7)
+    /** Kotlin keywords (fun, class, …). */
+    val CodeKeyword = Color(0xFFCF8E6D)
+    /** Call / declaration name followed by `(`. */
+    val CodeFunction = Color(0xFF56A8F5)
+    val CodeComment = Color(0xFF7A7E85)
+    val CodeNumber = Color(0xFF2AACB8)
     val Disabled = Color(0xFF4E5157)
 }
 
@@ -100,6 +106,10 @@ private fun ColorsPreview() {
         ColorSwatch("selection", Colors.Selection),
         ColorSwatch("code-string", Colors.CodeString),
         ColorSwatch("code-annotation", Colors.CodeAnnotation),
+        ColorSwatch("code-keyword", Colors.CodeKeyword),
+        ColorSwatch("code-function", Colors.CodeFunction),
+        ColorSwatch("code-comment", Colors.CodeComment),
+        ColorSwatch("code-number", Colors.CodeNumber),
         ColorSwatch("disabled", Colors.Disabled),
     )
 

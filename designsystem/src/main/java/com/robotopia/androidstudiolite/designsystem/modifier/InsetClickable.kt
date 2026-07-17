@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.designsystem.component
+package com.robotopia.androidstudiolite.designsystem.modifier
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background

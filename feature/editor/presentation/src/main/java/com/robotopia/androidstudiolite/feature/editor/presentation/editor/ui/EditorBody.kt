@@ -18,6 +18,7 @@ import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
+import com.robotopia.androidstudiolite.designsystem.editor.CodeHighlightTransformation
 import com.robotopia.androidstudiolite.designsystem.icon.IconWarning
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.EditorScreenContext
@@ -76,6 +77,7 @@ internal fun EditorScreenContext.EditorBody(state: EditorUiState, content: Strin
                     .fillMaxWidth(),
                 textStyle = Typography.Code.copy(color = Colors.Text),
                 cursorBrush = SolidColor(Colors.Primary),
+                visualTransformation = CodeHighlightTransformation,
             )
         }
     }

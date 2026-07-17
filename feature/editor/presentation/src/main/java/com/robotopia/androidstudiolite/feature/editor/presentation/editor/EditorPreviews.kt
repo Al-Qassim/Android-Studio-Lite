@@ -25,6 +25,29 @@ internal data class EditorPreviewCase(
     override fun toString(): String = label
 }
 
+private val PreviewHighlightedSource = """
+package com.example.demo
+
+import android.os.Bundle
+
+// Entry activity for the sample app
+@Composable
+fun MainScreen(count: Int = 0) {
+    val title = "Android Studio Lite"
+    /* greet once on open */
+    if (count > 0) {
+        println(title)
+        showToast(title, count)
+    }
+}
+
+private fun showToast(message: String, times: Int) {
+    repeat(times) {
+        Log.d("Demo", message)
+    }
+}
+""".trimIndent() + "\n"
+
 internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCase> {
     override fun getDisplayName(index: Int): String = values.toList()[index].toString()
 
@@ -36,20 +59,18 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
         EditorPreviewCase(
             "ready",
             previewBaseState().copy(isLoading = false),
-            document = previewDocument(
-                content = "fun main() {\n    println(\"Hello\")\n}\n",
-            ),
+            document = previewDocument(content = PreviewHighlightedSource),
         ),
         EditorPreviewCase(
             "dirty",
             previewBaseState().copy(isLoading = false),
-            document = previewDocument(content = "fun main() {}\n", isDirty = true),
+            document = previewDocument(content = PreviewHighlightedSource, isDirty = true),
             autoSave = false,
         ),
         EditorPreviewCase(
             "menu open",
             previewBaseState().copy(isLoading = false, menuOpen = true),
-            document = previewDocument(content = "package demo\n"),
+            document = previewDocument(content = PreviewHighlightedSource),
             autoSave = true,
         ),
         EditorPreviewCase(
@@ -58,7 +79,7 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
                 isLoading = false,
                 dialog = EditorDialog.UnsavedLeave,
             ),
-            document = previewDocument(content = "changed", isDirty = true),
+            document = previewDocument(content = PreviewHighlightedSource, isDirty = true),
             autoSave = false,
         ),
         EditorPreviewCase(
@@ -74,7 +95,7 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
                 isLoading = false,
                 toast = EditorToast("File saved", ToastVariant.Success),
             ),
-            document = previewDocument(content = "ok"),
+            document = previewDocument(content = PreviewHighlightedSource),
         ),
         EditorPreviewCase(
             "save error toast",
@@ -82,7 +103,7 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
                 isLoading = false,
                 toast = EditorToast("Couldn't save file", ToastVariant.Error),
             ),
-            document = previewDocument(content = "ok", isDirty = true),
+            document = previewDocument(content = PreviewHighlightedSource, isDirty = true),
             autoSave = false,
         ),
     )

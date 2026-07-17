@@ -31,6 +31,7 @@ import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
 import com.robotopia.androidstudiolite.designsystem.icon.IconRun
 import com.robotopia.androidstudiolite.designsystem.icon.IconSettings
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
+import com.robotopia.androidstudiolite.designsystem.modifier.insetClickable
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 private val MenuCorner = 8.dp

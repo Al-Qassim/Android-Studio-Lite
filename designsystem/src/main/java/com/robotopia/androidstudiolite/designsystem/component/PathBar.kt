@@ -2,6 +2,7 @@ package com.robotopia.androidstudiolite.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.editor.highlightCode
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 private const val PathSeparator = " / "
@@ -182,7 +184,6 @@ fun CodeSample(
     gutter: String,
     code: String,
     modifier: Modifier = Modifier,
-    stringHighlight: Boolean = false,
 ) {
     Row(
         modifier = modifier
@@ -197,10 +198,8 @@ fun CodeSample(
             modifier = Modifier.padding(end = 12.dp),
         )
         BasicText(
-            text = code,
-            style = Typography.Code.copy(
-                color = if (stringHighlight) Colors.CodeString else Colors.Text,
-            ),
+            text = highlightCode(code),
+            style = Typography.Code,
         )
     }
 }
@@ -271,5 +270,11 @@ private fun PathBarNarrowPreview() {
 @Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable
 private fun CodeSamplePreview() {
-    CodeSample(gutter = "12", code = "val name = \"ASL\"", stringHighlight = true)
+    Column {
+        CodeSample(gutter = "7", code = "fun MainScreen(count: Int = 0) {")
+        CodeSample(gutter = "8", code = "    val title = \"Android Studio Lite\"")
+        CodeSample(gutter = "9", code = "    // greet once")
+        CodeSample(gutter = "10", code = "    if (count > 0) println(title)")
+        CodeSample(gutter = "11", code = "}")
+    }
 }

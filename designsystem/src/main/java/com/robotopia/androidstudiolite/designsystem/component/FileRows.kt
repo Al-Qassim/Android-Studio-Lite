@@ -19,6 +19,7 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.icon.IconChevron
 import com.robotopia.androidstudiolite.designsystem.icon.IconFile
 import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
+import com.robotopia.androidstudiolite.designsystem.modifier.insetClickable
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 @Composable

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -358,17 +359,43 @@ private fun FilesMoveBarScreen() {
     }
 }
 
+private val EditorPreviewLines = listOf(
+    "1" to "package com.example.demo",
+    "2" to "",
+    "3" to "import android.os.Bundle",
+    "4" to "",
+    "5" to "// Entry activity for the sample app",
+    "6" to "@Composable",
+    "7" to "fun MainScreen(count: Int = 0) {",
+    "8" to "    val title = \"Android Studio Lite\"",
+    "9" to "    /* greet once on open */",
+    "10" to "    if (count > 0) {",
+    "11" to "        println(title)",
+    "12" to "        showToast(title, count)",
+    "13" to "    }",
+    "14" to "}",
+    "15" to "",
+    "16" to "private fun showToast(message: String, times: Int) {",
+    "17" to "    repeat(times) {",
+    "18" to "        Log.d(\"Demo\", message)",
+    "19" to "    }",
+    "20" to "}",
+)
+
+@Composable
+private fun ColumnScope.EditorPreviewCode() {
+    EditorPreviewLines.forEach { (gutter, code) ->
+        CodeSample(gutter = gutter, code = code)
+    }
+    Spacer(modifier = Modifier.weight(1f))
+}
+
 @Composable
 private fun EditorCleanScreen() {
     IslandScaffold(
         topBar = { TopBarEditorMore(fileName = "MainActivity.kt", onRunClick = {}) },
     ) {
-        CodeSample(gutter = "1", code = "package demo")
-        CodeSample(gutter = "2", code = "")
-        CodeSample(gutter = "3", code = "fun main() {")
-        CodeSample(gutter = "4", code = "    println(\"Hello\")", stringHighlight = true)
-        CodeSample(gutter = "5", code = "}")
-        Spacer(modifier = Modifier.weight(1f))
+        EditorPreviewCode()
     }
 }
 
@@ -384,12 +411,7 @@ private fun EditorDirtyToastScreen() {
                 )
             },
         ) {
-            CodeSample(gutter = "1", code = "package demo")
-            CodeSample(gutter = "2", code = "")
-            CodeSample(gutter = "3", code = "fun main() {")
-            CodeSample(gutter = "4", code = "    println(\"Hello ASL\")", stringHighlight = true)
-            CodeSample(gutter = "5", code = "}")
-            Spacer(modifier = Modifier.weight(1f))
+            EditorPreviewCode()
         }
         Toast(
             message = "File saved",
