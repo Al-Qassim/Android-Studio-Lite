@@ -17,6 +17,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Visual direction | JetBrains New UI / Islands Dark — radial canvas glow + rounded islands; `IslandScaffold` for product chrome |
 | Screen chrome | `IslandScaffold(topBar, body, footer?)` — edge-to-edge canvas under system bars; status/nav insets on top bar and island; one body island; optional footer under an inset divider; canvas glow soft-fades to transparent inside the scaffold |
 | Code coloring | `highlightCode(code)` / `CodeHighlightTransformation` — simple Kotlin syntax colors for the editor |
+| Code editor | `CodeEditorField` — editable code with line-number gutter (`Typography.CodeGutter` / `Colors.Gutter`) |
 | Activity shell | `MainActivity` enables edge-to-edge with transparent system bars and hosts the nav graph; screens / `IslandScaffold` own backgrounds and system-bar insets |
 
 ## Process
