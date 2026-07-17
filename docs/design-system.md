@@ -10,7 +10,8 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | --- | --- |
 | Tokens / components | `designsystem/` — tokens + reusable Compose components only (no product screens). UI type: Inter; code/gutter: JetBrains Mono (`Typography.Code` / `CodeGutter`). |
 | Composable UI | `designsystem/.../component/` — bars, rows, dialogs, scaffold, etc. |
-| Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable` (not under `component/`) |
+| Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable`, `overlayEnter` (not under `component/`) |
+| Overlay motion | Menus / dialogs use `overlayEnter` (short fade + scale) on their surfaces — feature Popup/Dialog hosts stay thin |
 | Editor helpers | `designsystem/.../editor/` — e.g. `highlightCode` |
 | Feature UI | `feature/*/presentation/` — real screens; compose DS components |
 | Screen previews | `feature/*/presentation/.../preview/` — `@Preview` composables + fixtures that call **real** Screen/Content (not on Screen/Content files; not duplicated fake screens). Preview `backgroundColor` `0xFF2B2D30` (canvas). Do not name a folder `build` — gitignores `**/build/`. |

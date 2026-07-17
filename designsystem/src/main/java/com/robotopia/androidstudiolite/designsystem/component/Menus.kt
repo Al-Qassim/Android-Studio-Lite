@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ import com.robotopia.androidstudiolite.designsystem.icon.IconSettings
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.icon.IconWrapText
 import com.robotopia.androidstudiolite.designsystem.modifier.insetClickable
+import com.robotopia.androidstudiolite.designsystem.modifier.overlayEnter
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 private val MenuCorner = 8.dp
@@ -173,6 +175,7 @@ private fun DropdownMenu(
     val shape = RoundedCornerShape(MenuCorner)
     Column(
         modifier = modifier
+            .overlayEnter(transformOrigin = TransformOrigin(pivotFractionX = 1f, pivotFractionY = 0f))
             .shadow(8.dp, shape)
             .clip(shape)
             .background(Colors.Menu)
