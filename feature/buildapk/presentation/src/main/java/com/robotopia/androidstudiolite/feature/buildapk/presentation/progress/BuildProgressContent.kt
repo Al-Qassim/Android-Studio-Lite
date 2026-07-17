@@ -19,7 +19,6 @@ import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.PhaseItem
 import com.robotopia.androidstudiolite.designsystem.component.PhaseList
 import com.robotopia.androidstudiolite.designsystem.component.PhaseStatus
-import com.robotopia.androidstudiolite.designsystem.component.ProgressBar
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
@@ -110,7 +109,6 @@ private fun BuildActiveState(
                 message = state.message,
                 providerName = state.providerName,
             )
-            ProgressBar(fraction = state.progressFraction)
             PhaseList(
                 phases = toPhaseItems(
                     currentPhase = state.phase,

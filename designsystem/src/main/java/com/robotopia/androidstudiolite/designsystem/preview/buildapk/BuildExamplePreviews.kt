@@ -26,7 +26,6 @@ import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.component.PhaseItem
 import com.robotopia.androidstudiolite.designsystem.component.PhaseList
 import com.robotopia.androidstudiolite.designsystem.component.PhaseStatus
-import com.robotopia.androidstudiolite.designsystem.component.ProgressBar
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.designsystem.preview.ExamplePreviewBackground
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
@@ -71,12 +70,11 @@ private fun BuildStartScreen(signedIn: Boolean) {
     IslandScaffold(
         topBar = { TopBarBackTitle(title = "Build") },
         footer = {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                horizontalAlignment = Alignment.End,
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
             ) {
                 if (signedIn) {
                     Button(
@@ -171,7 +169,6 @@ private fun BuildProgressScreen() {
         BuildProgressBody(
             title = "Building",
             message = "Compiling app sources…",
-            fraction = 0.55f,
             phases = listOf(
                 PhaseItem("Preparing", PhaseStatus.Complete),
                 PhaseItem("Uploading", PhaseStatus.Complete),
@@ -206,7 +203,6 @@ private fun BuildReadyScreen() {
         BuildProgressBody(
             title = "Ready to install",
             message = "APK downloaded to this device.",
-            fraction = 1f,
             phases = listOf(
                 PhaseItem("Preparing", PhaseStatus.Complete),
                 PhaseItem("Uploading", PhaseStatus.Complete),
@@ -280,7 +276,6 @@ private fun BuildFailedScreen() {
 private fun ColumnScope.BuildProgressBody(
     title: String,
     message: String,
-    fraction: Float,
     phases: List<PhaseItem>,
 ) {
     Column(
@@ -301,7 +296,6 @@ private fun ColumnScope.BuildProgressBody(
             text = "via GitHub",
             style = Typography.Caption.copy(color = Colors.Muted),
         )
-        ProgressBar(fraction = fraction)
         PhaseList(phases = phases)
     }
     Spacer(modifier = Modifier.weight(1f))

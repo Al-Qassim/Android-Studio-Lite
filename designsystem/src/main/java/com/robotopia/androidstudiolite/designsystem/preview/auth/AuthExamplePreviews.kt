@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -77,26 +78,14 @@ private fun AuthPreparingScreen() {
 private fun AuthShowCodeScreen() {
     IslandScaffold(
         topBar = { TopBarBackTitle(title = "Connect GitHub") },
-        footer = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                Button(
-                    label = "Open GitHub",
-                    onClick = {},
-                    variant = ButtonVariant.Primary,
-                )
-            }
-        },
     ) {
         Column(
             modifier = Modifier
+                .weight(1f)
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             BasicText(
                 text = "Copy the code below",
@@ -107,8 +96,15 @@ private fun AuthShowCodeScreen() {
                 text = "Paste it at github.com/login/device",
                 style = Typography.Body.copy(color = Colors.Muted),
             )
+            Spacer(modifier = Modifier.height(4.dp))
+            // Open also copies the user code to the clipboard so the user can paste
+            // it immediately after the browser opens (see ConnectShowCodeBody).
+            Button(
+                label = "Open GitHub",
+                onClick = {},
+                variant = ButtonVariant.Primary,
+            )
         }
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -178,9 +174,11 @@ private fun AuthFailedScreen() {
     ) {
         Column(
             modifier = Modifier
+                .weight(1f)
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             BasicText(
                 text = "Couldn't connect",
@@ -188,10 +186,12 @@ private fun AuthFailedScreen() {
             )
             BasicText(
                 text = "The code expired or was declined. Start again to get a new code.",
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(
+                    color = Colors.Muted,
+                    textAlign = TextAlign.Center,
+                ),
+                modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(modifier = Modifier.height(4.dp))
         }
-        Spacer(modifier = Modifier.weight(1f))
     }
 }

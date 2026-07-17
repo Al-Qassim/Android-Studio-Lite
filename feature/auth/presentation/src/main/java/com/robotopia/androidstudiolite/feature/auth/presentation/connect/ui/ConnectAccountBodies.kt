@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -56,6 +57,7 @@ internal fun ConnectShowCodeBody(
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             BasicText(
                 text = "Copy the code below",
@@ -70,10 +72,14 @@ internal fun ConnectShowCodeBody(
                 style = Typography.Body.copy(color = Colors.Muted),
             )
             Spacer(modifier = Modifier.height(4.dp))
+            // Opening the provider also copies the user code so the user can paste
+            // it immediately after the browser opens.
             Button(
                 label = "Open ${state.providerName}",
-                onClick = { onOpenVerificationUri(state.verificationUri) },
-                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    onCopyCode(state.userCode)
+                    onOpenVerificationUri(state.verificationUri)
+                },
                 variant = ButtonVariant.Primary,
             )
         }
@@ -131,10 +137,12 @@ internal fun ConnectFailedBody(
             .fillMaxSize()
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             BasicText(
                 text = "Couldn't connect",
@@ -142,23 +150,25 @@ internal fun ConnectFailedBody(
             )
             BasicText(
                 text = state.message,
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(
+                    color = Colors.Muted,
+                    textAlign = TextAlign.Center,
+                ),
+                modifier = Modifier.fillMaxWidth(),
             )
             Spacer(modifier = Modifier.height(4.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
             ) {
                 Button(
                     label = "Cancel",
                     onClick = onCancel,
-                    modifier = Modifier.weight(1f),
                     variant = ButtonVariant.Secondary,
                 )
                 Button(
                     label = "Try again",
                     onClick = onTryAgain,
-                    modifier = Modifier.weight(1f),
                     variant = ButtonVariant.Primary,
                 )
             }
