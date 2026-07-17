@@ -1,6 +1,5 @@
 package com.robotopia.androidstudiolite.feature.editor.presentation.editor.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -72,7 +71,6 @@ internal fun EditorScreenContext.EditorBody(state: EditorUiState, content: Strin
                 onValueChange = { onContentChange(state, it) },
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Colors.Editor)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp)
                     .fillMaxWidth(),

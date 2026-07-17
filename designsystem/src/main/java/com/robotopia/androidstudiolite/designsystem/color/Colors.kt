@@ -23,15 +23,19 @@ import com.robotopia.androidstudiolite.designsystem.typography.Typography
 /**
  * Android Studio Lite design tokens — JetBrains New UI / Islands Dark family.
  *
- * Anchored to Android Studio’s dark chrome: shell `#1E1F22`, island surfaces
- * `#2B2D30`, accent blue `#3574F0`, label gray `#DFE1E5`.
+ * Layering: lighter **canvas** (gradient sea) → darker **island** panels
+ * (`#1E1F22`) for files/editor. Accent `#3574F0`, labels `#DFE1E5`.
  */
 object Colors {
-    /** App / page shell (IDE content / editor island). */
+    /** Island fill (files list, editor, tool panels). */
     val Bg = Color(0xFF1E1F22)
-    val Canvas = Bg
 
-    /** Raised island (cards, dialogs, bars). */
+    /** Main-window sea under islands (solid fallback). */
+    val Canvas = Color(0xFF2B2D30)
+    val CanvasTop = Color(0xFF34363D)
+    val CanvasBottom = Color(0xFF2B2D30)
+
+    /** Cards / inputs inside an island. */
     val Surface = Color(0xFF2B2D30)
     val Surface2 = Color(0xFF26282B)
     val Input = Surface2
@@ -40,8 +44,8 @@ object Colors {
     val MenuBorder = Color(0xFF4E5157)
     val MenuDivider = Color(0xFF393B40)
 
-    /** Code well — same family as IDE editor. */
-    val Editor = Color(0xFF1E1F22)
+    /** Code well — same as island fill. */
+    val Editor = Bg
 
     val Border = Color(0xFF43454A)
     val Text = Color(0xFFDFE1E5)
@@ -52,6 +56,9 @@ object Colors {
     /** Kit / New UI primary blue. */
     val Primary = Color(0xFF3574F0)
     val OnPrimary = Color(0xFFFFFFFF)
+
+    /** Run / play control (Android Studio green). */
+    val Run = Color(0xFF499C54)
 
     val Danger = Color(0xFFE35252)
     val Warning = Color(0xFFF2C55C)
@@ -73,7 +80,10 @@ private fun Color.toHexLabel(): String =
 @Composable
 private fun ColorsPreview() {
     val swatches = listOf(
-        ColorSwatch("bg / canvas", Colors.Bg),
+        ColorSwatch("island / bg", Colors.Bg),
+        ColorSwatch("canvas", Colors.Canvas),
+        ColorSwatch("canvas-top", Colors.CanvasTop),
+        ColorSwatch("canvas-bottom", Colors.CanvasBottom),
         ColorSwatch("surface", Colors.Surface),
         ColorSwatch("surface-2", Colors.Surface2),
         ColorSwatch("menu", Colors.Menu),
@@ -84,6 +94,7 @@ private fun ColorsPreview() {
         ColorSwatch("muted-2", Colors.Muted2),
         ColorSwatch("primary", Colors.Primary),
         ColorSwatch("on-primary", Colors.OnPrimary),
+        ColorSwatch("run", Colors.Run),
         ColorSwatch("danger", Colors.Danger),
         ColorSwatch("warning", Colors.Warning),
         ColorSwatch("selection", Colors.Selection),

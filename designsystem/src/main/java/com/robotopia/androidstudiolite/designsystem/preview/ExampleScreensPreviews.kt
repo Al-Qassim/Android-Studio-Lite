@@ -4,10 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -29,11 +29,13 @@ import com.robotopia.androidstudiolite.designsystem.component.DialogMessageActio
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.FileRow
 import com.robotopia.androidstudiolite.designsystem.component.FolderRow
+import com.robotopia.androidstudiolite.designsystem.component.InsetDivider
+import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.component.MoveBar
 import com.robotopia.androidstudiolite.designsystem.component.PathBar
-import com.robotopia.androidstudiolite.designsystem.component.ProjectCard
 import com.robotopia.androidstudiolite.designsystem.component.ProjectMenu
+import com.robotopia.androidstudiolite.designsystem.component.ProjectRow
 import com.robotopia.androidstudiolite.designsystem.component.TextField
 import com.robotopia.androidstudiolite.designsystem.component.TextFieldVariant
 import com.robotopia.androidstudiolite.designsystem.component.Toast
@@ -48,6 +50,9 @@ import com.robotopia.androidstudiolite.designsystem.typography.Typography
 /**
  * Phone-sized example screens built only from `:designsystem` components.
  * Open this file in Android Studio Preview and flip cases in the preview picker.
+ *
+ * Previews render each screen as-is — no extra shell chrome — so canvas/islands
+ * come only from [IslandScaffold] (or whatever the screen itself draws).
  */
 enum class ExampleScreenCase {
     ProjectsEmpty,
@@ -74,7 +79,7 @@ private class ExampleScreenCaseProvider : PreviewParameterProvider<ExampleScreen
 @Preview(
     name = "Example screens",
     showBackground = true,
-    backgroundColor = 0xFF1E1F22,
+    backgroundColor = 0xFF2B2D30,
     widthDp = 360,
     heightDp = 640,
 )
@@ -82,33 +87,20 @@ private class ExampleScreenCaseProvider : PreviewParameterProvider<ExampleScreen
 fun ExampleScreensPreview(
     @PreviewParameter(ExampleScreenCaseProvider::class) case: ExampleScreenCase,
 ) {
-    ExamplePhoneShell {
-        when (case) {
-            ExampleScreenCase.ProjectsEmpty -> ProjectsEmptyScreen()
-            ExampleScreenCase.ProjectsList -> ProjectsListScreen()
-            ExampleScreenCase.ProjectsMenu -> ProjectsMenuScreen()
-            ExampleScreenCase.ProjectsDeleteConfirm -> ProjectsDeleteConfirmScreen()
-            ExampleScreenCase.NewProjectForm -> NewProjectFormScreen()
-            ExampleScreenCase.FilesBrowse -> FilesBrowseScreen()
-            ExampleScreenCase.FilesEmpty -> FilesEmptyScreen()
-            ExampleScreenCase.FilesCreateMenu -> FilesCreateMenuScreen()
-            ExampleScreenCase.FilesNewFileDialog -> FilesNewFileDialogScreen()
-            ExampleScreenCase.FilesMoveBar -> FilesMoveBarScreen()
-            ExampleScreenCase.EditorClean -> EditorCleanScreen()
-            ExampleScreenCase.EditorDirtyToast -> EditorDirtyToastScreen()
-            ExampleScreenCase.Loading -> LoadingScreen()
-        }
-    }
-}
-
-@Composable
-private fun ExamplePhoneShell(content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.Bg),
-    ) {
-        content()
+    when (case) {
+        ExampleScreenCase.ProjectsEmpty -> ProjectsEmptyScreen()
+        ExampleScreenCase.ProjectsList -> ProjectsListScreen()
+        ExampleScreenCase.ProjectsMenu -> ProjectsMenuScreen()
+        ExampleScreenCase.ProjectsDeleteConfirm -> ProjectsDeleteConfirmScreen()
+        ExampleScreenCase.NewProjectForm -> NewProjectFormScreen()
+        ExampleScreenCase.FilesBrowse -> FilesBrowseScreen()
+        ExampleScreenCase.FilesEmpty -> FilesEmptyScreen()
+        ExampleScreenCase.FilesCreateMenu -> FilesCreateMenuScreen()
+        ExampleScreenCase.FilesNewFileDialog -> FilesNewFileDialogScreen()
+        ExampleScreenCase.FilesMoveBar -> FilesMoveBarScreen()
+        ExampleScreenCase.EditorClean -> EditorCleanScreen()
+        ExampleScreenCase.EditorDirtyToast -> EditorDirtyToastScreen()
+        ExampleScreenCase.Loading -> LoadingScreen()
     }
 }
 
@@ -126,8 +118,9 @@ private fun Scrim(content: @Composable () -> Unit) {
 
 @Composable
 private fun ProjectsEmptyScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBarTitleAction(title = "Projects", onSettingsClick = {})
+    IslandScaffold(
+        topBar = { TopBarTitleAction(title = "Projects", onSettingsClick = {}) },
+    ) {
         Box(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             contentAlignment = Alignment.Center,
@@ -142,33 +135,42 @@ private fun ProjectsEmptyScreen() {
 
 @Composable
 private fun ProjectsListScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBarTitleAction(title = "Projects", onSettingsClick = {})
-        Column(
+    IslandScaffold(
+        topBar = { TopBarTitleAction(title = "Projects", onSettingsClick = {}) },
+    ) {
+        ProjectRow(
+            name = "HelloCompose",
+            packageName = "com.example.hellocompose",
+            meta = "Opened just now",
+            onMenuClick = {},
+        )
+        ProjectRow(
+            name = "TodoApp",
+            packageName = "com.example.todo",
+            meta = "Opened yesterday",
+            onMenuClick = {},
+        )
+        ProjectRow(
+            name = "WeatherDemo",
+            packageName = "com.example.weather",
+            meta = "Opened 3 days ago",
+            onMenuClick = {},
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        BasicText(
+            text = "Tap a project to open",
+            style = Typography.Caption.copy(color = Colors.Muted2),
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            ProjectCard(
-                name = "HelloCompose",
-                packageName = "com.example.hellocompose",
-                meta = "Opened just now",
-                onMenuClick = {},
-            )
-            ProjectCard(
-                name = "TodoApp",
-                packageName = "com.example.todo",
-                meta = "Opened yesterday",
-                onMenuClick = {},
-            )
-            ProjectCard(
-                name = "WeatherDemo",
-                packageName = "com.example.weather",
-                meta = "Opened 3 days ago",
-                onMenuClick = {},
-            )
-        }
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 8.dp),
+        )
+        BasicText(
+            text = "or + to create one",
+            style = Typography.Caption.copy(color = Colors.Muted2),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 16.dp),
+        )
     }
 }
 
@@ -179,7 +181,7 @@ private fun ProjectsMenuScreen() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 140.dp, end = 20.dp),
+                .padding(top = 100.dp, end = 12.dp),
             contentAlignment = Alignment.TopEnd,
         ) {
             ProjectMenu()
@@ -204,11 +206,12 @@ private fun ProjectsDeleteConfirmScreen() {
 
 @Composable
 private fun NewProjectFormScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBarBackTitle(title = "New project")
+    IslandScaffold(
+        topBar = { TopBarBackTitle(title = "New project") },
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -245,14 +248,17 @@ private fun NewProjectFormScreen() {
                 style = Typography.Caption.copy(color = Colors.Muted2),
             )
         }
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
 private fun FilesBrowseScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBarBackTitleAdd(title = "MyApp", onRunClick = {})
+    IslandScaffold(
+        topBar = { TopBarBackTitleAdd(title = "MyApp", onRunClick = {}) },
+    ) {
         PathBar(segments = listOf("/", "app", "src", "main"))
+        InsetDivider()
         FolderRow(name = "java")
         FolderRow(name = "res")
         FileRow(name = "AndroidManifest.xml", showChevron = false)
@@ -276,9 +282,11 @@ private fun FilesBrowseScreen() {
 
 @Composable
 private fun FilesEmptyScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBarBackTitleAdd(title = "MyApp", onRunClick = {})
+    IslandScaffold(
+        topBar = { TopBarBackTitleAdd(title = "MyApp", onRunClick = {}) },
+    ) {
         PathBar(segments = listOf("/", "app", "empty"))
+        InsetDivider()
         Box(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             contentAlignment = Alignment.Center,
@@ -326,9 +334,14 @@ private fun FilesNewFileDialogScreen() {
 @Composable
 private fun FilesMoveBarScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            TopBarBackTitleAdd(title = "MyApp", onRunClick = {})
+        IslandScaffold(
+            topBar = { TopBarBackTitleAdd(title = "MyApp", onRunClick = {}) },
+            footer = {
+                MoveBar(name = "build.gradle.kts", mode = TransferBarMode.Move)
+            },
+        ) {
             PathBar(segments = listOf("/"))
+            InsetDivider()
             FolderRow(name = "app", selected = true)
             FolderRow(name = "gradle")
             FileRow(name = "settings.gradle.kts", showChevron = false)
@@ -342,22 +355,14 @@ private fun FilesMoveBarScreen() {
         ) {
             ContextMenu()
         }
-        MoveBar(
-            name = "build.gradle.kts",
-            mode = TransferBarMode.Move,
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
     }
 }
 
 @Composable
 private fun EditorCleanScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.Editor),
+    IslandScaffold(
+        topBar = { TopBarEditorMore(fileName = "MainActivity.kt", onRunClick = {}) },
     ) {
-        TopBarEditorMore(fileName = "MainActivity.kt", onRunClick = {})
         CodeSample(gutter = "1", code = "package demo")
         CodeSample(gutter = "2", code = "")
         CodeSample(gutter = "3", code = "fun main() {")
@@ -370,16 +375,15 @@ private fun EditorCleanScreen() {
 @Composable
 private fun EditorDirtyToastScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Colors.Editor),
+        IslandScaffold(
+            topBar = {
+                TopBarEditorMore(
+                    fileName = "MainActivity.kt",
+                    isDirty = true,
+                    onRunClick = {},
+                )
+            },
         ) {
-            TopBarEditorMore(
-                fileName = "MainActivity.kt",
-                isDirty = true,
-                onRunClick = {},
-            )
             CodeSample(gutter = "1", code = "package demo")
             CodeSample(gutter = "2", code = "")
             CodeSample(gutter = "3", code = "fun main() {")
@@ -399,22 +403,28 @@ private fun EditorDirtyToastScreen() {
 
 @Composable
 private fun LoadingScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBarBackTitle(title = "Build")
+    IslandScaffold(
+        topBar = { TopBarBackTitle(title = "Build") },
+        footer = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                Button(
+                    label = "Cancel",
+                    onClick = {},
+                    variant = ButtonVariant.Secondary,
+                )
+            }
+        },
+    ) {
         Box(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
             LoadingIndicator(label = "Preparing workspace…")
         }
-        Button(
-            label = "Cancel",
-            onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            variant = ButtonVariant.Secondary,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }

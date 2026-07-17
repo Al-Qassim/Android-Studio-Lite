@@ -1,8 +1,10 @@
 package com.robotopia.androidstudiolite.designsystem.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +27,10 @@ import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
+private val DialogCorner = 12.dp
+private val DialogWidth = 320.dp
+private val DialogPadding = 16.dp
+
 @Composable
 fun DialogForm(
     title: String,
@@ -38,21 +44,10 @@ fun DialogForm(
     fieldPlaceholder: String = "",
     errorMessage: String? = null,
 ) {
-    val shape = RoundedCornerShape(14.dp)
-    Column(
-        modifier = modifier
-            .width(320.dp)
-            .shadow(12.dp, shape)
-            .clip(shape)
-            .background(Colors.Surface)
-            .padding(20.dp),
-    ) {
-        BasicText(
-            text = title,
-            style = Typography.Headline.copy(color = Colors.Text),
-        )
+    DialogSurface(modifier = modifier) {
+        DialogTitle(title)
         if (!locationLabel.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             BasicText(
                 text = locationLabel,
                 style = Typography.Caption.copy(color = Colors.Muted),
@@ -67,24 +62,14 @@ fun DialogForm(
             isError = !errorMessage.isNullOrBlank(),
             errorMessage = errorMessage,
         )
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Button(
-                label = "Cancel",
-                onClick = onCancel,
-                variant = ButtonVariant.TextAction,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                label = primaryActionLabel,
-                onClick = onPrimaryAction,
-                variant = ButtonVariant.Primary,
-            )
-        }
+        Spacer(modifier = Modifier.height(16.dp))
+        DialogActions(
+            cancelLabel = "Cancel",
+            onCancel = onCancel,
+            actionLabel = primaryActionLabel,
+            onAction = onPrimaryAction,
+            actionVariant = ButtonVariant.Primary,
+        )
     }
 }
 
@@ -98,50 +83,77 @@ fun DialogMessageAction(
     modifier: Modifier = Modifier,
     dangerAction: Boolean = false,
 ) {
-    val shape = RoundedCornerShape(14.dp)
-    Column(
-        modifier = modifier
-            .width(320.dp)
-            .shadow(12.dp, shape)
-            .clip(shape)
-            .background(Colors.Surface)
-            .padding(20.dp),
-    ) {
-        BasicText(
-            text = title,
-            style = Typography.Headline.copy(color = Colors.Text),
-        )
+    DialogSurface(modifier = modifier) {
+        DialogTitle(title)
         Spacer(modifier = Modifier.height(12.dp))
         BasicText(
             text = message,
             style = Typography.Body.copy(color = Colors.Muted),
         )
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Button(
-                label = "Cancel",
-                onClick = onCancel,
-                variant = if (dangerAction) {
-                    ButtonVariant.Neutral
-                } else {
-                    ButtonVariant.TextAction
-                },
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                label = actionLabel,
-                onClick = onAction,
-                variant = if (dangerAction) {
-                    ButtonVariant.Danger
-                } else {
-                    ButtonVariant.Primary
-                },
-            )
-        }
+        Spacer(modifier = Modifier.height(16.dp))
+        DialogActions(
+            cancelLabel = "Cancel",
+            onCancel = onCancel,
+            actionLabel = actionLabel,
+            onAction = onAction,
+            actionVariant = if (dangerAction) {
+                ButtonVariant.Danger
+            } else {
+                ButtonVariant.Primary
+            },
+        )
+    }
+}
+
+@Composable
+private fun DialogSurface(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val shape = RoundedCornerShape(DialogCorner)
+    Column(
+        modifier = modifier
+            .width(DialogWidth)
+            .shadow(12.dp, shape)
+            .clip(shape)
+            .background(Colors.Menu)
+            .border(1.dp, Colors.MenuBorder, shape)
+            .padding(DialogPadding),
+        content = content,
+    )
+}
+
+@Composable
+private fun DialogTitle(title: String) {
+    BasicText(
+        text = title,
+        style = Typography.BodyStrong.copy(color = Colors.Text),
+    )
+}
+
+@Composable
+private fun DialogActions(
+    cancelLabel: String,
+    onCancel: () -> Unit,
+    actionLabel: String,
+    onAction: () -> Unit,
+    actionVariant: ButtonVariant,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Button(
+            label = cancelLabel,
+            onClick = onCancel,
+            variant = ButtonVariant.Secondary,
+        )
+        Button(
+            label = actionLabel,
+            onClick = onAction,
+            variant = actionVariant,
+        )
     }
 }
 

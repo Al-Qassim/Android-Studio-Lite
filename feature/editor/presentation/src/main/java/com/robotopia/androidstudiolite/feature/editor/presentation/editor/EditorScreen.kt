@@ -1,9 +1,7 @@
 package com.robotopia.androidstudiolite.feature.editor.presentation.editor
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.Toast
 import com.robotopia.androidstudiolite.designsystem.component.TopBarEditorMore
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.dismissToast
@@ -47,19 +45,18 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
 
     BackHandler { requestLeave(state) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.Editor),
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            TopBarEditorMore(
-                fileName = state.fileName,
-                isDirty = openDocument?.isDirty == true,
-                onBackClick = { requestLeave(state) },
-                onRunClick = onRun,
-                onMoreClick = { openMenu() },
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        IslandScaffold(
+            topBar = {
+                TopBarEditorMore(
+                    fileName = state.fileName,
+                    isDirty = openDocument?.isDirty == true,
+                    onBackClick = { requestLeave(state) },
+                    onRunClick = onRun,
+                    onMoreClick = { openMenu() },
+                )
+            },
+        ) {
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -84,7 +81,7 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
     EditorDialogs(state)
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 360, heightDp = 640)
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
 @Composable
 private fun EditorPreview(
     @PreviewParameter(EditorPreviewProvider::class) case: EditorPreviewCase,

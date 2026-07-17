@@ -89,7 +89,7 @@ fun IconFile(
 @Composable
 fun IconRun(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Colors.Run,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_run, modifier, tint, size)
 

@@ -11,7 +11,8 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Tokens / components | `designsystem/` |
 | Example screen previews | `designsystem/.../preview/ExampleScreensPreviews.kt` (Compose Preview picker) |
 | Feature UI | `feature/*/presentation/` |
-| Visual direction | JetBrains New UI / Islands Dark — calm, compact; tokens in `Colors.kt` (`#1E1F22` shell, `#3574F0` primary) |
+| Visual direction | JetBrains New UI / Islands Dark — radial canvas glow + rounded islands; `IslandScaffold` for files/editor |
+| Screen chrome | `IslandScaffold(topBar, body, footer?)` — top bar on canvas; one body island; optional footer under an inset divider (same island) |
 
 ## Process
 

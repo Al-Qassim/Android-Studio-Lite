@@ -1,6 +1,5 @@
 package com.robotopia.androidstudiolite.feature.projects.presentation.list
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +22,9 @@ import androidx.compose.ui.window.PopupProperties
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.DialogMessageAction
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
-import com.robotopia.androidstudiolite.designsystem.component.ProjectCard
+import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.ProjectMenu
+import com.robotopia.androidstudiolite.designsystem.component.ProjectRow
 import com.robotopia.androidstudiolite.designsystem.component.TopBarTitleAction
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.projects.model.Project
@@ -44,24 +44,29 @@ internal fun ProjectsListContent(
     onDeleteConfirm: () -> Unit,
     onErrorDismiss: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.Bg),
+    IslandScaffold(
+        topBar = {
+            TopBarTitleAction(
+                title = "Projects",
+                onActionClick = onCreateProject,
+                onSettingsClick = onOpenSettings,
+            )
+        },
     ) {
-        TopBarTitleAction(
-            title = "Projects",
-            onActionClick = onCreateProject,
-            onSettingsClick = onOpenSettings,
-        )
-        ProjectsListBody(
-            state = state,
-            onOpenClick = onOpenClick,
-            onMenuOpen = onMenuOpen,
-            onMenuDismiss = onMenuDismiss,
-            onRunMenuClick = onRunMenuClick,
-            onDeleteMenuClick = onDeleteMenuClick,
-        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        ) {
+            ProjectsListBody(
+                state = state,
+                onOpenClick = onOpenClick,
+                onMenuOpen = onMenuOpen,
+                onMenuDismiss = onMenuDismiss,
+                onRunMenuClick = onRunMenuClick,
+                onDeleteMenuClick = onDeleteMenuClick,
+            )
+        }
     }
 
     state.pendingDelete?.let { project ->
@@ -129,8 +134,7 @@ private fun ProjectsList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(vertical = 4.dp),
     ) {
         items(projects, key = { it.id.value }) { project ->
             ProjectListItem(
@@ -158,10 +162,11 @@ private fun ProjectListItem(
     onDeleteMenuClick: (Project) -> Unit,
 ) {
     Box {
-        ProjectCard(
+        ProjectRow(
             name = project.name,
             packageName = project.packageName,
             meta = formatOpenedMeta(project.lastOpenedAt),
+            selected = menuOpen,
             onClick = { onOpenClick(project) },
             onLongClick = { onMenuOpen(project) },
             onMenuClick = { onMenuOpen(project) },
@@ -283,7 +288,7 @@ private val previewProjects = listOf(
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFF12171C,
+    backgroundColor = 0xFF2B2D30,
     widthDp = 360,
     heightDp = 640,
     name = "List · empty",
@@ -307,7 +312,7 @@ private fun ProjectsListEmptyPreview() {
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFF12171C,
+    backgroundColor = 0xFF2B2D30,
     widthDp = 360,
     heightDp = 640,
     name = "List · with projects",
@@ -331,7 +336,7 @@ private fun ProjectsListFilledPreview() {
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFF12171C,
+    backgroundColor = 0xFF2B2D30,
     widthDp = 360,
     heightDp = 640,
     name = "List · menu open",
@@ -358,7 +363,7 @@ private fun ProjectsListMenuPreview() {
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFF12171C,
+    backgroundColor = 0xFF2B2D30,
     widthDp = 360,
     heightDp = 640,
     name = "List · delete confirm",
@@ -385,7 +390,7 @@ private fun ProjectsListDeleteConfirmPreview() {
 
 @Preview(
     showBackground = true,
-    backgroundColor = 0xFF12171C,
+    backgroundColor = 0xFF2B2D30,
     widthDp = 360,
     heightDp = 640,
     name = "List · action error",

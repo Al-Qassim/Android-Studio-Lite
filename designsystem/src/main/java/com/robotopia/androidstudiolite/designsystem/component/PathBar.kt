@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -95,7 +96,7 @@ fun PathBar(
         modifier = modifier
             .fillMaxWidth()
             .height(32.dp)
-            .background(Colors.Editor)
+            .background(Color.Transparent)
             .padding(horizontal = 12.dp),
         parentStyle = Typography.Code.copy(color = Colors.Muted),
         currentStyle = Typography.Code.copy(color = Colors.Text),
@@ -186,7 +187,7 @@ fun CodeSample(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Colors.Editor)
+            .background(Color.Transparent)
             .padding(horizontal = 12.dp, vertical = 4.dp),
         verticalAlignment = Alignment.Top,
     ) {

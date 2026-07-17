@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,7 +37,7 @@ fun TopBarTitleAction(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(Colors.Bg)
+            .background(Color.Transparent)
             .padding(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -62,7 +63,7 @@ fun TopBarTitleAction(
             onClick = onActionClick,
             variant = IconButtonVariant.Ghost,
             modifier = Modifier.semantics { contentDescription = "New project" },
-            icon = { _, size -> IconAdd(tint = Colors.Primary, size = size) },
+            icon = { tint, size -> IconAdd(tint = tint, size = size) },
         )
     }
 }
@@ -77,12 +78,13 @@ fun TopBarBackTitle(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(Colors.Bg)
+            .background(Color.Transparent)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
             onClick = onBackClick,
+            variant = IconButtonVariant.Ghost,
             icon = { tint, size -> IconBack(tint = tint, size = size) },
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -109,12 +111,13 @@ fun TopBarBackTitleAdd(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(Colors.Bg)
+            .background(Color.Transparent)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
             onClick = onBackClick,
+            variant = IconButtonVariant.Ghost,
             icon = { tint, size -> IconBack(tint = tint, size = size) },
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -128,12 +131,14 @@ fun TopBarBackTitleAdd(
         if (onRunClick != null) {
             IconButton(
                 onClick = onRunClick,
-                icon = { _, size -> IconRun(tint = Colors.Primary, size = size) },
+                variant = IconButtonVariant.Ghost,
+                icon = { _, size -> IconRun(tint = Colors.Run, size = size) },
             )
         }
         IconButton(
             onClick = onAddClick,
-            icon = { _, size -> IconAdd(tint = Colors.Primary, size = size) },
+            variant = IconButtonVariant.Ghost,
+            icon = { tint, size -> IconAdd(tint = tint, size = size) },
         )
     }
 }
@@ -153,12 +158,13 @@ fun TopBarPathAdd(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(Colors.Bg)
+            .background(Color.Transparent)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
             onClick = onBackClick,
+            variant = IconButtonVariant.Ghost,
             icon = { tint, size -> IconBack(tint = tint, size = size) },
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -171,7 +177,8 @@ fun TopBarPathAdd(
         )
         IconButton(
             onClick = onAddClick,
-            icon = { _, size -> IconAdd(tint = Colors.Primary, size = size) },
+            variant = IconButtonVariant.Ghost,
+            icon = { tint, size -> IconAdd(tint = tint, size = size) },
         )
     }
 }
@@ -189,12 +196,13 @@ fun TopBarEditorMore(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(Colors.Editor)
+            .background(Color.Transparent)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
             onClick = onBackClick,
+            variant = IconButtonVariant.Ghost,
             icon = { tint, size -> IconBack(tint = tint, size = size) },
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -208,11 +216,13 @@ fun TopBarEditorMore(
         if (onRunClick != null) {
             IconButton(
                 onClick = onRunClick,
-                icon = { _, size -> IconRun(tint = Colors.Primary, size = size) },
+                variant = IconButtonVariant.Ghost,
+                icon = { _, size -> IconRun(tint = Colors.Run, size = size) },
             )
         }
         IconButton(
             onClick = onMoreClick,
+            variant = IconButtonVariant.Ghost,
             icon = { tint, size -> IconMore(tint = tint, size = size) },
         )
     }

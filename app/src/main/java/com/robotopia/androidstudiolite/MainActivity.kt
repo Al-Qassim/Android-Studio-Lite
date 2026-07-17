@@ -20,7 +20,7 @@ import com.robotopia.androidstudiolite.ui.theme.AndroidStudioLiteTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val scrim = Colors.Bg.toArgb()
+        val scrim = Colors.Canvas.toArgb()
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(scrim),
             navigationBarStyle = SystemBarStyle.dark(scrim),
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Colors.Bg),
+                        .background(Colors.Canvas),
                 ) {
                     Box(
                         modifier = Modifier
