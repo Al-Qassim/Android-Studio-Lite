@@ -21,13 +21,19 @@ import com.robotopia.androidstudiolite.designsystem.R
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 
 /**
- * Typography tokens using bundled Inter font files.
+ * Typography tokens: Inter for UI chrome, JetBrains Mono for code.
  */
 object Typography {
     private val Family = FontFamily(
         Font(R.font.inter_regular, FontWeight.Normal),
         Font(R.font.inter_medium, FontWeight.Medium),
         Font(R.font.inter_bold, FontWeight.Bold),
+    )
+
+    private val CodeFamily = FontFamily(
+        Font(R.font.jetbrains_mono_regular, FontWeight.Normal),
+        Font(R.font.jetbrains_mono_medium, FontWeight.Medium),
+        Font(R.font.jetbrains_mono_bold, FontWeight.Bold),
     )
 
     val Display = TextStyle(
@@ -122,14 +128,14 @@ object Typography {
     )
 
     val Code = TextStyle(
-        fontFamily = Family,
+        fontFamily = CodeFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 11.sp,
         lineHeight = 16.sp,
     )
 
     val CodeGutter = TextStyle(
-        fontFamily = Family,
+        fontFamily = CodeFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 10.sp,
         lineHeight = 16.sp,

@@ -8,7 +8,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 
 | Layer | Location |
 | --- | --- |
-| Tokens / components | `designsystem/` — tokens + reusable Compose components only (no product screens) |
+| Tokens / components | `designsystem/` — tokens + reusable Compose components only (no product screens). UI type: Inter; code/gutter: JetBrains Mono (`Typography.Code` / `CodeGutter`). |
 | Composable UI | `designsystem/.../component/` — bars, rows, dialogs, scaffold, etc. |
 | Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable` (not under `component/`) |
 | Editor helpers | `designsystem/.../editor/` — e.g. `highlightCode` |
