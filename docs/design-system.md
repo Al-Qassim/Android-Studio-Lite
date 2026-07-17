@@ -12,7 +12,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Composable UI | `designsystem/.../component/` — screens, bars, rows, dialogs only |
 | Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable` (not under `component/`) |
 | Editor helpers | `designsystem/.../editor/` — e.g. `highlightCode` |
-| Example screen previews | `designsystem/.../preview/ExampleScreensPreviews.kt` (Compose Preview picker) |
+| Example screen previews | `designsystem/.../preview/<feature>/` — one file per feature (Compose Preview picker). Do not name a folder `build` — gitignores `**/build/`. Use `buildapk` for build examples. |
 | Feature UI | `feature/*/presentation/` |
 | Visual direction | JetBrains New UI / Islands Dark — radial canvas glow + rounded islands; `IslandScaffold` for files/editor |
 | Screen chrome | `IslandScaffold(topBar, body, footer?)` — top bar on canvas; one body island; optional footer under an inset divider (same island) |
