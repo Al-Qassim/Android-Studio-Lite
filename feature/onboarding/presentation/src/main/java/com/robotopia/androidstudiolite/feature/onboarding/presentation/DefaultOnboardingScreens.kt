@@ -11,8 +11,10 @@ import com.robotopia.androidstudiolite.feature.auth.api.AuthSession
 import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingScreens
 import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingStore
 import com.robotopia.androidstudiolite.feature.onboarding.presentation.intro.OnboardingIntroContent
+import com.robotopia.androidstudiolite.feature.onboarding.presentation.welcome.OnboardingWelcomeContent
 
 private enum class OnboardingRoute {
+    Welcome,
     Intro,
     Connect,
 }
@@ -25,7 +27,7 @@ class DefaultOnboardingScreens(
 
     @Composable
     override fun Onboarding(onFinished: () -> Unit) {
-        var route by rememberSaveable { mutableStateOf(OnboardingRoute.Intro) }
+        var route by rememberSaveable { mutableStateOf(OnboardingRoute.Welcome) }
 
         fun complete() {
             onboardingStore.markCompleted()
@@ -33,8 +35,15 @@ class DefaultOnboardingScreens(
         }
 
         when (route) {
-            OnboardingRoute.Intro -> {
+            OnboardingRoute.Welcome -> {
                 BackHandler(onBack = ::complete)
+                OnboardingWelcomeContent(
+                    onContinueClick = { route = OnboardingRoute.Intro },
+                )
+            }
+
+            OnboardingRoute.Intro -> {
+                BackHandler(onBack = { route = OnboardingRoute.Welcome })
                 OnboardingIntroContent(
                     providerDisplayName = authSession.providerDisplayName,
                     onConnectClick = { route = OnboardingRoute.Connect },

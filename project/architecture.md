@@ -46,7 +46,7 @@ feature/
   buildapk/   model · api · data · presentation · di
   auth/       model · api · data · presentation · di   # session + Connect (login) only
   settings/   api · presentation · di                  # Settings hub + Build account (uses auth)
-  onboarding/ api · data · presentation · di           # first-launch Connect / Skip
+  onboarding/ api · data · presentation · di           # first-launch Welcome → Connect / Skip
   github/     api · data · di                          # stateless GitHub helpers (device + build REST)
 integration/
   database                  # Room assembly (feature entities/DAOs)
@@ -135,7 +135,7 @@ flowchart TB
 ### Auth / Settings / Onboarding
 - **Auth:** Connect device flow + session (`accessToken` via `auth:api`).
 - **Settings:** hub + Build account (connect / log out).
-- **Onboarding:** first-launch Connect / Skip; gate in `IdeNavHost`.
+- **Onboarding:** first-launch Welcome → Connect / Skip; gate in `IdeNavHost`.
 
 ### GitHub
 - Stateless `:feature:github` — device flow + build REST (`HttpGitHubClient`).

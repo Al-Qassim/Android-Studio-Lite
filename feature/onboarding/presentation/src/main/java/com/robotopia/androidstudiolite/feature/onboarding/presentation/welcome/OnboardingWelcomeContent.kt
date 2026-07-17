@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.onboarding.presentation.intro
+package com.robotopia.androidstudiolite.feature.onboarding.presentation.welcome
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -12,15 +12,13 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
-import com.robotopia.androidstudiolite.designsystem.icon.IconCloud
+import com.robotopia.androidstudiolite.designsystem.icon.IconApk
 import com.robotopia.androidstudiolite.feature.onboarding.presentation.OnboardingAppTitleBar
 import com.robotopia.androidstudiolite.feature.onboarding.presentation.OnboardingCenteredMessage
 
 @Composable
-internal fun OnboardingIntroContent(
-    providerDisplayName: String,
-    onConnectClick: () -> Unit,
-    onSkipClick: () -> Unit,
+internal fun OnboardingWelcomeContent(
+    onContinueClick: () -> Unit,
 ) {
     IslandScaffold(
         topBar = { OnboardingAppTitleBar() },
@@ -29,16 +27,11 @@ internal fun OnboardingIntroContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                horizontalArrangement = Arrangement.End,
             ) {
                 Button(
-                    label = "Skip for now",
-                    onClick = onSkipClick,
-                    variant = ButtonVariant.Secondary,
-                )
-                Button(
-                    label = "Connect $providerDisplayName",
-                    onClick = onConnectClick,
+                    label = "Continue",
+                    onClick = onContinueClick,
                     variant = ButtonVariant.Primary,
                 )
             }
@@ -46,10 +39,10 @@ internal fun OnboardingIntroContent(
     ) {
         OnboardingCenteredMessage(
             illustration = {
-                IconCloud(tint = Colors.Primary, size = 40.dp)
+                IconApk(tint = Colors.Primary, size = 40.dp)
             },
-            title = "Connect $providerDisplayName for cloud builds.",
-            body = "Optional — you can skip and connect later in Settings.",
+            title = "Edit and build Android apps on your phone.",
+            body = "Create a project, edit code, run a cloud build, and install the APK.",
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),

@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 
 interface OnboardingScreens {
     /**
-     * First-launch Connect prompt. Owns intro → shared auth Connect; calls [onFinished]
-     * after Connect success, Cancel, or Skip.
+     * First-launch flow: welcome → connect prompt → shared auth Connect.
+     * Calls [onFinished] after Connect success, Skip, or system Back from welcome.
      */
     @Composable
     fun Onboarding(
