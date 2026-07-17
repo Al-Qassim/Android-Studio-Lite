@@ -19,6 +19,7 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.icon.IconChevron
 import com.robotopia.androidstudiolite.designsystem.icon.IconFile
 import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
+import com.robotopia.androidstudiolite.designsystem.icon.IconMore
 import com.robotopia.androidstudiolite.designsystem.modifier.insetClickable
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
@@ -30,6 +31,7 @@ fun FileRow(
     selected: Boolean = false,
     showChevron: Boolean = true,
     onLongClick: (() -> Unit)? = null,
+    onMenuClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -52,8 +54,19 @@ fun FileRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        if (showChevron) {
-            IconChevron(tint = Colors.Muted, size = 16.dp)
+        when {
+            onMenuClick != null -> {
+                IconButton(
+                    onClick = onMenuClick,
+                    variant = IconButtonVariant.Ghost,
+                    size = 32.dp,
+                    iconSize = 18.dp,
+                    icon = { tint, size -> IconMore(tint = tint, size = size) },
+                )
+            }
+            showChevron -> {
+                IconChevron(tint = Colors.Muted, size = 16.dp)
+            }
         }
     }
 }
@@ -65,6 +78,7 @@ fun FolderRow(
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     onLongClick: (() -> Unit)? = null,
+    onMenuClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -87,6 +101,15 @@ fun FolderRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (onMenuClick != null) {
+            IconButton(
+                onClick = onMenuClick,
+                variant = IconButtonVariant.Ghost,
+                size = 32.dp,
+                iconSize = 18.dp,
+                icon = { tint, size -> IconMore(tint = tint, size = size) },
+            )
+        }
     }
 }
 
@@ -94,9 +117,9 @@ fun FolderRow(
 @Composable
 private fun FileFolderRowPreview() {
     Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-        FolderRow(name = "src")
-        FolderRow(name = "java", selected = true)
-        FileRow(name = "MainActivity.kt")
-        FileRow(name = "Theme.kt", selected = true)
+        FolderRow(name = "src", onMenuClick = {})
+        FolderRow(name = "java", selected = true, onMenuClick = {})
+        FileRow(name = "MainActivity.kt", showChevron = false, onMenuClick = {})
+        FileRow(name = "Theme.kt", selected = true, showChevron = false, onMenuClick = {})
     }
 }

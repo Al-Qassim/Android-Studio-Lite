@@ -1,25 +1,21 @@
 package com.robotopia.androidstudiolite.feature.files.presentation.browser.ui
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.robotopia.androidstudiolite.designsystem.component.ContextMenu
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.FileRow
 import com.robotopia.androidstudiolite.designsystem.component.FolderRow
 import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
-import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreenContext
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserUiState
@@ -31,8 +27,6 @@ import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.openFolder
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.openItemMenu
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.openRenameDialog
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 
 @Composable
 internal fun FileBrowserScreenContext.FileBrowserBody(state: FileBrowserUiState) {
@@ -75,7 +69,6 @@ private fun FileBrowserScreenContext.FileBrowserList(state: FileBrowserUiState) 
                 entry = entry,
             )
         }
-        item { FileBrowserFooterHint() }
     }
 }
 
@@ -93,6 +86,7 @@ private fun FileBrowserScreenContext.FileBrowserListItem(
                     selected = menuOpen,
                     onClick = { openFolder(entry) },
                     onLongClick = { openItemMenu(entry) },
+                    onMenuClick = { openItemMenu(entry) },
                 )
             }
 
@@ -103,48 +97,48 @@ private fun FileBrowserScreenContext.FileBrowserListItem(
                     showChevron = false,
                     onClick = { openFile(entry) },
                     onLongClick = { openItemMenu(entry) },
+                    onMenuClick = { openItemMenu(entry) },
                 )
             }
         }
         if (menuOpen) {
-            Popup(
-                alignment = Alignment.TopEnd,
-                onDismissRequest = { dismissItemMenu() },
-                properties = PopupProperties(focusable = true),
-            ) {
-                ContextMenu(
-                    onRename = { openRenameDialog(entry) },
-                    onMove = { moveItem(entry) },
-                    onCopy = { copyItem(entry) },
-                    onDelete = { openDeleteDialog(entry) },
-                    modifier = Modifier.padding(top = 4.dp, end = 16.dp),
-                )
-            }
+            FileItemOverflowMenu(
+                onRename = { openRenameDialog(entry) },
+                onMove = { moveItem(entry) },
+                onCopy = { copyItem(entry) },
+                onDelete = { openDeleteDialog(entry) },
+                onDismiss = { dismissItemMenu() },
+            )
         }
     }
 }
 
+/** Below FileRow/FolderRow's ⋮ control: row 40.dp + small gap under the button. */
+private val FileItemOverflowMenuTopOffset = 44.dp
+
 @Composable
-private fun FileBrowserFooterHint() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+private fun FileItemOverflowMenu(
+    onRename: () -> Unit,
+    onMove: () -> Unit,
+    onCopy: () -> Unit,
+    onDelete: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Popup(
+        alignment = Alignment.TopEnd,
+        onDismissRequest = onDismiss,
+        properties = PopupProperties(focusable = true),
     ) {
-        BasicText(
-            text = "Tap a folder to open, a file to edit",
-            style = Typography.Caption.copy(
-                color = Colors.Muted2,
-                textAlign = TextAlign.Center,
-            ),
-        )
-        BasicText(
-            text = "Long-press for rename, move, copy, or delete",
-            style = Typography.Caption.copy(
-                color = Colors.Muted2,
-                textAlign = TextAlign.Center,
+        ContextMenu(
+            onRename = onRename,
+            onMove = onMove,
+            onCopy = onCopy,
+            onDelete = onDelete,
+            modifier = Modifier.padding(
+                top = FileItemOverflowMenuTopOffset,
+                end = 8.dp,
             ),
         )
     }
 }
+

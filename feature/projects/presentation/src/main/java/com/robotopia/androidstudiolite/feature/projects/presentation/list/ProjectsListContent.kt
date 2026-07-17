@@ -1,9 +1,7 @@
 package com.robotopia.androidstudiolite.feature.projects.presentation.list
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,11 +9,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
@@ -28,7 +24,6 @@ import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.component.ProjectMenu
 import com.robotopia.androidstudiolite.designsystem.component.ProjectRow
 import com.robotopia.androidstudiolite.designsystem.component.TopBarTitleAction
-import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 
@@ -166,7 +161,6 @@ private fun ProjectsList(
                     .background(Colors.MenuDivider),
             )
         }
-        item { ProjectsListFooterHint() }
     }
 }
 
@@ -223,32 +217,6 @@ private fun ProjectOverflowMenu(
             modifier = Modifier.padding(
                 top = ProjectOverflowMenuTopOffset,
                 end = 8.dp,
-            ),
-        )
-    }
-}
-
-@Composable
-private fun ProjectsListFooterHint() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        BasicText(
-            text = "Tap a project to open",
-            style = Typography.Caption.copy(
-                color = Colors.Muted2,
-                textAlign = TextAlign.Center,
-            ),
-        )
-        BasicText(
-            text = "or + to create one",
-            style = Typography.Caption.copy(
-                color = Colors.Muted2,
-                textAlign = TextAlign.Center,
             ),
         )
     }

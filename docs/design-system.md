@@ -33,4 +33,4 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 
 ### Component approval while iterating
 
-Do **not** auto-commit after every polish turn. Commit when the user says **commit**, or when they move on to a **different** component (that handoff means the previous one is approved — commit per `AGENTS.md`, then start the new work).
+Do **not** auto-commit after every polish turn. Commit only when the user explicitly asks (see `AGENTS.md`).
