@@ -104,6 +104,7 @@ flowchart TB
 
 - Outside a feature: **`:api` / `:model` only**.
 - `:integration:navigation` only wires **cross-feature** exits; feature-internal routes stay in each feature’s `*Screens`.
+- Navigation state is **not** cold-started on every Activity recreate: persist routes with `rememberSaveable` (IDs for deep links), not plain `remember`.
 - `:editor:data` may depend on `:files:api` (document load/save through the file explorer).
 - No feature → feature `:data` / `:presentation` edges.
 
@@ -149,7 +150,7 @@ Busy-screen layout: `docs/agents/screen-context.md`. Feature conventions: `/stru
 | --- | --- |
 | `:integration:database` | `AslDatabase` — today projects entity/DAO only |
 | `:integration:di` | `integrationDiModule` — only module `:app` starts |
-| `:integration:navigation` | `IdeNavHost` — Onboarding / Projects / Files / Editor / Build / Settings; closes editor if project deleted |
+| `:integration:navigation` | `IdeNavHost` — Onboarding / Projects / Files / Editor / Build / Settings; closes editor if project deleted. Cross-feature route + feature sub-routes use `rememberSaveable` so Activity recreation (theme / config / process death) restores the same screen; project deep-links rehydrate via `ProjectService` and fall back to Projects if missing. |
 | `:app` | `AslApplication`, `MainActivity`, theme bridge, FileProvider / install permission |
 
 ```text

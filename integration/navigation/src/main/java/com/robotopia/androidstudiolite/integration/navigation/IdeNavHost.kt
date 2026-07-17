@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
@@ -22,12 +22,14 @@ import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import com.robotopia.androidstudiolite.feature.settings.api.SettingsScreens
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 /**
  * IDE root: switches between feature sub-navigations.
  * Feature-internal routes stay inside each feature’s [NavHost].
+ *
+ * Cross-feature [IdeRoute] is [rememberSaveable] so Activity recreation
+ * (theme / config / process death) restores the same screen.
  */
 @Composable
 fun IdeNavHost() {
@@ -41,22 +43,19 @@ fun IdeNavHost() {
     val apkInstaller: ApkInstaller = koinInject()
     val editorSession: EditorSession = koinInject()
     val projectService: ProjectService = koinInject()
-    var route by remember {
-        mutableStateOf<IdeRoute>(
+    var route by rememberSaveable(stateSaver = IdeRouteSaver) {
+        mutableStateOf(
             if (onboardingStore.isCompleted()) IdeRoute.Projects else IdeRoute.Onboarding,
         )
     }
-    val scope = rememberCoroutineScope()
 
-    // Force-close editor when the open document's project is deleted.
-    LaunchedEffect(Unit) {
+    // Drop deep links to deleted projects; also force-close editor session.
+    LaunchedEffect(route) {
+        val projectId = route.projectIdOrNull() ?: return@LaunchedEffect
         projectService.observeProjects().collect { projects ->
-            val open = editorSession.document.value ?: return@collect
-            if (projects.none { it.id == open.id.projectId }) {
+            if (projects.none { it.id == projectId }) {
                 editorSession.close()
-                if (route is IdeRoute.Editor) {
-                    route = IdeRoute.Projects
-                }
+                route = IdeRoute.Projects
             }
         }
     }
@@ -71,22 +70,13 @@ fun IdeNavHost() {
         IdeRoute.Projects -> {
             projectsScreens.NavHost(
                 onOpenProject = { projectId ->
-                    scope.launch {
-                        val project = projectService.getProject(projectId)
-                        if (project != null) {
-                            route = IdeRoute.Files(project)
-                        }
-                    }
+                    route = IdeRoute.Files(projectId)
                 },
                 onRunProject = { projectId ->
-                    scope.launch {
-                        openBuildForProjectId(
-                            projectService = projectService,
-                            projectId = projectId,
-                            returnTo = IdeRoute.Projects,
-                            setRoute = { route = it },
-                        )
-                    }
+                    route = IdeRoute.Build(
+                        projectId = projectId,
+                        returnTo = IdeRoute.Projects,
+                    )
                 },
                 onOpenSettings = {
                     route = IdeRoute.Settings
@@ -101,83 +91,82 @@ fun IdeNavHost() {
         }
 
         is IdeRoute.Files -> {
-            filesScreens.NavHost(
-                root = ProjectRoot(current.project.rootPath),
-                projectName = current.project.name,
-                initialRelativePath = "",
-                onOpenFile = { relativePath ->
-                    route = IdeRoute.Editor(
-                        project = current.project,
-                        documentId = DocumentId(current.project.id, relativePath),
-                    )
-                },
-                onNavigateBack = { route = IdeRoute.Projects },
-                onRun = {
-                    route = IdeRoute.Build(
-                        project = current.project,
-                        returnTo = current,
-                    )
-                },
-            )
+            RestoredProject(projectId = current.projectId, onMissing = { route = IdeRoute.Projects }) { project ->
+                filesScreens.NavHost(
+                    root = ProjectRoot(project.rootPath),
+                    projectName = project.name,
+                    initialRelativePath = "",
+                    onOpenFile = { relativePath ->
+                        route = IdeRoute.Editor(
+                            documentId = DocumentId(project.id, relativePath),
+                        )
+                    },
+                    onNavigateBack = { route = IdeRoute.Projects },
+                    onRun = {
+                        route = IdeRoute.Build(
+                            projectId = project.id,
+                            returnTo = current,
+                        )
+                    },
+                )
+            }
         }
 
         is IdeRoute.Editor -> {
-            editorScreens.NavHost(
-                documentId = current.documentId,
-                root = ProjectRoot(current.project.rootPath),
-                onNavigateBack = { route = IdeRoute.Files(current.project) },
-                onRun = {
-                    route = IdeRoute.Build(
-                        project = current.project,
-                        returnTo = current,
-                    )
-                },
-            )
+            RestoredProject(
+                projectId = current.documentId.projectId,
+                onMissing = { route = IdeRoute.Projects },
+            ) { project ->
+                editorScreens.NavHost(
+                    documentId = current.documentId,
+                    root = ProjectRoot(project.rootPath),
+                    onNavigateBack = { route = IdeRoute.Files(project.id) },
+                    onRun = {
+                        route = IdeRoute.Build(
+                            projectId = project.id,
+                            returnTo = current,
+                        )
+                    },
+                )
+            }
         }
 
         is IdeRoute.Build -> {
-            buildScreens.NavHost(
-                request = BuildRequest(
-                    projectId = current.project.id,
-                    projectRoot = ProjectRoot(current.project.rootPath),
-                    projectName = current.project.name,
-                    packageName = current.project.packageName,
-                ),
-                onReadyToInstall = { apkPath ->
-                    apkInstaller.requestInstall(apkPath)
-                },
-                onDismiss = { route = current.returnTo },
-            )
+            RestoredProject(projectId = current.projectId, onMissing = { route = IdeRoute.Projects }) { project ->
+                buildScreens.NavHost(
+                    request = BuildRequest(
+                        projectId = project.id,
+                        projectRoot = ProjectRoot(project.rootPath),
+                        projectName = project.name,
+                        packageName = project.packageName,
+                    ),
+                    onReadyToInstall = { apkPath ->
+                        apkInstaller.requestInstall(apkPath)
+                    },
+                    onDismiss = { route = current.returnTo },
+                )
+            }
         }
     }
 }
 
-private suspend fun openBuildForProjectId(
-    projectService: ProjectService,
+@Composable
+private fun RestoredProject(
     projectId: ProjectId,
-    returnTo: IdeRoute,
-    setRoute: (IdeRoute) -> Unit,
+    onMissing: () -> Unit,
+    content: @Composable (Project) -> Unit,
 ) {
-    val project = projectService.getProject(projectId) ?: return
-    setRoute(
-        IdeRoute.Build(
-            project = project,
-            returnTo = returnTo,
-        ),
-    )
-}
+    val projectService: ProjectService = koinInject()
+    var project by remember(projectId) { mutableStateOf<Project?>(null) }
 
-private sealed interface IdeRoute {
-    data object Onboarding : IdeRoute
-    data object Projects : IdeRoute
-    data object Settings : IdeRoute
-    data class Files(val project: Project) : IdeRoute
-    data class Editor(
-        val project: Project,
-        val documentId: DocumentId,
-    ) : IdeRoute
-    data class Build(
-        val project: Project,
-        val returnTo: IdeRoute,
-    ) : IdeRoute
+    LaunchedEffect(projectId) {
+        val loaded = projectService.getProject(projectId)
+        if (loaded == null) {
+            onMissing()
+        } else {
+            project = loaded
+        }
+    }
+
+    project?.let { content(it) }
 }

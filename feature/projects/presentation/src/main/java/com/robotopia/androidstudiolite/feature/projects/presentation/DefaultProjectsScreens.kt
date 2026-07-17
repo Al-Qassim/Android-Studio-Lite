@@ -3,7 +3,7 @@ package com.robotopia.androidstudiolite.feature.projects.presentation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
@@ -58,9 +58,9 @@ class DefaultProjectsScreens(
     }
 }
 
-private sealed interface ProjectsRoute {
-    data object List : ProjectsRoute
-    data object Create : ProjectsRoute
+private enum class ProjectsRoute {
+    List,
+    Create,
 }
 
 /**
@@ -74,7 +74,7 @@ private fun ProjectsNavHost(
     onRunProject: (projectId: ProjectId) -> Unit,
     onOpenSettings: () -> Unit,
 ) {
-    var route by remember { mutableStateOf<ProjectsRoute>(ProjectsRoute.List) }
+    var route by rememberSaveable { mutableStateOf(ProjectsRoute.List) }
 
     when (route) {
         ProjectsRoute.List -> {
