@@ -104,7 +104,7 @@ flowchart TB
 
 - Outside a feature: **`:api` / `:model` only**.
 - `:integration:navigation` only wires **cross-feature** exits; feature-internal routes stay in each feature’s `*Screens`.
-- Navigation state is **not** cold-started on every Activity recreate: persist routes with `rememberSaveable`, not plain `remember`. Deep links carry the project fields destinations need (name, root path, package) so the nav host does not fetch `Project` to render.
+- Navigation state is **not** cold-started on every Activity recreate: persist routes with `rememberSaveable` + kotlinx.serialization JSON (`IdeRouteSaver`), not plain `remember`. Deep links carry the project fields destinations need (name, root path, package) so the nav host does not fetch `Project` to render. Route payloads use serializable primitives (project id as `String`) — wrap into domain types (`ProjectId`, etc.) only at feature API boundaries.
 - `:editor:data` may depend on `:files:api` (document load/save through the file explorer).
 - No feature → feature `:data` / `:presentation` edges.
 
@@ -150,7 +150,7 @@ Busy-screen layout: `docs/agents/screen-context.md`. Feature conventions: `/stru
 | --- | --- |
 | `:integration:database` | `AslDatabase` — today projects entity/DAO only |
 | `:integration:di` | `integrationDiModule` — only module `:app` starts |
-| `:integration:navigation` | `IdeNavHost` — Onboarding / Projects / Files / Editor / Build / Settings; closes editor if project deleted. Cross-feature route + feature sub-routes use `rememberSaveable` so Activity recreation restores the same screen. Deep routes carry project fields (no host-side `getProject`); deleted-project observe falls back to Projects. |
+| `:integration:navigation` | `IdeNavHost` — Onboarding / Projects / Files / Editor / Build / Settings; closes editor if project deleted. Cross-feature `IdeRoute` is `@Serializable` and restored via `IdeRouteSaver` (JSON). Feature sub-routes use `rememberSaveable`. Deep routes carry project fields (no host-side `getProject`); deleted-project observe falls back to Projects. |
 | `:app` | `AslApplication`, `MainActivity`, theme bridge, FileProvider / install permission |
 
 ```text

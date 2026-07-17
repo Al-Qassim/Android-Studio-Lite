@@ -1,6 +1,5 @@
 package com.robotopia.androidstudiolite.integration.navigation
 
-import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -16,15 +15,14 @@ class IdeRouteSaverTest {
 
     @Test
     fun roundTripsDeepLinks() {
-        val projectId = ProjectId("p1")
         val files = IdeRoute.Files(
-            projectId = projectId,
+            projectId = "p1",
             projectName = "Hello",
             rootPath = "/projects/p1",
             packageName = "com.example.hello",
         )
         val editor = IdeRoute.Editor(
-            projectId = projectId,
+            projectId = "p1",
             relativePath = "app/src/MainActivity.kt",
             projectName = "Hello",
             rootPath = "/projects/p1",
@@ -34,7 +32,7 @@ class IdeRouteSaverTest {
         assertRoundTrip(editor)
         assertRoundTrip(
             IdeRoute.Build(
-                projectId = projectId,
+                projectId = "p1",
                 projectName = "Hello",
                 rootPath = "/projects/p1",
                 packageName = "com.example.hello",
@@ -43,7 +41,7 @@ class IdeRouteSaverTest {
         )
         assertRoundTrip(
             IdeRoute.Build(
-                projectId = projectId,
+                projectId = "p1",
                 projectName = "Hello",
                 rootPath = "/projects/p1",
                 packageName = "com.example.hello",
@@ -52,7 +50,7 @@ class IdeRouteSaverTest {
         )
         assertRoundTrip(
             IdeRoute.Build(
-                projectId = projectId,
+                projectId = "p1",
                 projectName = "Hello",
                 rootPath = "/projects/p1",
                 packageName = "com.example.hello",
@@ -62,12 +60,13 @@ class IdeRouteSaverTest {
     }
 
     @Test
-    fun rejectsUnknownTokens() {
-        assertNull(listOf("nope").toIdeRoute())
-        assertNull(emptyList<String>().toIdeRoute())
+    fun rejectsCorruptPayloads() {
+        assertNull("{}".decodeIdeRouteOrNull())
+        assertNull("".decodeIdeRouteOrNull())
+        assertNull("""{"type":"nope"}""".decodeIdeRouteOrNull())
     }
 
     private fun assertRoundTrip(route: IdeRoute) {
-        assertEquals(route, route.toSaveList().toIdeRoute())
+        assertEquals(route, route.encodeToString().decodeIdeRouteOrNull())
     }
 }

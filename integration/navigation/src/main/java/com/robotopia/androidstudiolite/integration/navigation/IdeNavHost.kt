@@ -21,6 +21,7 @@ import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingScreens
 import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingStore
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
+import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import com.robotopia.androidstudiolite.feature.settings.api.SettingsScreens
 import org.koin.compose.koinInject
 
@@ -54,7 +55,7 @@ fun IdeNavHost() {
     LaunchedEffect(route) {
         val projectId = route.projectIdOrNull() ?: return@LaunchedEffect
         projectService.observeProjects().collect { projects ->
-            if (projects.none { it.id == projectId }) {
+            if (projects.none { it.id.value == projectId }) {
                 editorSession.close()
                 route = IdeRoute.Projects
             }
@@ -123,7 +124,7 @@ fun IdeNavHost() {
             is IdeRoute.Build -> {
                 buildScreens.NavHost(
                     request = BuildRequest(
-                        projectId = current.projectId,
+                        projectId = ProjectId(current.projectId),
                         projectRoot = ProjectRoot(current.rootPath),
                         projectName = current.projectName,
                         packageName = current.packageName,
