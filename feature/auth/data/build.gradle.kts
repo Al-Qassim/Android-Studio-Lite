@@ -9,7 +9,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = 34
+        minSdk = 26
         consumerProguardFiles("consumer-rules.pro")
 
         val githubOAuthClientId = rootProject.file("local.properties")

@@ -28,15 +28,25 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build release APK
-        run: ./gradlew :app:assembleRelease --stacktrace -PuseDebugSigning=true
+        run: ./gradlew :app:assembleRelease --stacktrace
 
-      - name: Stage APK
+      - name: Stage and verify APK
         run: |
+          set -euo pipefail
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk \
-            "dist/AndroidStudioLite-${{ github.sha }}.apk"
-          cp app/build/outputs/apk/release/app-release.apk \
+          SRC=app/build/outputs/apk/release/app-release.apk
+          test -f "$SRC"
+          cp "$SRC" "dist/AndroidStudioLite-${{ github.sha }}.apk"
+          cp "$SRC" dist/AndroidStudioLite-latest.apk
+
+          # Fail the job if the artifact is unsigned or not a valid APK zip.
+          unzip -t dist/AndroidStudioLite-latest.apk >/dev/null
+          BUILD_TOOLS=$(ls -1 "$ANDROID_HOME/build-tools" | sort -V | tail -1)
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify --verbose \
             dist/AndroidStudioLite-latest.apk
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging \
+            dist/AndroidStudioLite-latest.apk | tee /tmp/apk-badging.txt
+          grep -q "sdkVersion:'26'" /tmp/apk-badging.txt
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -46,7 +56,7 @@ jobs:
           body: |
             Automated build from `main` (`${{ github.sha }}`).
 
-            Installable release APK (CI-signed with the debug keystore until a production signing key is configured).
+            Installable release APK (debug-signed for sideload; `minSdk` 26 / Android 8.0+).
           files: |
             dist/AndroidStudioLite-${{ github.sha }}.apk
             dist/AndroidStudioLite-latest.apk

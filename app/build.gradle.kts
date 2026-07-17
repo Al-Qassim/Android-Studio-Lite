@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId = "com.robotopia.androidstudiolite"
-        minSdk = 34
+        minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -26,11 +26,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // CI publishes an installable APK via -PuseDebugSigning=true until
-            // a production keystore is wired through GitHub secrets.
-            if (project.hasProperty("useDebugSigning")) {
-                signingConfig = signingConfigs.getByName("debug")
-            }
+            // Sideloadable until a production keystore is configured via secrets.
+            // Debug keystore signs with v1+v2 so installers on Android 8–13 accept the APK.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
