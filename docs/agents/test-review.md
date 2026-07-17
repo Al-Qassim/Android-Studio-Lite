@@ -18,7 +18,7 @@ Before touching the device, write down every user-visible capability the PR says
 2. PR **Summary** / description (features, screens, actions named there).
 3. PR **Test plan** manual items (unchecked or checked — still verify on device).
 4. Architecture / API surface newly implemented if the PR exposes it in UI (e.g. create, rename, move, copy, delete, paste).
-5. **Designed primary affordances** — designsystem components and Figma for the flow (e.g. `MoveBar` after Move/Copy, dialogs, path bar). If the kit has a dedicated control for the action, that control is what must appear.
+5. **Designed primary affordances** — `:designsystem` components for the flow (e.g. `MoveBar` after Move/Copy, dialogs, path bar). If the DS has a dedicated control for the action, that control is what must appear.
 6. **System chrome / platform controls** — when the PR owns hierarchy, overlays, or multi-step flows, include Android **system Back** (3-button nav and/or gesture back), not only in-app back/chevron. Ticket ACs and the checklist must treat these as first-class paths.
 
 Turn that into a **checklist of concrete actions**, one row per capability. Example shape:

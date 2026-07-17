@@ -8,9 +8,10 @@ description: >-
 
 # Design verify (critic)
 
-Authors cannot set **Ready**. A **different** agent runs this skill → **PASS** (Ready for human) or **FAIL** (send back).
+Authors cannot set **Ready**. A **different** agent runs this skill → **PASS** (Ready) or **FAIL** (send back).
 
-**Gate:** critic PASS → human accept → implement.  
+**Gate:** critic PASS → Ready. Human accept before **implement** unless the coordinator/ticket says otherwise.  
+When the ticket or epic says **auto-ready** / **no human design gate**: on PASS set Ready and stop — do not wait for human.  
 **Oracle file:** Int UI Kit `6whxXz3bbL8FG7dr83Oi4u` only.  
 **Candidate file:** ASL `M2LGyXHC5YYJekr3Fq3oiP` only.
 
@@ -29,6 +30,8 @@ This is an **audit**, not a spot-check. Missing inventory rows or missing Kit no
 
 3. **Pass A — Cleanliness (page / phones as artifacts).**  
    Judge the candidate alone: dark designed page, no scrapyard, no default white boxes, no clipped samples, notes not on phone chrome.  
+   **FAIL** full-bleed / near-full-phone **gray content slabs** (large rounded panel wrapping empty/list/form/**editor**/**build phase lists** under the top bar — looks like a gray card filling the UI, even with small side/bottom insets). Content should sit on the shell background; islands are tight (rows, fields, dialogs, menus, toasts)—not a second screen / code card / phase card inside the phone. **FAIL** muddy full-row **active washes** on phase/step lists (prefer icon + type weight only).  
+   **FAIL** **duplicate flow pages** — e.g. both `Files editor` and `Editor` (or `Build` + `Build v2`) still in the file for the same ticket. Redesign must replace in place; superseded page must be gone.  
    For DS: if a unit is still on the page, it must belong (sectioned) or the inventory says **delete** and it is gone.  
    **FAIL** Pass A → stop (board make ui/ux design). Do not claim family PASS.
 

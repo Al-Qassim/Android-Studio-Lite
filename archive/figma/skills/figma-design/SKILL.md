@@ -21,7 +21,7 @@ Portable workflow. Project rules live in the design contract (`docs/figma-design
 
 4. **Build by reuse.** Instance DS or kit components per contract (including **kit-local** exceptions). Promote missing primitives before inventing glyphs.
 
-5. **Edit incrementally.** One coherent pass at a time. Re-layout after text cuts.
+5. **Edit incrementally.** One coherent pass at a time. Re-layout after text cuts. **Redesign in place** on the existing flow page — do not create a parallel page and leave the old one (e.g. `Editor` + leftover `Files editor`). Delete superseded pages/frames in the same pass.
 
 6. **Self-check before evidence.** Phones: scan chrome for author/anim notes (`Anim:`, kit asides, timings) and leftover progress tracks on outcome states — notes live only under phones. Design System tokens: title/body/sample labels must match bound variable values; sample rows must not clip (`clipsContent` off, hug height, **and** no child overflowing the row — prefer auto-layout columns). Type samples must contrast with the dark surface (blank/near-invisible samples = FAIL). Then take fresh screenshots of candidates **and** the visual oracle (here: Int UI Kit). Post **Kit | Candidate** on the tracking issue. Comment **Awaiting critic**. Do **not** set board Ready — a different agent runs `/design-verify`.
 

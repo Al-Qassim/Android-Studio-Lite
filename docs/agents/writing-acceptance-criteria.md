@@ -12,9 +12,9 @@ When a ticket or story ships screens, hierarchy, dialogs, menus, or multi-step a
 
 ### 1. Designed primary affordances
 
-- Name the **visible** control the user is meant to use (toolbar, bottom bar, dialog button, Figma component — e.g. `MoveBar` after Move/Copy).
+- Name the **visible** control the user is meant to use (toolbar, bottom bar, dialog button, designsystem component — e.g. `MoveBar` after Move/Copy).
 - ACs must not be satisfiable only via a **hidden alternate** (e.g. Paste buried under `+` while the designed bar never appears).
-- If designsystem / Figma defines a component for the state, the criterion should require that component (or its equivalent copy/layout) to show.
+- If `:designsystem` defines a component for the state, the criterion should require that component (or its equivalent copy/layout) to show.
 
 ### 2. System / platform chrome (not only in-app buttons)
 

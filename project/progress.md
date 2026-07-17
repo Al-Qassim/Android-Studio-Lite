@@ -31,7 +31,6 @@ On-device Compose IDE: manage projects → browse/edit files → Run → build �
 
 ## Useful links
 
-- Figma: [Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite)
-- Design how-to: `docs/figma-design.md`
+- UI: `:designsystem` + Compose — `docs/design-system.md` (Figma track archived: `archive/figma/`)
 - Architecture: `project/architecture.md`
 - Cloud build PRD: `project/cloud-build-prd.md`

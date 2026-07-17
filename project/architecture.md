@@ -1,6 +1,6 @@
 # Android Studio Lite — Architecture (v0.1)
 
-Concise module map for agents and humans. **Source of truth for APIs and models is the code** (`:feature:*:api` / `:model`), not this file. UI contract: [Figma](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite). Related: `project/progress.md`, `project/requierments.md`, `docs/agents/project-overview.md`.
+Concise module map for agents and humans. **Source of truth for APIs and models is the code** (`:feature:*:api` / `:model`), not this file. **UI source of truth:** `:designsystem` + Compose (`docs/design-system.md`). Related: `project/progress.md`, `project/requierments.md`, `docs/agents/project-overview.md`.
 
 ---
 

@@ -3,7 +3,7 @@
 **Status:** Ready for design sign-off / implementation sequencing  
 **Parent ticket:** [#19](https://github.com/Al-Qassim/Android-Studio-Lite/issues/19)  
 **Source decisions:** [`cloud-build-github-actions-grilling-2026-07-11.md`](cloud-build-github-actions-grilling-2026-07-11.md)  
-**UI:** [Figma — Android Studio Lite](https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite) — pages **Connect account**, **Settings · Build account**, **Onboarding · Connect**, **Run & build**
+**UI:** Compose + `:designsystem` (`docs/design-system.md`) — Connect, Settings · Build account, Onboarding · Connect, Run & build (Figma archived)
 
 ---
 
