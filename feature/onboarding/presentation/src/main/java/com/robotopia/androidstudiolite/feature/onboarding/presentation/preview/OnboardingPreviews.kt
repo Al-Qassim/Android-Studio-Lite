@@ -15,12 +15,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
+import com.robotopia.androidstudiolite.feature.onboarding.presentation.intro.OnboardingIntroContent
+
+internal data class OnboardingIntroPreviewCase(
+    private val label: String,
+    val providerDisplayName: String,
+) {
+    override fun toString(): String = label
+}
+
+internal class OnboardingIntroPreviewProvider : PreviewParameterProvider<OnboardingIntroPreviewCase> {
+    override fun getDisplayName(index: Int): String = values.toList()[index].toString()
+
+    override val values = sequenceOf(
+        OnboardingIntroPreviewCase("github", providerDisplayName = "GitHub"),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
+@Composable
+private fun OnboardingWelcomePreview() {
+    OnboardingWelcomeContent(onContinueClick = {})
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
+@Composable
+private fun OnboardingIntroPreview(
+    @PreviewParameter(OnboardingIntroPreviewProvider::class) preview: OnboardingIntroPreviewCase,
+) {
+    OnboardingIntroContent(
+        providerDisplayName = preview.providerDisplayName,
+        onConnectClick = {},
+        onSkipClick = {},
+    )
+}
 
 /**
  * Preview-only welcome screen. Not wired into onboarding navigation yet.
@@ -82,10 +118,4 @@ private fun OnboardingWelcomeContent(
         }
         Spacer(modifier = Modifier.weight(1f))
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun OnboardingWelcomePreview() {
-    OnboardingWelcomeContent(onContinueClick = {})
 }
