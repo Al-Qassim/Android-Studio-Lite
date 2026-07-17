@@ -3,7 +3,10 @@ package com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.l
 import com.robotopia.androidstudiolite.core.error.userMessageOrNull
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstallOutcome
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
-import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.BuildProgressViewModel
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.BuildProgressUiState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlin.coroutines.cancellation.CancellationException
 
 private const val TAG = "BuildInstall"
 private const val GENERIC_INSTALL_ERROR = "Couldn't start the install. Try again."
@@ -14,22 +17,33 @@ private const val UNKNOWN_SOURCES_HINT =
 internal fun requestApkInstall(
     apkLocalPath: String?,
     apkInstaller: ApkInstaller,
-    viewModel: BuildProgressViewModel,
+    uiState: MutableStateFlow<BuildProgressUiState>,
 ) {
     if (apkLocalPath.isNullOrBlank()) {
-        viewModel.failInstall(MISSING_APK_ERROR)
+        uiState.update { it.copy(isInstalling = false, installError = MISSING_APK_ERROR) }
         return
     }
-    if (viewModel.uiState.value.isInstalling) return
+    if (uiState.value.isInstalling) return
 
-    viewModel.beginInstall()
+    uiState.update { it.copy(isInstalling = true, installError = null) }
     try {
         when (apkInstaller.requestInstall(apkLocalPath)) {
-            ApkInstallOutcome.InstallerOpened -> viewModel.finishInstall()
+            ApkInstallOutcome.InstallerOpened ->
+                uiState.update { it.copy(isInstalling = false) }
             ApkInstallOutcome.UnknownSourcesSettingsOpened ->
-                viewModel.failInstall(UNKNOWN_SOURCES_HINT)
+                uiState.update {
+                    it.copy(isInstalling = false, installError = UNKNOWN_SOURCES_HINT)
+                }
         }
+    } catch (error: CancellationException) {
+        uiState.update { it.copy(isInstalling = false) }
+        throw error
     } catch (error: Exception) {
-        viewModel.failInstall(error.userMessageOrNull(TAG) ?: GENERIC_INSTALL_ERROR)
+        uiState.update {
+            it.copy(
+                isInstalling = false,
+                installError = error.userMessageOrNull(TAG) ?: GENERIC_INSTALL_ERROR,
+            )
+        }
     }
 }

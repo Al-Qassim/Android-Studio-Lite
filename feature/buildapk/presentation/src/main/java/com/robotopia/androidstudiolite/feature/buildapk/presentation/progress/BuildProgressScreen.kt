@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.logic.applyBuildProgress
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.logic.requestApkInstall
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -27,7 +28,7 @@ internal fun BuildProgressScreen(
 
     LaunchedEffect(jobId, buildService) {
         buildService.observeBuild(jobId).collect { progress ->
-            viewModel.applyProgress(progress)
+            viewModel.uiState.applyBuildProgress(progress)
         }
     }
 
@@ -43,7 +44,7 @@ internal fun BuildProgressScreen(
             requestApkInstall(
                 apkLocalPath = state.apkLocalPath,
                 apkInstaller = apkInstaller,
-                viewModel = viewModel,
+                uiState = viewModel.uiState,
             )
         },
         onRetry = onRetry,

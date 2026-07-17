@@ -25,7 +25,6 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.Preparing,
                 message = "Preparing workspace…",
-                progressFraction = 0.05f,
                 providerName = "GitHub",
             ),
             onRetry = null,
@@ -35,7 +34,6 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.Queued,
                 message = "Waiting in queue…",
-                progressFraction = 0.35f,
                 providerName = "GitHub",
             ),
             onRetry = null,
@@ -45,7 +43,6 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.Uploading,
                 message = "Uploading project sources…",
-                progressFraction = 0.2f,
                 providerName = "GitHub",
             ),
             onRetry = null,
@@ -55,7 +52,6 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.Building,
                 message = "Building APK remotely…",
-                progressFraction = 0.55f,
                 providerName = "GitHub",
             ),
             onRetry = null,
@@ -65,7 +61,6 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.Downloading,
                 message = "Downloading APK…",
-                progressFraction = 0.85f,
                 providerName = "GitHub",
             ),
             onRetry = null,
@@ -75,7 +70,6 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.ReadyToInstall,
                 message = "APK ready to install",
-                progressFraction = 1f,
                 apkLocalPath = "/cache/demo.apk",
                 providerName = "GitHub",
             ),
@@ -86,7 +80,6 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.ReadyToInstall,
                 message = "APK ready to install",
-                progressFraction = 1f,
                 apkLocalPath = "/cache/demo.apk",
                 providerName = "GitHub",
                 isInstalling = true,
@@ -98,7 +91,6 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             state = BuildProgressUiState(
                 phase = BuildPhase.ReadyToInstall,
                 message = "APK ready to install",
-                progressFraction = 1f,
                 apkLocalPath = "/cache/demo.apk",
                 providerName = "GitHub",
                 installError = "Allow installs from this app, then tap Install again.",
