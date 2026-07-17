@@ -2,7 +2,6 @@ package com.robotopia.androidstudiolite.feature.files.presentation.browser.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -16,6 +15,7 @@ import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.FileRow
 import com.robotopia.androidstudiolite.designsystem.component.FolderRow
 import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
+import com.robotopia.androidstudiolite.designsystem.popup.topEndPopupOffset
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreenContext
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserUiState
@@ -115,6 +115,7 @@ private fun FileBrowserScreenContext.FileBrowserListItem(
 
 /** Below FileRow/FolderRow's ⋮ control: row 40.dp + small gap under the button. */
 private val FileItemOverflowMenuTopOffset = 44.dp
+private val FileItemOverflowMenuEndOffset = 8.dp
 
 @Composable
 private fun FileItemOverflowMenu(
@@ -126,6 +127,10 @@ private fun FileItemOverflowMenu(
 ) {
     Popup(
         alignment = Alignment.TopEnd,
+        offset = topEndPopupOffset(
+            top = FileItemOverflowMenuTopOffset,
+            end = FileItemOverflowMenuEndOffset,
+        ),
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
@@ -134,10 +139,6 @@ private fun FileItemOverflowMenu(
             onMove = onMove,
             onCopy = onCopy,
             onDelete = onDelete,
-            modifier = Modifier.padding(
-                top = FileItemOverflowMenuTopOffset,
-                end = 8.dp,
-            ),
         )
     }
 }

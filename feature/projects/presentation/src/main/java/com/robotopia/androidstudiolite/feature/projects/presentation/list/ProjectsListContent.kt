@@ -24,6 +24,7 @@ import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.component.ProjectMenu
 import com.robotopia.androidstudiolite.designsystem.component.ProjectRow
 import com.robotopia.androidstudiolite.designsystem.component.TopBarTitleAction
+import com.robotopia.androidstudiolite.designsystem.popup.topEndPopupOffset
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 
@@ -197,6 +198,7 @@ private fun ProjectListItem(
 
 /** Below ProjectRow's ⋮ control: inset 2 + pad 12 + centered 32.dp IconButton. */
 private val ProjectOverflowMenuTopOffset = 62.dp
+private val ProjectOverflowMenuEndOffset = 8.dp
 
 @Composable
 private fun ProjectOverflowMenu(
@@ -207,6 +209,10 @@ private fun ProjectOverflowMenu(
 ) {
     Popup(
         alignment = Alignment.TopEnd,
+        offset = topEndPopupOffset(
+            top = ProjectOverflowMenuTopOffset,
+            end = ProjectOverflowMenuEndOffset,
+        ),
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
@@ -214,10 +220,6 @@ private fun ProjectOverflowMenu(
             onOpen = onOpen,
             onRun = onRun,
             onDelete = onDelete,
-            modifier = Modifier.padding(
-                top = ProjectOverflowMenuTopOffset,
-                end = 8.dp,
-            ),
         )
     }
 }
