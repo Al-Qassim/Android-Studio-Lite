@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.SettingsRow
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
+import com.robotopia.androidstudiolite.feature.settings.presentation.preview.SettingsHomePreviewCase
+import com.robotopia.androidstudiolite.feature.settings.presentation.preview.SettingsHomePreviewProvider
 
 @Composable
 internal fun SettingsHomeContent(
@@ -38,6 +41,10 @@ internal fun SettingsHomeContent(
                 subtitle = buildAccountSubtitle,
                 onClick = onBuildAccountClick,
             )
+            SettingsRow(
+                title = "About",
+                subtitle = "Android Studio Lite",
+            )
         }
         Spacer(modifier = Modifier.weight(1f))
     }
@@ -45,19 +52,11 @@ internal fun SettingsHomeContent(
 
 @Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
 @Composable
-private fun SettingsHomeLoggedOutPreview() {
+private fun SettingsHomeContentPreview(
+    @PreviewParameter(SettingsHomePreviewProvider::class) preview: SettingsHomePreviewCase,
+) {
     SettingsHomeContent(
-        buildAccountSubtitle = "Not connected",
-        onBackClick = {},
-        onBuildAccountClick = {},
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun SettingsHomeConnectedPreview() {
-    SettingsHomeContent(
-        buildAccountSubtitle = "GitHub · @alex-dev",
+        buildAccountSubtitle = preview.buildAccountSubtitle,
         onBackClick = {},
         onBuildAccountClick = {},
     )

@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +19,7 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.InfoCard
+import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.component.UserCodeRow
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
@@ -31,10 +31,7 @@ internal fun ConnectLoadingBody() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        BasicText(
-            text = "Preparing…",
-            style = Typography.Body.copy(color = Colors.Muted),
-        )
+        LoadingIndicator(label = "Preparing…")
     }
 }
 
@@ -89,7 +86,6 @@ internal fun ConnectShowCodeBody(
 @Composable
 internal fun ConnectConnectedBody(
     state: ConnectUiState.Connected,
-    onContinue: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -116,12 +112,6 @@ internal fun ConnectConnectedBody(
                 label = state.account.providerName,
                 title = state.account.identity,
             )
-            Button(
-                label = "Continue",
-                onClick = onContinue,
-                modifier = Modifier.fillMaxWidth(),
-                variant = ButtonVariant.Primary,
-            )
         }
     }
 }
@@ -129,8 +119,6 @@ internal fun ConnectConnectedBody(
 @Composable
 internal fun ConnectFailedBody(
     state: ConnectUiState.Failed,
-    onCancel: () -> Unit,
-    onTryAgain: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -156,22 +144,6 @@ internal fun ConnectFailedBody(
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
-            ) {
-                Button(
-                    label = "Cancel",
-                    onClick = onCancel,
-                    variant = ButtonVariant.Secondary,
-                )
-                Button(
-                    label = "Try again",
-                    onClick = onTryAgain,
-                    variant = ButtonVariant.Primary,
-                )
-            }
         }
     }
 }

@@ -1,11 +1,13 @@
-package com.robotopia.androidstudiolite.feature.auth.presentation.connect
+package com.robotopia.androidstudiolite.feature.auth.presentation.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.robotopia.androidstudiolite.feature.auth.model.AuthAccount
+import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ConnectUiState
 
 internal data class ConnectAccountPreviewCase(
     private val label: String,
     val state: ConnectUiState,
+    val providerDisplayName: String = "GitHub",
 ) {
     override fun toString(): String = label
 }

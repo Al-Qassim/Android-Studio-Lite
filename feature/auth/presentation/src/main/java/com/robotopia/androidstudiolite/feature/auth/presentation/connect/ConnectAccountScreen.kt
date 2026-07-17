@@ -1,21 +1,26 @@
 package com.robotopia.androidstudiolite.feature.auth.presentation.connect
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.component.Button
+import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
+import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.logic.collectConnectProgress
@@ -25,6 +30,8 @@ import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.Conn
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectFailedBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectLoadingBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectShowCodeBody
+import com.robotopia.androidstudiolite.feature.auth.presentation.preview.ConnectAccountPreviewCase
+import com.robotopia.androidstudiolite.feature.auth.presentation.preview.ConnectAccountPreviewProvider
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
@@ -55,6 +62,7 @@ internal fun ConnectAccountScreen(
 
     ConnectAccountScreen(
         state = state,
+        providerDisplayName = authService.providerDisplayName,
         onBackClick = onCancel,
         onOpenVerificationUri = { uri ->
             openVerificationUri(
@@ -76,6 +84,7 @@ internal fun ConnectAccountScreen(
 @Composable
 internal fun ConnectAccountScreen(
     state: ConnectUiState,
+    providerDisplayName: String,
     onBackClick: () -> Unit,
     onOpenVerificationUri: (uri: String) -> Unit,
     onCopyCode: (code: String) -> Unit,
@@ -83,15 +92,44 @@ internal fun ConnectAccountScreen(
     onContinue: () -> Unit,
     onTryAgain: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.Bg),
+    IslandScaffold(
+        topBar = {
+            TopBarBackTitle(
+                title = "Connect $providerDisplayName",
+                onBackClick = onBackClick,
+            )
+        },
+        footer = when (state) {
+            is ConnectUiState.Connected -> {
+                {
+                    ConnectFooterEnd {
+                        Button(
+                            label = "Continue",
+                            onClick = onContinue,
+                            variant = ButtonVariant.Primary,
+                        )
+                    }
+                }
+            }
+            is ConnectUiState.Failed -> {
+                {
+                    ConnectFooterEnd {
+                        Button(
+                            label = "Cancel",
+                            onClick = onCancel,
+                            variant = ButtonVariant.Secondary,
+                        )
+                        Button(
+                            label = "Try again",
+                            onClick = onTryAgain,
+                            variant = ButtonVariant.Primary,
+                        )
+                    }
+                }
+            }
+            else -> null
+        },
     ) {
-        TopBarBackTitle(
-            title = "Connect",
-            onBackClick = onBackClick,
-        )
         when (state) {
             ConnectUiState.Loading -> ConnectLoadingBody()
 
@@ -101,27 +139,33 @@ internal fun ConnectAccountScreen(
                 onCopyCode = onCopyCode,
             )
 
-            is ConnectUiState.Connected -> ConnectConnectedBody(
-                state = state,
-                onContinue = onContinue,
-            )
+            is ConnectUiState.Connected -> ConnectConnectedBody(state = state)
 
-            is ConnectUiState.Failed -> ConnectFailedBody(
-                state = state,
-                onCancel = onCancel,
-                onTryAgain = onTryAgain,
-            )
+            is ConnectUiState.Failed -> ConnectFailedBody(state = state)
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
+@Composable
+private fun ConnectFooterEnd(content: @Composable () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+    ) {
+        content()
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
 @Composable
 private fun ConnectAccountScreenPreview(
     @PreviewParameter(ConnectAccountPreviewProvider::class) preview: ConnectAccountPreviewCase,
 ) {
     ConnectAccountScreen(
         state = preview.state,
+        providerDisplayName = preview.providerDisplayName,
         onBackClick = {},
         onOpenVerificationUri = {},
         onCopyCode = {},

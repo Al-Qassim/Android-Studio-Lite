@@ -4,13 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -22,6 +24,8 @@ import com.robotopia.androidstudiolite.designsystem.component.PhaseStatus
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.preview.BuildProgressPreviewCase
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.preview.BuildProgressPreviewProvider
 
 private val progressPhases = listOf(
     BuildPhase.Preparing,
@@ -41,6 +45,10 @@ internal fun BuildProgressContent(
     onRetry: (() -> Unit)?,
     onViewLog: ((logUrl: String) -> Unit)? = null,
 ) {
+    val isFailed = state.error != null || state.phase == BuildPhase.Failed
+    val isCancelled = state.phase == BuildPhase.Cancelled
+    val isReady = state.phase == BuildPhase.ReadyToInstall
+
     IslandScaffold(
         topBar = {
             TopBarBackTitle(
@@ -48,13 +56,54 @@ internal fun BuildProgressContent(
                 onBackClick = onDismiss,
             )
         },
+        footer = when {
+            isCancelled -> null
+            isFailed -> {
+                {
+                    BuildProgressFooter {
+                        Button(
+                            label = "Close",
+                            onClick = onDismiss,
+                            variant = ButtonVariant.Secondary,
+                        )
+                        if (onRetry != null) {
+                            Button(
+                                label = "Retry",
+                                onClick = onRetry,
+                                variant = ButtonVariant.Primary,
+                            )
+                        }
+                    }
+                }
+            }
+            isReady -> {
+                {
+                    BuildProgressFooter {
+                        val apkPath = state.apkLocalPath
+                        Button(
+                            label = "Install app",
+                            onClick = { apkPath?.let(onInstall) },
+                            variant = ButtonVariant.Primary,
+                            enabled = apkPath != null,
+                        )
+                    }
+                }
+            }
+            else -> {
+                {
+                    BuildProgressFooter {
+                        Button(
+                            label = "Cancel",
+                            onClick = onCancel,
+                            variant = ButtonVariant.Secondary,
+                        )
+                    }
+                }
+            }
+        },
     ) {
         BuildProgressBody(
             state = state,
-            onDismiss = onDismiss,
-            onCancel = onCancel,
-            onInstall = onInstall,
-            onRetry = onRetry,
             onViewLog = onViewLog,
             modifier = Modifier
                 .weight(1f)
@@ -64,12 +113,20 @@ internal fun BuildProgressContent(
 }
 
 @Composable
+private fun BuildProgressFooter(content: @Composable () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+    ) {
+        content()
+    }
+}
+
+@Composable
 private fun BuildProgressBody(
     state: BuildProgressUiState,
-    onDismiss: () -> Unit,
-    onCancel: () -> Unit,
-    onInstall: (apkLocalPath: String) -> Unit,
-    onRetry: (() -> Unit)?,
     onViewLog: ((logUrl: String) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -82,119 +139,67 @@ private fun BuildProgressBody(
             )
             state.error != null || state.phase == BuildPhase.Failed -> BuildFailedState(
                 state = state,
-                onRetry = onRetry,
-                onDismiss = onDismiss,
                 onViewLog = onViewLog,
             )
-            else -> BuildActiveState(
-                state = state,
-                onCancel = onCancel,
-                onInstall = onInstall,
-            )
+            else -> BuildActiveState(state = state)
         }
     }
 }
 
 @Composable
-private fun BuildActiveState(
-    state: BuildProgressUiState,
-    onCancel: () -> Unit,
-    onInstall: (apkLocalPath: String) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            BuildProgressHeader(
-                title = phaseLabel(state.phase),
-                titleColor = Colors.Text,
-                message = state.message,
-                providerName = state.providerName,
-            )
-            PhaseList(
-                phases = toPhaseItems(
-                    currentPhase = state.phase,
-                    failedAtPhase = null,
-                ),
-            )
-        }
+private fun BuildActiveState(state: BuildProgressUiState) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        BuildProgressHeader(
+            title = phaseLabel(state.phase),
+            titleColor = Colors.Text,
+            message = state.message,
+            providerName = state.providerName,
+        )
+        PhaseList(
+            phases = toPhaseItems(
+                currentPhase = state.phase,
+                failedAtPhase = null,
+            ),
+        )
         Spacer(modifier = Modifier.weight(1f))
-        if (state.phase == BuildPhase.ReadyToInstall) {
-            val apkPath = state.apkLocalPath
-            Button(
-                label = "Install app",
-                onClick = { apkPath?.let(onInstall) },
-                modifier = Modifier.fillMaxWidth(),
-                variant = ButtonVariant.Primary,
-                enabled = apkPath != null,
-            )
-        } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                Button(
-                    label = "Cancel",
-                    onClick = onCancel,
-                    variant = ButtonVariant.Secondary,
-                )
-            }
-        }
     }
 }
 
 @Composable
 private fun BuildFailedState(
     state: BuildProgressUiState,
-    onRetry: (() -> Unit)?,
-    onDismiss: () -> Unit,
     onViewLog: ((logUrl: String) -> Unit)?,
 ) {
     val logUrl = state.logUrl
-    Column(modifier = Modifier.fillMaxSize()) {
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            BuildProgressHeader(
-                title = "Build failed",
-                titleColor = Colors.Danger,
-                message = state.error ?: state.message
-                    ?: "Build failed. Open the build log.",
-                providerName = state.providerName,
-            )
-            PhaseList(
-                phases = toPhaseItems(
-                    currentPhase = state.phase,
-                    failedAtPhase = state.failedAtPhase ?: BuildPhase.Building,
-                ),
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        BuildProgressHeader(
+            title = "Build failed",
+            titleColor = Colors.Danger,
+            message = state.error ?: state.message
+                ?: "Build failed. Open the build log.",
+            providerName = state.providerName,
+        )
+        PhaseList(
+            phases = toPhaseItems(
+                currentPhase = state.phase,
+                failedAtPhase = state.failedAtPhase ?: BuildPhase.Building,
+            ),
+        )
+        if (!logUrl.isNullOrBlank() && onViewLog != null) {
+            Button(
+                label = "View build log",
+                onClick = { onViewLog(logUrl) },
+                modifier = Modifier.fillMaxWidth(),
+                variant = ButtonVariant.Secondary,
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (!logUrl.isNullOrBlank() && onViewLog != null) {
-                Button(
-                    label = "View build log",
-                    onClick = { onViewLog(logUrl) },
-                    modifier = Modifier.fillMaxWidth(),
-                    variant = ButtonVariant.Secondary,
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Button(
-                    label = "Close",
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f),
-                    variant = ButtonVariant.Secondary,
-                )
-                if (onRetry != null) {
-                    Button(
-                        label = "Retry",
-                        onClick = onRetry,
-                        modifier = Modifier.weight(1f),
-                        variant = ButtonVariant.Primary,
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -243,7 +248,6 @@ private fun BuildProgressHeader(
     }
 }
 
-
 private fun toPhaseItems(
     currentPhase: BuildPhase,
     failedAtPhase: BuildPhase?,
@@ -291,4 +295,19 @@ private fun phaseStatus(
         phaseIndex == currentIndex -> PhaseStatus.Current
         else -> PhaseStatus.Upcoming
     }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
+@Composable
+private fun BuildProgressContentPreview(
+    @PreviewParameter(BuildProgressPreviewProvider::class) case: BuildProgressPreviewCase,
+) {
+    BuildProgressContent(
+        state = case.state,
+        onDismiss = {},
+        onCancel = {},
+        onInstall = {},
+        onRetry = case.onRetry,
+        onViewLog = if (case.state.logUrl != null) ({}) else null,
+    )
 }

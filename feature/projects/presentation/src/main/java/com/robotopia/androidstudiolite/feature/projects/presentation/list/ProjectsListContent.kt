@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
@@ -29,6 +30,8 @@ import com.robotopia.androidstudiolite.designsystem.component.TopBarTitleAction
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
+import com.robotopia.androidstudiolite.feature.projects.presentation.preview.ProjectsListPreviewCase
+import com.robotopia.androidstudiolite.feature.projects.presentation.preview.ProjectsListPreviewProvider
 
 @Composable
 internal fun ProjectsListContent(
@@ -262,146 +265,13 @@ private fun ActionErrorDialog(
     }
 }
 
-private val previewProjects = listOf(
-    Project(
-        id = ProjectId("1"),
-        name = "MyApp",
-        packageName = "com.example.myapp",
-        rootPath = "/projects/1",
-        lastOpenedAt = System.currentTimeMillis() - 3_600_000,
-    ),
-    Project(
-        id = ProjectId("2"),
-        name = "Demo",
-        packageName = "com.example.demo",
-        rootPath = "/projects/2",
-        lastOpenedAt = null,
-    ),
-    Project(
-        id = ProjectId("3"),
-        name = "Notes",
-        packageName = "com.example.notes",
-        rootPath = "/projects/3",
-        lastOpenedAt = System.currentTimeMillis() - 86_400_000,
-    ),
-)
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF2B2D30,
-    widthDp = 360,
-    heightDp = 640,
-    name = "List · empty",
-)
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
 @Composable
-private fun ProjectsListEmptyPreview() {
+private fun ProjectsListContentPreview(
+    @PreviewParameter(ProjectsListPreviewProvider::class) preview: ProjectsListPreviewCase,
+) {
     ProjectsListContent(
-        state = ProjectsListUiState(),
-        onCreateProject = {},
-        onOpenSettings = {},
-        onOpenClick = {},
-        onMenuOpen = {},
-        onMenuDismiss = {},
-        onRunMenuClick = {},
-        onDeleteMenuClick = {},
-        onDeleteCancel = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
-    )
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF2B2D30,
-    widthDp = 360,
-    heightDp = 640,
-    name = "List · with projects",
-)
-@Composable
-private fun ProjectsListFilledPreview() {
-    ProjectsListContent(
-        state = ProjectsListUiState(projects = previewProjects),
-        onCreateProject = {},
-        onOpenSettings = {},
-        onOpenClick = {},
-        onMenuOpen = {},
-        onMenuDismiss = {},
-        onRunMenuClick = {},
-        onDeleteMenuClick = {},
-        onDeleteCancel = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
-    )
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF2B2D30,
-    widthDp = 360,
-    heightDp = 640,
-    name = "List · menu open",
-)
-@Composable
-private fun ProjectsListMenuPreview() {
-    ProjectsListContent(
-        state = ProjectsListUiState(
-            projects = previewProjects,
-            menuProject = previewProjects.first(),
-        ),
-        onCreateProject = {},
-        onOpenSettings = {},
-        onOpenClick = {},
-        onMenuOpen = {},
-        onMenuDismiss = {},
-        onRunMenuClick = {},
-        onDeleteMenuClick = {},
-        onDeleteCancel = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
-    )
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF2B2D30,
-    widthDp = 360,
-    heightDp = 640,
-    name = "List · delete confirm",
-)
-@Composable
-private fun ProjectsListDeleteConfirmPreview() {
-    ProjectsListContent(
-        state = ProjectsListUiState(
-            projects = previewProjects,
-            pendingDelete = previewProjects.first(),
-        ),
-        onCreateProject = {},
-        onOpenSettings = {},
-        onOpenClick = {},
-        onMenuOpen = {},
-        onMenuDismiss = {},
-        onRunMenuClick = {},
-        onDeleteMenuClick = {},
-        onDeleteCancel = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
-    )
-}
-
-@Preview(
-    showBackground = true,
-    backgroundColor = 0xFF2B2D30,
-    widthDp = 360,
-    heightDp = 640,
-    name = "List · action error",
-)
-@Composable
-private fun ProjectsListActionErrorPreview() {
-    ProjectsListContent(
-        state = ProjectsListUiState(
-            projects = previewProjects,
-            actionError = "Project not found",
-        ),
+        state = preview.state,
         onCreateProject = {},
         onOpenSettings = {},
         onOpenClick = {},

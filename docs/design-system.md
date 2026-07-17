@@ -8,14 +8,14 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 
 | Layer | Location |
 | --- | --- |
-| Tokens / components | `designsystem/` |
-| Composable UI | `designsystem/.../component/` — screens, bars, rows, dialogs only |
+| Tokens / components | `designsystem/` — tokens + reusable Compose components only (no product screens) |
+| Composable UI | `designsystem/.../component/` — bars, rows, dialogs, scaffold, etc. |
 | Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable` (not under `component/`) |
 | Editor helpers | `designsystem/.../editor/` — e.g. `highlightCode` |
-| Example screen previews | `designsystem/.../preview/<feature>/` — one file per feature (Compose Preview picker). Do not name a folder `build` — gitignores `**/build/`. Use `buildapk` for build examples. |
-| Feature UI | `feature/*/presentation/` |
-| Visual direction | JetBrains New UI / Islands Dark — radial canvas glow + rounded islands; `IslandScaffold` for files/editor |
-| Screen chrome | `IslandScaffold(topBar, body, footer?)` — top bar on canvas; one body island; optional footer under an inset divider (same island) |
+| Feature UI | `feature/*/presentation/` — real screens; compose DS components |
+| Screen previews | `feature/*/presentation/.../preview/` — multi-state Compose previews that call **real** Screen/Content (not duplicated fake screens). Preview `backgroundColor` `0xFF2B2D30` (canvas). Do not name a folder `build` — gitignores `**/build/`. |
+| Visual direction | JetBrains New UI / Islands Dark — radial canvas glow + rounded islands; `IslandScaffold` for product chrome |
+| Screen chrome | `IslandScaffold(topBar, body, footer?)` — top bar on canvas; one body island; optional footer under an inset divider (same island). Canvas glow: solid sea + radial primary that **soft-fades to transparent inside the scaffold** (never hard-clip a non-zero alpha at the edges). |
 | Code coloring | `highlightCode(code)` / `CodeHighlightTransformation` — simple Kotlin syntax colors for the editor |
 
 ## Process

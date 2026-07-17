@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -19,6 +20,8 @@ import com.robotopia.androidstudiolite.designsystem.component.InfoCard
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.preview.BuildStartPreviewCase
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.preview.BuildStartPreviewProvider
 
 @Composable
 internal fun BuildStartContent(
@@ -91,28 +94,15 @@ internal fun BuildStartContent(
 
 @Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
 @Composable
-private fun BuildStartContentSignedInPreview() {
+private fun BuildStartContentPreview(
+    @PreviewParameter(BuildStartPreviewProvider::class) preview: BuildStartPreviewCase,
+) {
     BuildStartContent(
-        projectName = "HelloCompose",
-        packageName = "com.example.hellocompose",
-        starting = false,
-        signedIn = true,
-        providerDisplayName = "GitHub",
-        onBackClick = {},
-        onStartBuildClick = {},
-        onConnectAccountClick = {},
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun BuildStartContentGatePreview() {
-    BuildStartContent(
-        projectName = "HelloCompose",
-        packageName = "com.example.hellocompose",
-        starting = false,
-        signedIn = false,
-        providerDisplayName = "GitHub",
+        projectName = preview.projectName,
+        packageName = preview.packageName,
+        starting = preview.starting,
+        signedIn = preview.signedIn,
+        providerDisplayName = preview.providerDisplayName,
         onBackClick = {},
         onStartBuildClick = {},
         onConnectAccountClick = {},

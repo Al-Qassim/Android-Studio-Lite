@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.files.presentation.browser
+package com.robotopia.androidstudiolite.feature.files.presentation.preview
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -9,6 +9,12 @@ import com.robotopia.androidstudiolite.feature.files.model.DirectoryListing
 import com.robotopia.androidstudiolite.feature.files.model.FileNameFieldErrors
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.ClipboardMode
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.ClipboardState
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserDialog
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreen
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreenContext
+import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserUiState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -25,6 +31,10 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
     }
     override val values = sequenceOf(
         FileBrowserPreviewCase("empty", FileBrowserUiState(projectName = "MyApp")),
+        FileBrowserPreviewCase(
+            "add menu",
+            FileBrowserUiState(projectName = "MyApp", entries = previewEntries, addMenuOpen = true),
+        ),
         FileBrowserPreviewCase(
             "filled",
             FileBrowserUiState(projectName = "MyApp", entries = previewEntries),

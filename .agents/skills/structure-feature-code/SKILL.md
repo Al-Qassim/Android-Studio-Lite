@@ -47,9 +47,10 @@ presentation/<screen>/
   <Name>ScreenContext.kt   # service, updateState, exits, scope
   <Name>ViewModel.kt       # state-only + UiState types
   <Name>Screen.kt          # Ctx.Screen(state) + thin @Preview stub
-  <Name>Previews.kt        # host, fakes, preview cases
   ui/                      # Ctx UI extensions (state param)
   logic/                   # Ctx logic extensions
+presentation/preview/
+  <Name>Previews.kt        # host, fakes, preview cases — call real Screen/Content
 ```
 
 Summary:
@@ -67,9 +68,10 @@ Simple screens still follow the **same layout roles** as Screen Context — just
 presentation/<screen>/
   <Name>ViewModel.kt   # state-only + UiState types
   <Name>Screen.kt      # host wiring + state-driven composition + thin @Preview stub
-  <Name>Previews.kt    # preview cases / provider
   ui/                  # state-driven bodies (take state + only that piece’s actions)
   logic/               # top-level functions (service, updateState, exits)
+presentation/preview/
+  <Name>Previews.kt    # preview cases / provider — call real Screen/Content
 ```
 
 Rules (same as Screen Context, adapted):
@@ -134,7 +136,7 @@ Before calling UI/code work done:
 - [ ] State holder is state-only
 - [ ] Host builds context with `remember(…keys)` + VM; busy screen → Screen Context (`docs/agents/screen-context.md`); thin screen → small Screen/Content OK
 - [ ] No nested function declarations (helpers at file / private top level)
-- [ ] Multi-state previews (fixtures in `*Previews.kt`, thin stub on screen)
+- [ ] Multi-state previews (fixtures in `presentation/preview/`, thin stub on screen; no product screens in `:designsystem`)
 - [ ] Touched files free of deprecation/error diagnostics; compile (+ install if UI) before done
 - [ ] Types imported (no unnecessary fully-qualified names in call sites)
 - [ ] Focused commit → push → PR comment (if on a PR)
