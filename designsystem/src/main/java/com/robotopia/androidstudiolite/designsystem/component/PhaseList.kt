@@ -79,16 +79,8 @@ private fun PhaseRow(
 @Composable
 private fun PhaseStatusIcon(status: PhaseStatus) {
     when (status) {
-        PhaseStatus.Complete -> IconSuccess(tint = Colors.Primary, size = 16.dp)
-        PhaseStatus.Current -> Box(
-            modifier = Modifier.size(16.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            BasicText(
-                text = "•••",
-                style = Typography.Caption.copy(color = Colors.Primary),
-            )
-        }
+        PhaseStatus.Complete -> IconSuccess(tint = Colors.Run, size = 16.dp)
+        PhaseStatus.Current -> LoadingIndicator(size = 16.dp)
         PhaseStatus.Failed -> Box(
             modifier = Modifier.size(16.dp),
             contentAlignment = Alignment.Center,

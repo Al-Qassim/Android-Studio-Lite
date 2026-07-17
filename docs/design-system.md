@@ -24,3 +24,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 2. Wire features to DS components; avoid one-off colors/type when a token exists.
 3. Verify on device/emulator (`/design-review` — app screenshots vs DS intent / prior device shots, **not** Figma).
 4. Track work on implement tickets (e.g. Design System #37, then feature implement issues). No separate Figma design gate.
+
+### Component approval while iterating
+
+When the user says **commit** and then gives instructions about a **different** component than the one just fixed, treat that as approval of the previous component: **commit** (and push per `AGENTS.md`), then start the new work. Do not keep polishing the previous component unless they ask.

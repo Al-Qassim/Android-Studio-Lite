@@ -14,6 +14,7 @@ Do **not** leave local file edits uncommitted when you finish a turn of work. **
 2. Exception: skip only if the user explicitly said not to commit/push, or the only leftovers are secrets / generated junk that must not be committed.
 3. Prefer one focused commit per logical change; include the docs/skills/rules you hardened for the same correction in that commit when they belong together.
 4. Do not push to `main` unless the user explicitly asked for that.
+5. **Component handoff:** if the user says **commit** and then instructs on a *different* UI component than the last one you were fixing, that means the previous component is approved — commit/push it and move on (see `docs/design-system.md`).
 
 ## User correction = system error
 
