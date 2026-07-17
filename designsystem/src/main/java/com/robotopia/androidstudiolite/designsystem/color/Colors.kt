@@ -36,6 +36,9 @@ object Colors {
     val Surface2 = Color(0xFF26282B)
     val Input = Surface2
     val Menu = Color(0xFF2B2D30)
+    /** Popup menu outline (New UI). */
+    val MenuBorder = Color(0xFF4E5157)
+    val MenuDivider = Color(0xFF393B40)
 
     /** Code well — same family as IDE editor. */
     val Editor = Color(0xFF1E1F22)
