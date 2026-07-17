@@ -115,6 +115,20 @@ fun IconCopy(
 ) = VectorIcon(R.drawable.ic_copy, modifier, tint, size)
 
 @Composable
+fun IconSave(
+    modifier: Modifier = Modifier,
+    tint: Color = Colors.Text,
+    size: Dp = 24.dp,
+) = VectorIcon(R.drawable.ic_save, modifier, tint, size)
+
+@Composable
+fun IconWrapText(
+    modifier: Modifier = Modifier,
+    tint: Color = Colors.Text,
+    size: Dp = 24.dp,
+) = VectorIcon(R.drawable.ic_wrap_text, modifier, tint, size)
+
+@Composable
 fun IconSettings(
     modifier: Modifier = Modifier,
     tint: Color = Colors.Text,
@@ -161,6 +175,8 @@ private fun IconsPreview() {
         IconPreviewItem("run", "Build / run action") { IconRun() },
         IconPreviewItem("cloud", "Remote build status") { IconCloud() },
         IconPreviewItem("success", "Success / check") { IconSuccess() },
+        IconPreviewItem("save", "Save document") { IconSave() },
+        IconPreviewItem("wrap", "Wrap text") { IconWrapText() },
         IconPreviewItem("apk", "APK artifact") { IconApk() },
         IconPreviewItem("warning", "Warning / caution") { IconWarning() },
         IconPreviewItem("locked", "Read-only / locked") { IconLocked() },

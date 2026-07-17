@@ -29,8 +29,10 @@ import com.robotopia.androidstudiolite.designsystem.icon.IconCopy
 import com.robotopia.androidstudiolite.designsystem.icon.IconFile
 import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
 import com.robotopia.androidstudiolite.designsystem.icon.IconRun
+import com.robotopia.androidstudiolite.designsystem.icon.IconSave
 import com.robotopia.androidstudiolite.designsystem.icon.IconSettings
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
+import com.robotopia.androidstudiolite.designsystem.icon.IconWrapText
 import com.robotopia.androidstudiolite.designsystem.modifier.insetClickable
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
@@ -120,6 +122,13 @@ fun EditorMenu(
 ) {
     DropdownMenu(modifier = modifier.width(220.dp)) {
         MenuItem(
+            label = "Save",
+            onClick = onSave,
+            enabled = !autoSave,
+            muted = autoSave,
+            icon = { tint, size -> IconSave(tint = tint, size = size) },
+        )
+        MenuItem(
             label = "Auto save",
             onClick = onAutoSaveToggle,
             trailing = if (autoSave) {
@@ -128,20 +137,16 @@ fun EditorMenu(
                 null
             },
         )
+        MenuDivider()
         MenuItem(
             label = "Wrap text",
             onClick = onWrapTextToggle,
+            icon = { tint, size -> IconWrapText(tint = tint, size = size) },
             trailing = if (wrapText) {
                 { IconSuccess(tint = Colors.Primary, size = MenuIconSize) }
             } else {
                 null
             },
-        )
-        MenuItem(
-            label = "Save",
-            onClick = onSave,
-            enabled = !autoSave,
-            muted = autoSave,
         )
         if (showEditorSettings || showRename) {
             MenuDivider()
