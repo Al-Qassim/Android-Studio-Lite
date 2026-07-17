@@ -2,7 +2,9 @@ package com.robotopia.androidstudiolite.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -23,8 +25,12 @@ enum class ToastVariant {
     Error,
 }
 
+private val ToastBottomGap = 24.dp
+
 /**
  * Pill toast — surface fill, no border. Success uses check; error uses warning.
+ *
+ * For screen overlays, prefer [ToastBottom] so the pill clears the system nav bar.
  */
 @Composable
 fun Toast(
@@ -51,6 +57,25 @@ fun Toast(
             style = Typography.BodyMedium.copy(color = Colors.Text),
         )
     }
+}
+
+/**
+ * Bottom-centered toast overlay. Clears the system navigation bar, then adds
+ * [ToastBottomGap] above that inset.
+ */
+@Composable
+fun BoxScope.ToastBottom(
+    message: String,
+    variant: ToastVariant = ToastVariant.Success,
+) {
+    Toast(
+        message = message,
+        variant = variant,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .navigationBarsPadding()
+            .padding(bottom = ToastBottomGap),
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
