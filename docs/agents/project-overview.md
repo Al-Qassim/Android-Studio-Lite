@@ -21,7 +21,7 @@ Stack highlights: Compose, Koin, feature modules (`model` / `api` / `data` / `pr
 | **GitHub Project board** | Status (Todo / In Progress / Done) — sync after pushes (`docs/agents/issue-tracker.md`) |
 | **Pull requests** | Code review / merge — not a triage surface for external feature requests |
 | **Labels** | Triage roles — `docs/agents/triage-labels.md` |
-| **GitHub Actions** | Push to `main` → build release APK → attach to a GitHub Release (`.github/workflows/release-apk.yml`). App `minSdk` is **26** (Android 8+); higher minSdk shows “problem parsing the package” on older phones. |
+| **GitHub Actions** | Push to `release-apk` → build release APK → attach to a GitHub Release (`.github/workflows/release-apk.yml`). Does **not** run on `main`. App `minSdk` is **26** (Android 8+); higher minSdk shows “problem parsing the package” on older phones. |
 
 ## How code is organized (pointer)
 

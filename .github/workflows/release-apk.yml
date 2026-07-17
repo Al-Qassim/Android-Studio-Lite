@@ -1,8 +1,9 @@
 name: Release APK
 
+# Sideload APK releases — push (or merge) to this branch only; not on `main`.
 on:
   push:
-    branches: [main]
+    branches: [release-apk]
 
 permissions:
   contents: write
@@ -54,7 +55,7 @@ jobs:
           tag_name: apk-${{ github.run_number }}
           name: Build ${{ github.run_number }}
           body: |
-            Automated build from `main` (`${{ github.sha }}`).
+            Automated build from `release-apk` (`${{ github.sha }}`).
 
             Installable release APK (debug-signed for sideload; `minSdk` 26 / Android 8.0+).
           files: |
