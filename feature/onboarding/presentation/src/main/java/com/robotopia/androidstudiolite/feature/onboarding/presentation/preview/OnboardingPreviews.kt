@@ -108,7 +108,7 @@ private fun OnboardingWelcomeContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             BasicText(
-                text = "Build Android apps on your phone.",
+                text = "Edit and build Android apps on your phone.",
                 style = Typography.Headline.copy(color = Colors.Text),
             )
             BasicText(
