@@ -45,7 +45,7 @@ fun LoadingIndicator(
     LaunchedEffect(Unit) {
         while (isActive) {
             delay(TickMs)
-            brightSpoke = (brightSpoke + 1) % SpokeCount
+            brightSpoke = (brightSpoke - 1 + SpokeCount) % SpokeCount
         }
     }
     Column(
