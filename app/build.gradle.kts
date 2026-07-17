@@ -26,6 +26,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // CI publishes an installable APK via -PuseDebugSigning=true until
+            // a production keystore is wired through GitHub secrets.
+            if (project.hasProperty("useDebugSigning")) {
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
     }
     compileOptions {

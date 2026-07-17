@@ -21,6 +21,7 @@ Stack highlights: Compose, Koin, feature modules (`model` / `api` / `data` / `pr
 | **GitHub Project board** | Status (Todo / In Progress / Done) — sync after pushes (`docs/agents/issue-tracker.md`) |
 | **Pull requests** | Code review / merge — not a triage surface for external feature requests |
 | **Labels** | Triage roles — `docs/agents/triage-labels.md` |
+| **GitHub Actions** | Push to `main` → build release APK → attach to a GitHub Release (`.github/workflows/release-apk.yml`) |
 
 ## How code is organized (pointer)
 
