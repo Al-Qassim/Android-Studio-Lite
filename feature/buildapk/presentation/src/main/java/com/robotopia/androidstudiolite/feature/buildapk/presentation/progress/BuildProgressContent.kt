@@ -37,13 +37,14 @@ internal fun BuildProgressContent(
     state: BuildProgressUiState,
     onDismiss: () -> Unit,
     onCancel: () -> Unit,
-    onInstall: (apkLocalPath: String) -> Unit,
+    onInstall: () -> Unit,
     onRetry: (() -> Unit)?,
     onViewLog: ((logUrl: String) -> Unit)? = null,
 ) {
     val isFailed = state.error != null || state.phase == BuildPhase.Failed
     val isCancelled = state.phase == BuildPhase.Cancelled
     val isReady = state.phase == BuildPhase.ReadyToInstall
+    val canInstall = !state.apkLocalPath.isNullOrBlank() && !state.isInstalling
 
     IslandScaffold(
         topBar = {
@@ -75,12 +76,11 @@ internal fun BuildProgressContent(
             isReady -> {
                 {
                     BuildProgressFooter {
-                        val apkPath = state.apkLocalPath
                         Button(
-                            label = "Install app",
-                            onClick = { apkPath?.let(onInstall) },
+                            label = if (state.isInstalling) "Opening installer…" else "Install app",
+                            onClick = onInstall,
                             variant = ButtonVariant.Primary,
-                            enabled = apkPath != null,
+                            enabled = canInstall,
                         )
                     }
                 }
@@ -92,6 +92,7 @@ internal fun BuildProgressContent(
                             label = "Cancel",
                             onClick = onCancel,
                             variant = ButtonVariant.Secondary,
+                            enabled = !state.isInstalling,
                         )
                     }
                 }
@@ -160,6 +161,18 @@ private fun BuildActiveState(state: BuildProgressUiState) {
                 failedAtPhase = null,
             ),
         )
+        if (state.phase == BuildPhase.ReadyToInstall && state.isInstalling) {
+            BasicText(
+                text = "Opening the package installer…",
+                style = Typography.Body.copy(color = Colors.Muted),
+            )
+        }
+        if (state.phase == BuildPhase.ReadyToInstall && !state.installError.isNullOrBlank()) {
+            BasicText(
+                text = state.installError,
+                style = Typography.Body.copy(color = Colors.Danger),
+            )
+        }
         Spacer(modifier = Modifier.weight(1f))
     }
 }

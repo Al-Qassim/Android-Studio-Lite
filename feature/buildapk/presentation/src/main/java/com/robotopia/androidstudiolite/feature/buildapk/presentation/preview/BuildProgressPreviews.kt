@@ -82,6 +82,30 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             onRetry = null,
         ),
         BuildProgressPreviewCase(
+            label = "installing",
+            state = BuildProgressUiState(
+                phase = BuildPhase.ReadyToInstall,
+                message = "APK ready to install",
+                progressFraction = 1f,
+                apkLocalPath = "/cache/demo.apk",
+                providerName = "GitHub",
+                isInstalling = true,
+            ),
+            onRetry = null,
+        ),
+        BuildProgressPreviewCase(
+            label = "install error",
+            state = BuildProgressUiState(
+                phase = BuildPhase.ReadyToInstall,
+                message = "APK ready to install",
+                progressFraction = 1f,
+                apkLocalPath = "/cache/demo.apk",
+                providerName = "GitHub",
+                installError = "Allow installs from this app, then tap Install again.",
+            ),
+            onRetry = null,
+        ),
+        BuildProgressPreviewCase(
             label = "failed · with log",
             state = BuildProgressUiState(
                 phase = BuildPhase.Failed,

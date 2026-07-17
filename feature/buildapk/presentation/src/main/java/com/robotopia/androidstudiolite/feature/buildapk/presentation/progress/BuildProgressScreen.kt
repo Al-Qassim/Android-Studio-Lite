@@ -6,7 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.logic.requestApkInstall
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -14,7 +16,7 @@ import org.koin.androidx.compose.koinViewModel
 internal fun BuildProgressScreen(
     jobId: String,
     buildService: BuildService,
-    onReadyToInstall: (apkLocalPath: String) -> Unit,
+    apkInstaller: ApkInstaller,
     onDismiss: () -> Unit,
     onRetry: (() -> Unit)?,
     viewModel: BuildProgressViewModel = koinViewModel(),
@@ -37,8 +39,12 @@ internal fun BuildProgressScreen(
                 buildService.cancelBuild(jobId)
             }
         },
-        onInstall = { apkPath ->
-            onReadyToInstall(apkPath)
+        onInstall = {
+            requestApkInstall(
+                apkLocalPath = state.apkLocalPath,
+                apkInstaller = apkInstaller,
+                viewModel = viewModel,
+            )
         },
         onRetry = onRetry,
         onViewLog = { url ->

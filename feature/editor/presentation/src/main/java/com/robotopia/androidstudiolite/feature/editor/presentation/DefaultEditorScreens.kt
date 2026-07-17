@@ -1,6 +1,7 @@
 package com.robotopia.androidstudiolite.feature.editor.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,6 +47,9 @@ class DefaultEditorScreens(
         onNavigateBack: () -> Unit,
         onRun: (() -> Unit)?,
     ) {
+        DisposableEffect(editorSession) {
+            onDispose { editorSession.close() }
+        }
         val viewModel: EditorViewModel = koinViewModel(
             key = "${documentId.projectId.value}/${documentId.relativePath}",
         ) {

@@ -130,7 +130,7 @@ flowchart TB
 ### Build (`buildapk`)
 - `BuildService` + `ApkInstaller` in `:api`.
 - **Product data:** `GitHubActionsBuildService` — public sandbox `asl-builds-android-studio-lite`, ephemeral release, Actions `workflow_dispatch`, APK download (`FakeBuildService` remains for tests).
-- UI: start → progress; on ready, nav asks installer to open the system install flow.
+- UI: start → progress; on ready, `BuildProgressScreen` calls `ApkInstaller` (loading + user-safe install errors / unknown-sources hint). Nav host only dismisses.
 
 ### Auth / Settings / Onboarding
 - **Auth:** Connect device flow + session (`accessToken` via `auth:api`).
@@ -150,7 +150,7 @@ Busy-screen layout: `docs/agents/screen-context.md`. Feature conventions: `/stru
 | --- | --- |
 | `:integration:database` | `AslDatabase` — today projects entity/DAO only |
 | `:integration:di` | `integrationDiModule` — only module `:app` starts |
-| `:integration:navigation` | `IdeNavHost` — Onboarding / Projects / Files / Editor / Build / Settings; closes editor if project deleted. Cross-feature `IdeRoute` is `@Serializable` and restored via `IdeRouteSaver` (JSON). Feature sub-routes use `rememberSaveable`. Deep routes carry project fields (no host-side `getProject`); deleted-project observe falls back to Projects. |
+| `:integration:navigation` | `IdeNavHost` — Onboarding / Projects / Files / Editor / Build / Settings. Cross-feature `IdeRoute` is `@Serializable` and restored via `IdeRouteSaver` (JSON). Feature sub-routes use `rememberSaveable`. Deep routes carry project fields (no host-side `getProject`). Editor session is closed by the editor feature when its screen leaves composition — not by the nav host. |
 | `:app` | `AslApplication`, `MainActivity`, theme bridge, FileProvider / install permission |
 
 ```text
@@ -158,7 +158,7 @@ Projects
   ├─ open ──► Files ─┬─ open file ──► Editor ──► Build (return Editor)
   │                  └─ run ───────────────────► Build (return Files)
   └─ run ──────────────────────────────────────► Build (return Projects)
-Build ──► ApkInstaller (system UI) ; dismiss ──► returnTo
+Build (owns ApkInstaller) ──► system install UI ; dismiss ──► returnTo
 ```
 
 ---

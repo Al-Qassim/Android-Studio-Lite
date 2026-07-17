@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import com.robotopia.androidstudiolite.designsystem.animation.aslNavFade
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthSession
+import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildRequest
@@ -28,6 +29,7 @@ private enum class BuildStep {
 
 class DefaultBuildScreens(
     private val buildService: BuildService,
+    private val apkInstaller: ApkInstaller,
     private val authSession: AuthSession,
     private val authScreens: AuthScreens,
 ) : BuildScreens {
@@ -35,7 +37,6 @@ class DefaultBuildScreens(
     @Composable
     override fun NavHost(
         request: BuildRequest,
-        onReadyToInstall: (apkLocalPath: String) -> Unit,
         onDismiss: () -> Unit,
     ) {
         var step by rememberSaveable(request.projectId.value) {
@@ -81,7 +82,6 @@ class DefaultBuildScreens(
                 BuildStep.Progress -> {
                     BuildProgress(
                         jobId = jobId,
-                        onReadyToInstall = onReadyToInstall,
                         onDismiss = onDismiss,
                         onRetry = {
                             scope.launch {
@@ -98,14 +98,13 @@ class DefaultBuildScreens(
     @Composable
     override fun BuildProgress(
         jobId: String,
-        onReadyToInstall: (apkLocalPath: String) -> Unit,
         onDismiss: () -> Unit,
         onRetry: (() -> Unit)?,
     ) {
         BuildProgressScreen(
             jobId = jobId,
             buildService = buildService,
-            onReadyToInstall = onReadyToInstall,
+            apkInstaller = apkInstaller,
             onDismiss = onDismiss,
             onRetry = onRetry,
         )

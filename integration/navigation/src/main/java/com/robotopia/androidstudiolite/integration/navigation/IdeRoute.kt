@@ -59,13 +59,6 @@ internal sealed interface IdeRoute {
     ) : IdeRoute
 }
 
-internal fun IdeRoute.projectIdOrNull(): String? = when (this) {
-    is IdeRoute.Files -> projectId
-    is IdeRoute.Editor -> projectId
-    is IdeRoute.Build -> projectId
-    IdeRoute.Onboarding, IdeRoute.Projects, IdeRoute.Settings -> null
-}
-
 internal fun IdeRoute.Files.toEditor(relativePath: String): IdeRoute.Editor =
     IdeRoute.Editor(
         projectId = projectId,

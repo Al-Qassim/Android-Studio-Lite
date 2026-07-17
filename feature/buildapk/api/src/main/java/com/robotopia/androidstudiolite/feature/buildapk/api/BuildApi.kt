@@ -11,8 +11,20 @@ interface BuildService {
     suspend fun cancelBuild(jobId: String)
 }
 
+/** Result of asking the system to install a local APK. */
+enum class ApkInstallOutcome {
+    /** Package installer activity was started. */
+    InstallerOpened,
+
+    /**
+     * Install-unknown-apps settings were opened because the app is not allowed
+     * to install packages yet. Caller should ask the user to allow, then retry.
+     */
+    UnknownSourcesSettingsOpened,
+}
+
 interface ApkInstaller {
-    fun requestInstall(apkLocalPath: String)
+    fun requestInstall(apkLocalPath: String): ApkInstallOutcome
 }
 
 interface BuildScreens {
@@ -20,14 +32,12 @@ interface BuildScreens {
     @Composable
     fun NavHost(
         request: BuildRequest,
-        onReadyToInstall: (apkLocalPath: String) -> Unit,
         onDismiss: () -> Unit,
     )
 
     @Composable
     fun BuildProgress(
         jobId: String,
-        onReadyToInstall: (apkLocalPath: String) -> Unit,
         onDismiss: () -> Unit,
         onRetry: (() -> Unit)?,
     )

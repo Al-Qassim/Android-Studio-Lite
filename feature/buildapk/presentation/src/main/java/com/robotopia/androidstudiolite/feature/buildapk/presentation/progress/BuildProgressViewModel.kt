@@ -19,6 +19,8 @@ data class BuildProgressUiState(
     val failedAtPhase: BuildPhase? = null,
     val providerName: String? = null,
     val logUrl: String? = null,
+    val isInstalling: Boolean = false,
+    val installError: String? = null,
 )
 
 /** Holds build progress UI state across configuration changes. No service calls. */
@@ -33,7 +35,8 @@ class BuildProgressViewModel : ViewModel() {
             lastActivePhase = progress.phase
         }
         val isFailed = progress.phase == BuildPhase.Failed || progress.error != null
-        _uiState.update {
+        _uiState.update { previous ->
+            val sameJob = previous.jobId.isEmpty() || previous.jobId == progress.jobId
             BuildProgressUiState(
                 jobId = progress.jobId,
                 phase = progress.phase,
@@ -44,8 +47,22 @@ class BuildProgressViewModel : ViewModel() {
                 failedAtPhase = if (isFailed) lastActivePhase else null,
                 providerName = progress.providerName,
                 logUrl = progress.logUrl,
+                isInstalling = if (sameJob) previous.isInstalling else false,
+                installError = if (sameJob) previous.installError else null,
             )
         }
+    }
+
+    fun beginInstall() {
+        _uiState.update { it.copy(isInstalling = true, installError = null) }
+    }
+
+    fun finishInstall() {
+        _uiState.update { it.copy(isInstalling = false) }
+    }
+
+    fun failInstall(message: String) {
+        _uiState.update { it.copy(isInstalling = false, installError = message) }
     }
 }
 

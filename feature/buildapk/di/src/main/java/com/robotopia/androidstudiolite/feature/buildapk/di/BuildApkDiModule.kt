@@ -23,6 +23,7 @@ val buildApkDiModule = module {
     single<BuildScreens> {
         DefaultBuildScreens(
             buildService = get(),
+            apkInstaller = get(),
             authSession = get(),
             authScreens = get(),
         )

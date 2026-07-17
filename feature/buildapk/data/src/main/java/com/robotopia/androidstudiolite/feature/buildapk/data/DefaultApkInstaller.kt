@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.core.content.FileProvider
 import com.robotopia.androidstudiolite.core.error.AppException
+import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstallOutcome
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
 import java.io.File
 
@@ -14,9 +15,9 @@ class DefaultApkInstaller(
     private val context: Context,
 ) : ApkInstaller {
 
-    override fun requestInstall(apkLocalPath: String) {
+    override fun requestInstall(apkLocalPath: String): ApkInstallOutcome {
         val uri = resolveApkUri(apkLocalPath)
-            ?: throw AppException("APK file not found")
+            ?: throw AppException("Couldn't find the APK. Try building again.")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             !context.packageManager.canRequestPackageInstalls()
@@ -27,7 +28,7 @@ class DefaultApkInstaller(
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 },
             )
-            return
+            return ApkInstallOutcome.UnknownSourcesSettingsOpened
         }
 
         val intent = Intent(Intent.ACTION_VIEW).apply {
@@ -37,8 +38,9 @@ class DefaultApkInstaller(
         try {
             context.startActivity(intent)
         } catch (error: Exception) {
-            throw AppException("Could not open package installer", error)
+            throw AppException("Couldn't open the package installer.", error)
         }
+        return ApkInstallOutcome.InstallerOpened
     }
 
     private fun resolveApkUri(apkLocalPath: String): Uri? {
