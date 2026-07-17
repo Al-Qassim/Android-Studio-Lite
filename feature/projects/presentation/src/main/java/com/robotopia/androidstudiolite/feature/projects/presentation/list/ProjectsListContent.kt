@@ -1,11 +1,13 @@
 package com.robotopia.androidstudiolite.feature.projects.presentation.list
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -145,6 +147,13 @@ private fun ProjectsList(
                 onRunMenuClick = onRunMenuClick,
                 onDeleteMenuClick = onDeleteMenuClick,
             )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp, horizontal = 16.dp)
+                    .height(1.dp)
+                    .background(Colors.MenuDivider),
+            )
         }
         item { ProjectsListFooterHint() }
     }
@@ -181,6 +190,9 @@ private fun ProjectListItem(
     }
 }
 
+/** Below ProjectRow's ⋮ control: inset 2 + pad 12 + centered 32.dp IconButton. */
+private val ProjectOverflowMenuTopOffset = 62.dp
+
 @Composable
 private fun ProjectOverflowMenu(
     onOpen: () -> Unit,
@@ -197,6 +209,10 @@ private fun ProjectOverflowMenu(
             onOpen = onOpen,
             onRun = onRun,
             onDelete = onDelete,
+            modifier = Modifier.padding(
+                top = ProjectOverflowMenuTopOffset,
+                end = 8.dp,
+            ),
         )
     }
 }
