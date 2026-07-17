@@ -8,13 +8,13 @@ Do not invent alternate process paths when a matching skill or linked doc exists
 
 ## Commit after changes
 
-Do **not** leave local file edits uncommitted when you finish a turn of work. **Commit is always followed by push** so local and remote branches stay in sync.
+Do **not** leave local file edits uncommitted when you finish a turn of work. Follow [`docs/agents/git-workflow.md`](docs/agents/git-workflow.md).
 
-1. After you create or modify files in the repo, **commit** them, then **push** to `origin` on the same branch (follow `docs/agents/git-workflow.md`).
-2. Exception: skip only if the user explicitly said not to commit/push, or the only leftovers are secrets / generated junk that must not be committed.
-3. Prefer one focused commit per logical change; include the docs/skills/rules you hardened for the same correction in that commit when they belong together.
-4. Do not push to `main` unless the user explicitly asked for that.
-5. **Component handoff:** if the user says **commit** and then instructs on a *different* UI component than the last one you were fixing, that means the previous component is approved — commit/push it and move on (see `docs/design-system.md`).
+1. After you create or modify files in the repo, **commit** them on the human’s current branch. **Do not create a new branch or open a PR** unless the user explicitly asks.
+2. **Push** to `origin` on the same branch when that branch is not `main` (keep local/remote in sync). On `main`, commit locally and **do not push** unless the user asked to land work on `main`.
+3. Exception: skip commit/push only if the user explicitly said not to, or the only leftovers are secrets / generated junk that must not be committed.
+4. Prefer one focused commit per logical change; include the docs/skills/rules you hardened for the same correction in that commit when they belong together.
+5. **Component handoff:** if the user says **commit** and then instructs on a *different* UI component than the last one you were fixing, that means the previous component is approved — commit (and push if allowed) and move on (see `docs/design-system.md`).
 
 ## User correction = system error
 
