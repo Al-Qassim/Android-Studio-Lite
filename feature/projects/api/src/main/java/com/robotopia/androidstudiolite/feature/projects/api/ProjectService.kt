@@ -32,15 +32,15 @@ interface ProjectService {
 interface ProjectsScreens {
     @Composable
     fun NavHost(
-        onOpenProject: (projectId: ProjectId) -> Unit,
-        onRunProject: (projectId: ProjectId) -> Unit,
+        onOpenProject: (Project) -> Unit,
+        onRunProject: (Project) -> Unit,
         onOpenSettings: () -> Unit,
     )
 
     @Composable
     fun ProjectsList(
-        onOpenProject: (projectId: ProjectId) -> Unit,
-        onRunProject: (projectId: ProjectId) -> Unit,
+        onOpenProject: (Project) -> Unit,
+        onRunProject: (Project) -> Unit,
         onCreateProject: () -> Unit,
         onOpenSettings: () -> Unit,
     )

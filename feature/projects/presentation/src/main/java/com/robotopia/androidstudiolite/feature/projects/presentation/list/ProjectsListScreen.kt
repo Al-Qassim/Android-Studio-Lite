@@ -8,7 +8,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotopia.androidstudiolite.core.error.userMessageOrNull
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.model.Project
-import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -17,8 +16,8 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 internal fun ProjectsListScreen(
     projectService: ProjectService,
-    onOpenProject: (projectId: ProjectId) -> Unit,
-    onRunProject: (projectId: ProjectId) -> Unit,
+    onOpenProject: (Project) -> Unit,
+    onRunProject: (Project) -> Unit,
     onCreateProject: () -> Unit,
     onOpenSettings: () -> Unit,
     viewModel: ProjectsListViewModel = koinViewModel(),
@@ -52,7 +51,7 @@ internal fun ProjectsListScreen(
         },
         onRunMenuClick = { project ->
             viewModel.uiState.update { it.copy(menuProject = null) }
-            onRunProject(project.id)
+            onRunProject(project)
         },
         onDeleteMenuClick = { project ->
             viewModel.uiState.update {
@@ -103,11 +102,11 @@ private suspend fun openProject(
     projectService: ProjectService,
     uiState: MutableStateFlow<ProjectsListUiState>,
     project: Project,
-    onOpenProject: (ProjectId) -> Unit,
+    onOpenProject: (Project) -> Unit,
 ) {
     uiState.update { it.copy(menuProject = null) }
     runCatching { projectService.markOpened(project.id) }
-        .onSuccess { onOpenProject(project.id) }
+        .onSuccess { onOpenProject(project) }
         .onFailure { error ->
             uiState.update {
                 it.copy(actionError = error.userMessageOrNull(TAG) ?: GENERIC_ERROR_MESSAGE)

@@ -7,6 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
+import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import com.robotopia.androidstudiolite.feature.projects.presentation.create.CreateProjectScreen
 import com.robotopia.androidstudiolite.feature.projects.presentation.list.ProjectsListScreen
@@ -17,8 +18,8 @@ class DefaultProjectsScreens(
 
     @Composable
     override fun NavHost(
-        onOpenProject: (projectId: ProjectId) -> Unit,
-        onRunProject: (projectId: ProjectId) -> Unit,
+        onOpenProject: (Project) -> Unit,
+        onRunProject: (Project) -> Unit,
         onOpenSettings: () -> Unit,
     ) {
         ProjectsNavHost(
@@ -31,8 +32,8 @@ class DefaultProjectsScreens(
 
     @Composable
     override fun ProjectsList(
-        onOpenProject: (projectId: ProjectId) -> Unit,
-        onRunProject: (projectId: ProjectId) -> Unit,
+        onOpenProject: (Project) -> Unit,
+        onRunProject: (Project) -> Unit,
         onCreateProject: () -> Unit,
         onOpenSettings: () -> Unit,
     ) {
@@ -70,8 +71,8 @@ private enum class ProjectsRoute {
 @Composable
 private fun ProjectsNavHost(
     projectService: ProjectService,
-    onOpenProject: (projectId: ProjectId) -> Unit,
-    onRunProject: (projectId: ProjectId) -> Unit,
+    onOpenProject: (Project) -> Unit,
+    onRunProject: (Project) -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     var route by rememberSaveable { mutableStateOf(ProjectsRoute.List) }

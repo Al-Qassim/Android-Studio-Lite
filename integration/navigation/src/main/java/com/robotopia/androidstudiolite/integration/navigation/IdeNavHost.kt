@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
@@ -12,15 +11,12 @@ import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildRequest
 import com.robotopia.androidstudiolite.feature.editor.api.EditorScreens
 import com.robotopia.androidstudiolite.feature.editor.api.EditorSession
-import com.robotopia.androidstudiolite.feature.editor.model.DocumentId
 import com.robotopia.androidstudiolite.feature.files.api.FilesScreens
 import com.robotopia.androidstudiolite.feature.files.model.ProjectRoot
 import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingScreens
 import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingStore
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
-import com.robotopia.androidstudiolite.feature.projects.model.Project
-import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import com.robotopia.androidstudiolite.feature.settings.api.SettingsScreens
 import org.koin.compose.koinInject
 
@@ -29,7 +25,8 @@ import org.koin.compose.koinInject
  * Feature-internal routes stay inside each feature’s [NavHost].
  *
  * Cross-feature [IdeRoute] is [rememberSaveable] so Activity recreation
- * (theme / config / process death) restores the same screen.
+ * (theme / config / process death) restores the same screen. Deep routes
+ * carry project fields so destinations render without a host-side fetch.
  */
 @Composable
 fun IdeNavHost() {
@@ -69,14 +66,11 @@ fun IdeNavHost() {
 
         IdeRoute.Projects -> {
             projectsScreens.NavHost(
-                onOpenProject = { projectId ->
-                    route = IdeRoute.Files(projectId)
+                onOpenProject = { project ->
+                    route = project.toFilesRoute()
                 },
-                onRunProject = { projectId ->
-                    route = IdeRoute.Build(
-                        projectId = projectId,
-                        returnTo = IdeRoute.Projects,
-                    )
+                onRunProject = { project ->
+                    route = project.toBuildRoute(returnTo = IdeRoute.Projects)
                 },
                 onOpenSettings = {
                     route = IdeRoute.Settings
@@ -91,82 +85,44 @@ fun IdeNavHost() {
         }
 
         is IdeRoute.Files -> {
-            RestoredProject(projectId = current.projectId, onMissing = { route = IdeRoute.Projects }) { project ->
-                filesScreens.NavHost(
-                    root = ProjectRoot(project.rootPath),
-                    projectName = project.name,
-                    initialRelativePath = "",
-                    onOpenFile = { relativePath ->
-                        route = IdeRoute.Editor(
-                            documentId = DocumentId(project.id, relativePath),
-                        )
-                    },
-                    onNavigateBack = { route = IdeRoute.Projects },
-                    onRun = {
-                        route = IdeRoute.Build(
-                            projectId = project.id,
-                            returnTo = current,
-                        )
-                    },
-                )
-            }
+            filesScreens.NavHost(
+                root = ProjectRoot(current.rootPath),
+                projectName = current.projectName,
+                initialRelativePath = "",
+                onOpenFile = { relativePath ->
+                    route = current.toEditor(relativePath)
+                },
+                onNavigateBack = { route = IdeRoute.Projects },
+                onRun = {
+                    route = current.toBuild()
+                },
+            )
         }
 
         is IdeRoute.Editor -> {
-            RestoredProject(
-                projectId = current.documentId.projectId,
-                onMissing = { route = IdeRoute.Projects },
-            ) { project ->
-                editorScreens.NavHost(
-                    documentId = current.documentId,
-                    root = ProjectRoot(project.rootPath),
-                    onNavigateBack = { route = IdeRoute.Files(project.id) },
-                    onRun = {
-                        route = IdeRoute.Build(
-                            projectId = project.id,
-                            returnTo = current,
-                        )
-                    },
-                )
-            }
+            editorScreens.NavHost(
+                documentId = current.documentId(),
+                root = ProjectRoot(current.rootPath),
+                onNavigateBack = { route = current.toFiles() },
+                onRun = {
+                    route = current.toBuild()
+                },
+            )
         }
 
         is IdeRoute.Build -> {
-            RestoredProject(projectId = current.projectId, onMissing = { route = IdeRoute.Projects }) { project ->
-                buildScreens.NavHost(
-                    request = BuildRequest(
-                        projectId = project.id,
-                        projectRoot = ProjectRoot(project.rootPath),
-                        projectName = project.name,
-                        packageName = project.packageName,
-                    ),
-                    onReadyToInstall = { apkPath ->
-                        apkInstaller.requestInstall(apkPath)
-                    },
-                    onDismiss = { route = current.returnTo },
-                )
-            }
+            buildScreens.NavHost(
+                request = BuildRequest(
+                    projectId = current.projectId,
+                    projectRoot = ProjectRoot(current.rootPath),
+                    projectName = current.projectName,
+                    packageName = current.packageName,
+                ),
+                onReadyToInstall = { apkPath ->
+                    apkInstaller.requestInstall(apkPath)
+                },
+                onDismiss = { route = current.returnTo },
+            )
         }
     }
-}
-
-@Composable
-private fun RestoredProject(
-    projectId: ProjectId,
-    onMissing: () -> Unit,
-    content: @Composable (Project) -> Unit,
-) {
-    val projectService: ProjectService = koinInject()
-    var project by remember(projectId) { mutableStateOf<Project?>(null) }
-
-    LaunchedEffect(projectId) {
-        val loaded = projectService.getProject(projectId)
-        if (loaded == null) {
-            onMissing()
-        } else {
-            project = loaded
-        }
-    }
-
-    project?.let { content(it) }
 }
