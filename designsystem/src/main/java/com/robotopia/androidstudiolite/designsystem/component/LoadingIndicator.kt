@@ -32,7 +32,7 @@ private const val TickMs = 90L
 /**
  * Classic 8-spoke activity indicator (pill bars).
  *
- * Speaks stay fixed; the bright spoke advances every [TickMs] so opacity
+ * Spokes stay fixed; the bright spoke advances every [TickMs] so opacity
  * alone creates the spin illusion (no continuous rotation).
  */
 @Composable
@@ -45,7 +45,7 @@ fun LoadingIndicator(
     LaunchedEffect(Unit) {
         while (isActive) {
             delay(TickMs)
-            brightSpoke = (brightSpoke - 1 + SpokeCount) % SpokeCount
+            brightSpoke = (brightSpoke + 1) % SpokeCount
         }
     }
     Column(
@@ -64,7 +64,7 @@ fun LoadingIndicator(
 
             repeat(SpokeCount) { index ->
                 val distance = (index - brightSpoke + SpokeCount) % SpokeCount
-                val alpha = (1f - distance / SpokeCount.toFloat()).coerceIn(0.15f, 1f)
+                val alpha = (distance / SpokeCount.toFloat()).coerceIn(0.15f, 1f)
                 val angleDegrees = index * (360f / SpokeCount)
                 rotate(degrees = angleDegrees, pivot = center) {
                     val topLeft = Offset(
