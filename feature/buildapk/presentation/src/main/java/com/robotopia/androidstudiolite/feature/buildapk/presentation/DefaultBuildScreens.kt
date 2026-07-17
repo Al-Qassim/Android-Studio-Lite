@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthSession
@@ -16,10 +16,10 @@ import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.Bu
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.start.BuildStartScreen
 import kotlinx.coroutines.launch
 
-private sealed interface BuildRoute {
-    data object Start : BuildRoute
-    data object Connect : BuildRoute
-    data class Progress(val jobId: String) : BuildRoute
+private enum class BuildStep {
+    Start,
+    Connect,
+    Progress,
 }
 
 class DefaultBuildScreens(
@@ -34,12 +34,17 @@ class DefaultBuildScreens(
         onReadyToInstall: (apkLocalPath: String) -> Unit,
         onDismiss: () -> Unit,
     ) {
-        var route by remember(request.projectId) { mutableStateOf<BuildRoute>(BuildRoute.Start) }
+        var step by rememberSaveable(request.projectId.value) {
+            mutableStateOf(BuildStep.Start)
+        }
+        var jobId by rememberSaveable(request.projectId.value) {
+            mutableStateOf("")
+        }
         val scope = rememberCoroutineScope()
         val account by authSession.observeAccount().collectAsState(initial = null)
 
-        when (val current = route) {
-            BuildRoute.Start -> {
+        when (step) {
+            BuildStep.Start -> {
                 BuildStartScreen(
                     projectName = request.projectName,
                     packageName = request.packageName,
@@ -47,31 +52,31 @@ class DefaultBuildScreens(
                     providerDisplayName = authSession.providerDisplayName,
                     onBackClick = onDismiss,
                     onStartBuild = {
-                        val jobId = buildService.startBuild(request)
-                        route = BuildRoute.Progress(jobId)
+                        jobId = buildService.startBuild(request)
+                        step = BuildStep.Progress
                     },
                     onConnectAccountClick = {
-                        route = BuildRoute.Connect
+                        step = BuildStep.Connect
                     },
                 )
             }
 
-            BuildRoute.Connect -> {
+            BuildStep.Connect -> {
                 authScreens.ConnectAccount(
-                    onFinished = { route = BuildRoute.Start },
-                    onCancel = { route = BuildRoute.Start },
+                    onFinished = { step = BuildStep.Start },
+                    onCancel = { step = BuildStep.Start },
                 )
             }
 
-            is BuildRoute.Progress -> {
+            BuildStep.Progress -> {
                 BuildProgress(
-                    jobId = current.jobId,
+                    jobId = jobId,
                     onReadyToInstall = onReadyToInstall,
                     onDismiss = onDismiss,
                     onRetry = {
                         scope.launch {
-                            val jobId = buildService.startBuild(request)
-                            route = BuildRoute.Progress(jobId)
+                            jobId = buildService.startBuild(request)
+                            step = BuildStep.Progress
                         }
                     },
                 )

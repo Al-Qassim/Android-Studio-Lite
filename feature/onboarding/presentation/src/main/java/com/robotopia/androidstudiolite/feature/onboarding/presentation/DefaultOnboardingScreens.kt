@@ -4,7 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthSession
@@ -12,9 +12,9 @@ import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingScreens
 import com.robotopia.androidstudiolite.feature.onboarding.api.OnboardingStore
 import com.robotopia.androidstudiolite.feature.onboarding.presentation.intro.OnboardingIntroContent
 
-private sealed interface OnboardingRoute {
-    data object Intro : OnboardingRoute
-    data object Connect : OnboardingRoute
+private enum class OnboardingRoute {
+    Intro,
+    Connect,
 }
 
 class DefaultOnboardingScreens(
@@ -25,7 +25,7 @@ class DefaultOnboardingScreens(
 
     @Composable
     override fun Onboarding(onFinished: () -> Unit) {
-        var route by remember { mutableStateOf<OnboardingRoute>(OnboardingRoute.Intro) }
+        var route by rememberSaveable { mutableStateOf(OnboardingRoute.Intro) }
 
         fun complete() {
             onboardingStore.markCompleted()

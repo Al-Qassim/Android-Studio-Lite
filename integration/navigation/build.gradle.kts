@@ -29,6 +29,7 @@ dependencies {
     api(project(":feature:files:api"))
     api(project(":feature:files:model"))
     api(project(":feature:editor:api"))
+    api(project(":feature:editor:model"))
     api(project(":feature:buildapk:api"))
     api(project(":feature:settings:api"))
     api(project(":feature:onboarding:api"))
@@ -37,4 +38,5 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.core.ktx)
+    testImplementation(libs.junit)
 }

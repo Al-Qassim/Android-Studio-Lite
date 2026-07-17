@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
@@ -14,10 +14,10 @@ import com.robotopia.androidstudiolite.feature.settings.presentation.account.Bui
 import com.robotopia.androidstudiolite.feature.settings.presentation.home.SettingsHomeContent
 import kotlinx.coroutines.launch
 
-private sealed interface SettingsRoute {
-    data object Home : SettingsRoute
-    data object BuildAccount : SettingsRoute
-    data object Connect : SettingsRoute
+private enum class SettingsRoute {
+    Home,
+    BuildAccount,
+    Connect,
 }
 
 @Composable
@@ -26,7 +26,7 @@ internal fun SettingsScreen(
     authScreens: AuthScreens,
     onDismiss: () -> Unit,
 ) {
-    var route by remember { mutableStateOf<SettingsRoute>(SettingsRoute.Home) }
+    var route by rememberSaveable { mutableStateOf(SettingsRoute.Home) }
     val account by authService.observeAccount().collectAsState(initial = null)
     val scope = rememberCoroutineScope()
 
