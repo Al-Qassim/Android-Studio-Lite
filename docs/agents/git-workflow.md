@@ -28,10 +28,12 @@ git branch --show-current   # equals target → shared-branch; otherwise → wor
 
 2. **Start or resume the branch:**
    - Shared-branch: edit in place on the existing checkout.
-   - Worktree — new branch:
+   - Worktree — new branch (**always** from `origin/main`, never from local `main`):
 
 ```bash
 git fetch origin
+# Local main is often ahead of origin/main. Basing a PR branch on local main
+# piles those unpushed commits into the PR (thousands of unrelated lines).
 git worktree add "../AndroidStudioLite-wt-<short-name>" -b feature/<short-name> origin/main
 ```
 
@@ -43,7 +45,16 @@ git worktree add "../AndroidStudioLite-wt-<short-name>" feature/<short-name>
 ```
 
 3. Edit and commit only in the chosen place (main checkout or worktree). Do not push to `main`.
-4. Push, then clean up according to mode:
+4. **Before opening a PR**, confirm the branch is only the intended delta vs `origin/main`:
+
+```bash
+git fetch origin
+git log --oneline origin/main..HEAD   # only your commits
+git diff --stat origin/main...HEAD    # only your files
+```
+
+   If either shows unrelated history, reset onto `origin/main` and re-apply only your commits before pushing.
+5. Push, then clean up according to mode:
    - **Worktree:** push, then **immediately remove** the local worktree:
 
 ```bash
@@ -53,9 +64,9 @@ git worktree remove "../AndroidStudioLite-wt-<short-name>"
 
    - **Shared-branch:** push from the main checkout and leave the human on the branch (no worktree to remove).
 
-5. Open or update the PR from the remote branch (via `gh`) after the push.
-6. **Update the linked GitHub Issue + Project board** for that work (Status, comment with PR/branch link). See `docs/agents/issue-tracker.md` → *Project board sync*. Then, if more edits are needed later, start again at step 1.
-7. **Before calling the work finished:** run the Finish reviews checklist in `AGENTS.md`. Fix findings, then push again using steps 1–6. Do not mark the ticket Done until reviews pass or the human waives them.
+6. Open or update the PR from the remote branch (via `gh`) after the push.
+7. **Update the linked GitHub Issue + Project board** for that work (Status, comment with PR/branch link). See `docs/agents/issue-tracker.md` → *Project board sync*. Then, if more edits are needed later, start again at step 1.
+8. **Before calling the work finished:** run the Finish reviews checklist in `AGENTS.md`. Fix findings, then push again using steps 1–8. Do not mark the ticket Done until reviews pass or the human waives them.
 
 ## Keep open branches current with `main`
 
