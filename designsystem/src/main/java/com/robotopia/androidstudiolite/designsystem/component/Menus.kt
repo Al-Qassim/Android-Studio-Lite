@@ -108,7 +108,9 @@ fun CreateMenu(
 @Composable
 fun EditorMenu(
     autoSave: Boolean = false,
+    wrapText: Boolean = false,
     onAutoSaveToggle: () -> Unit = {},
+    onWrapTextToggle: () -> Unit = {},
     onSave: () -> Unit = {},
     onEditorSettings: () -> Unit = {},
     onRename: () -> Unit = {},
@@ -121,6 +123,15 @@ fun EditorMenu(
             label = "Auto save",
             onClick = onAutoSaveToggle,
             trailing = if (autoSave) {
+                { IconSuccess(tint = Colors.Primary, size = MenuIconSize) }
+            } else {
+                null
+            },
+        )
+        MenuItem(
+            label = "Wrap text",
+            onClick = onWrapTextToggle,
+            trailing = if (wrapText) {
                 { IconSuccess(tint = Colors.Primary, size = MenuIconSize) }
             } else {
                 null
@@ -256,7 +267,7 @@ private fun EditorMenuPreview() {
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        EditorMenu(autoSave = false)
-        EditorMenu(autoSave = true)
+        EditorMenu(autoSave = false, wrapText = false)
+        EditorMenu(autoSave = true, wrapText = true)
     }
 }

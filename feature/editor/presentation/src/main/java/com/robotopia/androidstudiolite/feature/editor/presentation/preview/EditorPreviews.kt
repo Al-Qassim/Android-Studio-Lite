@@ -28,6 +28,7 @@ internal data class EditorPreviewCase(
     val state: EditorUiState,
     val document: OpenDocument? = null,
     val autoSave: Boolean = true,
+    val wrapText: Boolean = false,
 ) {
     override fun toString(): String = label
 }
@@ -79,7 +80,15 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
             previewBaseState().copy(isLoading = false, menuOpen = true),
             document = previewDocument(content = PreviewHighlightedSource),
             autoSave = true,
+            wrapText = true,
         ),
+        EditorPreviewCase(
+            "wrap off",
+            previewBaseState().copy(isLoading = false),
+            document = previewDocument(content = PreviewHighlightedSource),
+            wrapText = false,
+        ),
+
         EditorPreviewCase(
             "unsaved leave",
             previewBaseState().copy(
@@ -121,7 +130,7 @@ internal class EditorPreviewProvider : PreviewParameterProvider<EditorPreviewCas
 private fun EditorPreview(
     @PreviewParameter(EditorPreviewProvider::class) case: EditorPreviewCase,
 ) {
-    EditorPreviewHost(case.state, case.document, case.autoSave)
+    EditorPreviewHost(case.state, case.document, case.autoSave, case.wrapText)
 }
 
 @Composable
@@ -129,10 +138,13 @@ private fun EditorPreviewHost(
     state: EditorUiState,
     document: OpenDocument? = null,
     autoSave: Boolean = true,
+    wrapText: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     val session = remember(document) { PreviewEditorSession(document) }
-    val preferences = remember(autoSave) { PreviewEditorPreferences(autoSave) }
+    val preferences = remember(autoSave, wrapText) {
+        PreviewEditorPreferences(autoSave = autoSave, wrapText = wrapText)
+    }
     val context = remember(scope, session, preferences) {
         EditorScreenContext(
             updateState = {},
@@ -182,12 +194,19 @@ private class PreviewEditorSession(
 }
 
 private class PreviewEditorPreferences(
-    initialAutoSave: Boolean,
+    autoSave: Boolean,
+    wrapText: Boolean,
 ) : EditorPreferences {
-    private val _autoSave = MutableStateFlow(initialAutoSave)
+    private val _autoSave = MutableStateFlow(autoSave)
     override val autoSave: StateFlow<Boolean> = _autoSave.asStateFlow()
     override fun setAutoSave(enabled: Boolean) {
         _autoSave.value = enabled
+    }
+
+    private val _wrapText = MutableStateFlow(wrapText)
+    override val wrapText: StateFlow<Boolean> = _wrapText.asStateFlow()
+    override fun setWrapText(enabled: Boolean) {
+        _wrapText.value = enabled
     }
 }
 

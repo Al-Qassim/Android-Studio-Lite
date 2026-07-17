@@ -29,6 +29,7 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
     val document by editorSession.document.collectAsStateWithLifecycle()
     val openDocument = document?.takeIf { it.id == state.documentId }
     val autoSave by editorPreferences.autoSave.collectAsStateWithLifecycle()
+    val wrapText by editorPreferences.wrapText.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.documentId, state.root) {
         loadDocument(state)
@@ -60,7 +61,11 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
                     .weight(1f)
                     .fillMaxWidth(),
             ) {
-                EditorBody(state = state, content = openDocument?.content.orEmpty())
+                EditorBody(
+                    state = state,
+                    content = openDocument?.content.orEmpty(),
+                    wrapText = wrapText,
+                )
             }
         }
 
@@ -75,6 +80,10 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
         }
     }
 
-    EditorOverflowMenu(state = state, autoSave = autoSave)
+    EditorOverflowMenu(
+        state = state,
+        autoSave = autoSave,
+        wrapText = wrapText,
+    )
     EditorDialogs(state)
 }

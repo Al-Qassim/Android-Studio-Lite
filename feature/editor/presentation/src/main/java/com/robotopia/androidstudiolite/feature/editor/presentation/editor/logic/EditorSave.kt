@@ -49,6 +49,11 @@ internal fun EditorScreenContext.toggleAutoSave(state: EditorUiState) {
     }
 }
 
+internal fun EditorScreenContext.toggleWrapText() {
+    editorPreferences.setWrapText(!editorPreferences.wrapText.value)
+    updateState { copy(menuOpen = false) }
+}
+
 internal suspend fun EditorScreenContext.persist(
     state: EditorUiState,
     content: String,

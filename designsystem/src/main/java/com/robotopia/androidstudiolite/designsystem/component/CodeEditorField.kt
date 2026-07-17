@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.designsystem.component
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,15 +21,20 @@ import com.robotopia.androidstudiolite.designsystem.editor.CodeHighlightTransfor
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 /**
- * Multi-line code field with a scrolling line-number gutter (Islands / New UI).
+ * Multi-line code field with a scrolling line-number gutter.
+ *
+ * @param wrapText when true, lines soft-wrap to the viewport width; when false, the editor
+ * scrolls horizontally for long lines.
  */
 @Composable
 fun CodeEditorField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    wrapText: Boolean = false,
 ) {
-    val scrollState = rememberScrollState()
+    val verticalScroll = rememberScrollState()
+    val horizontalScroll = rememberScrollState()
     val lineCount = remember(value) { value.count { it == '\n' } + 1 }
     val gutterText = remember(lineCount) {
         buildString(lineCount * 3) {
@@ -42,7 +48,14 @@ fun CodeEditorField(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(scrollState)
+            .verticalScroll(verticalScroll)
+            .then(
+                if (wrapText) {
+                    Modifier
+                } else {
+                    Modifier.horizontalScroll(horizontalScroll)
+                },
+            )
             .padding(horizontal = 12.dp, vertical = 12.dp),
     ) {
         BasicText(
@@ -58,9 +71,13 @@ fun CodeEditorField(
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
+            modifier = if (wrapText) {
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            } else {
+                Modifier
+            },
             textStyle = Typography.Code.copy(color = Colors.Text),
             cursorBrush = SolidColor(Colors.Primary),
             visualTransformation = CodeHighlightTransformation,
@@ -80,5 +97,6 @@ private fun CodeEditorFieldPreview() {
             }
         """.trimIndent(),
         onValueChange = {},
+        wrapText = true,
     )
 }

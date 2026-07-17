@@ -17,6 +17,9 @@ interface EditorSession {
 interface EditorPreferences {
     val autoSave: StateFlow<Boolean>
     fun setAutoSave(enabled: Boolean)
+
+    val wrapText: StateFlow<Boolean>
+    fun setWrapText(enabled: Boolean)
 }
 
 interface DocumentStore {
