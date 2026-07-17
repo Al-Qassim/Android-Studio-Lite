@@ -56,8 +56,8 @@ gh auth refresh -h github.com -s read:project,project
 | --- | --- |
 | Idea / not ready to spec | `Backlog` |
 | Needs a written PRD / grilled decisions turned into requirements | `make prd` |
-| PRD ready; needs Figma / flow design (or design still in progress) | `make ui/ux design` |
-| Spec + design done; agent/human can start implementation | `Ready` (closest match for “Todo” / `ready-for-agent`) |
+| Spec ready; UI/UX still being shaped in `:designsystem` / Compose | `make ui/ux design` |
+| Spec + UI direction clear in code/tickets; agent can implement | `Ready` (closest match for “Todo” / `ready-for-agent`) |
 | Agent starts work / first push of the feature branch | `In progress` |
 | PR opened or updated with new commits | `In progress` (comment on the issue with the PR URL) |
 | PR open and waiting on review / design-review | `In review` |

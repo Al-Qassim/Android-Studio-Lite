@@ -21,11 +21,13 @@ Whenever the user corrects your work — **or you discover you broke something**
 
 1. **Review the latest work end-to-end** for the same class of mistakes (not only the one pointed-out spot). Fix everything that fails that review before moving on.
 2. Find the **root cause** of why the work was wrong the first time (missing instruction, wrong instruction, ambiguous router, skill not triggered, conflicting docs, skipped verification, etc.).
-3. **Generalize the error case** before editing docs. Do **not** write a narrow ban that only matches the exact failure (“don’t use API X”). Ask: *what process would have caught this and many similar mistakes?* Prefer **verification and workflow rules** that prevent whole classes of errors — across **code, Gradle/sync, design, UX, testing, copy, Figma sync, tickets**, and anything else a developer would have to correct.
+3. **Generalize the error case** before editing docs. Do **not** write a narrow ban that only matches the exact failure (“don’t use API X”). Ask: *what process would have caught this and many similar mistakes?* Prefer **verification and workflow rules** that prevent whole classes of errors — across **code, Gradle/sync, design system, UX, testing, copy, tickets**, and anything else a developer would have to correct.
    - Weak (too specific): “Never call `java.util.Properties` in `build.gradle.kts`.”
    - Strong (general): “After editing build scripts or app code, run a compile/sync (and install when UI changed) before calling the work done.”
    - Same idea for design (screenshot finish pass), UX (walk the flow on device), tests (run the suite that covers the change), etc.
 4. **Edit** the relevant docs/skills/rules so that **process** is mandatory next time: add missing process, fix wrong process, or delete harmful/outdated process. Specific examples may appear as tips under a general rule, but the rule itself must stay general.
 5. Goal: **minimize future user corrections** by hardening prevention across every kind of work, not only the immediate bugfix.
 
-A silent artifact-only fix (code, Figma, or copy) without generalizing and updating process docs is **incomplete**.
+A silent artifact-only fix (code or copy) without generalizing and updating process docs is **incomplete**.
+
+**Figma is archived** — do not open Figma, sync to Figma, or use archived skills under `archive/figma/`. UI work goes through `:designsystem` (`docs/design-system.md`).

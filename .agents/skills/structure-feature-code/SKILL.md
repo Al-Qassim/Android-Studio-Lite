@@ -97,7 +97,7 @@ When a feature can swap backends (auth, cloud build):
 1. **Identifiers and APIs** in `:presentation` / feature `:api` / `:model` use generic names (`openVerificationUri`, `providerDisplayName`, `ConnectAccount`) — not a vendor (`openGitHub…`, `onConnectGitHubClick`).
 2. **User-visible chrome** interpolates API-supplied fields (`"Open ${state.providerName}"`, paste host from `verificationUri`). Do not bake a vendor into production Compose strings.
 3. **Vendor lives in** `:data` and dedicated vendor modules (e.g. `:feature:github`). They emit the concrete display name / URIs.
-4. **Previews / Figma** may use the current provider as fixture copy so phones look real.
+4. **Previews** may use the current provider as fixture copy so phones look real.
 
 When the screen grows many components (list + menus + dialogs), **add** a `*ScreenContext` and turn `ui/` / `logic/` into context extensions — see `docs/agents/screen-context.md`.
 

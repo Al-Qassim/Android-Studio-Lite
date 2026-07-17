@@ -17,6 +17,4 @@ the app should run directly on your phone and achieve the following:
 - Syntax highlighting.
 
 # UI/UX
-the project should be designed in following figma file
-
-https://www.figma.com/design/M2LGyXHC5YYJekr3Fq3oiP/Android-Studio-Lite?node-id=0-1&p=f&t=4kAisu64eU8gnovN-0
+UI is designed and owned in **`:designsystem` + Compose** (`docs/design-system.md`). The former Figma file is archived and not a contract.
