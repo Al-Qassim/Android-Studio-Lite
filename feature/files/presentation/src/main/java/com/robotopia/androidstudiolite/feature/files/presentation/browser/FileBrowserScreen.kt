@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.robotopia.androidstudiolite.designsystem.component.InsetDivider
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.MoveBar
@@ -22,9 +20,6 @@ import com.robotopia.androidstudiolite.feature.files.presentation.browser.logic.
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.ui.FileBrowserAddMenu
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.ui.FileBrowserBody
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.ui.FileBrowserDialogs
-import com.robotopia.androidstudiolite.feature.files.presentation.preview.FileBrowserPreviewCase
-import com.robotopia.androidstudiolite.feature.files.presentation.preview.FileBrowserPreviewHost
-import com.robotopia.androidstudiolite.feature.files.presentation.preview.FileBrowserPreviewProvider
 
 @Composable
 internal fun FileBrowserScreenContext.FileBrowserScreen(state: FileBrowserUiState) {
@@ -79,12 +74,4 @@ internal fun FileBrowserScreenContext.FileBrowserScreen(state: FileBrowserUiStat
 private fun relativePathSegments(relativePath: String): List<String> {
     val parts = relativePath.split('/').filter { it.isNotEmpty() }
     return listOf("/") + parts
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun FileBrowserPreview(
-    @PreviewParameter(FileBrowserPreviewProvider::class) case: FileBrowserPreviewCase,
-) {
-    FileBrowserPreviewHost(case.state)
 }

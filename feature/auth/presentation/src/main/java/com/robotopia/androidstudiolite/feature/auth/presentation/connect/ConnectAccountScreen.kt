@@ -14,8 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -30,8 +28,6 @@ import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.Conn
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectFailedBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectLoadingBody
 import com.robotopia.androidstudiolite.feature.auth.presentation.connect.ui.ConnectShowCodeBody
-import com.robotopia.androidstudiolite.feature.auth.presentation.preview.ConnectAccountPreviewCase
-import com.robotopia.androidstudiolite.feature.auth.presentation.preview.ConnectAccountPreviewProvider
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
@@ -156,21 +152,4 @@ private fun ConnectFooterEnd(content: @Composable () -> Unit) {
     ) {
         content()
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun ConnectAccountScreenPreview(
-    @PreviewParameter(ConnectAccountPreviewProvider::class) preview: ConnectAccountPreviewCase,
-) {
-    ConnectAccountScreen(
-        state = preview.state,
-        providerDisplayName = preview.providerDisplayName,
-        onBackClick = {},
-        onOpenVerificationUri = {},
-        onCopyCode = {},
-        onCancel = {},
-        onContinue = {},
-        onTryAgain = {},
-    )
 }

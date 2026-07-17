@@ -22,11 +22,11 @@ Splitting a busy screen into **Screen (all logic)** vs **Content (all drawing)**
 presentation/<screen>/
   <Name>ScreenContext.kt   # resources: service, updateState, exits, scope
   <Name>ViewModel.kt       # UI state types + state-only ViewModel
-  <Name>Screen.kt          # Ctx.<Name>Screen(state) + thin @Preview stub
+  <Name>Screen.kt          # Ctx.<Name>Screen(state)
   ui/                      # Ctx UI extensions (take state)
   logic/                   # Ctx logic extensions (mutations, navigate, listing)
 presentation/preview/
-  <Name>Previews.kt        # fixtures, fakes, PreviewParameter providers (call real Screen)
+  <Name>Previews.kt        # @Preview composables, fixtures, fakes (call real Screen)
 ```
 
 ```mermaid
@@ -55,7 +55,7 @@ flowchart TB
 4. **Design-system / shared UI stays parameterized** — not context extensions.
 5. **Host owns the ViewModel and remembers the context.** Construct `*ScreenContext` with `remember(…keys)` in the host (and in preview hosts). Key every dependency the context closes over (`viewModel`, services, exit lambdas, etc.) so the instance is stable across recomposition but rebuilt when those inputs change. Do not allocate a fresh context on every composition — that drops any `var` fields on the context and wastes work.
 6. **`updateState` must apply to the flow’s current value** (`updater(it)`), never a composition-captured snapshot.
-7. **Previews:** fixtures and fakes live in the module’s `presentation/preview/` package and call the **real** Screen/Content (no duplicated fake screens in `:designsystem`). Keep a **thin** `@Preview` / `@PreviewParameter` stub on `*Screen.kt` so the IDE preview pane stays next to the screen. Preview hosts also `remember` the context.
+7. **Previews:** `@Preview` composables, fixtures, and fakes live in the module’s `presentation/preview/` package and call the **real** Screen/Content (no duplicated fake screens in `:designsystem`; no `@Preview` on Screen/Content files). Preview hosts also `remember` the context.
 8. **No nested function declarations** (same as the rest of feature structure).
 
 ## When to use
@@ -66,7 +66,7 @@ flowchart TB
 | Logic naturally belongs next to each UI piece | Same split into `ui/` + `logic/`, but top-level functions |
 | File browser–scale screens | Still: ViewModel + Screen + Previews — **not** a mega `*Content` callback table |
 
-Thin screens should still look like Screen Context on disk (`ViewModel`, `Screen`, `ui/`, `logic/`, plus `presentation/preview/*Previews.kt`) — omit only the `*ScreenContext` type. See `/structure-feature-code` → *Thin screens*.
+Thin screens should still look like Screen Context on disk (`ViewModel`, `Screen`, `ui/`, `logic/`, plus `presentation/preview/*Previews.kt` for `@Preview`) — omit only the `*ScreenContext` type. See `/structure-feature-code` → *Thin screens*.
 
 Do **not** collapse a thin screen into one `*Content` with every `onClick` in the signature.
 
@@ -86,5 +86,5 @@ Do **not** collapse a thin screen into one `*Content` with every `onClick` in th
 - [ ] Screen-specific UI under `ui/` as context extensions with `state`
 - [ ] Logic under `logic/` as context extensions
 - [ ] Designsystem stays normal parameters
-- [ ] Previews: fixtures in `presentation/preview/`, thin stub on `*Screen.kt`; preview host `remember`s context; no product screens in `:designsystem`
+- [ ] Previews: `@Preview` + fixtures in `presentation/preview/` only; preview host `remember`s context; no product screens in `:designsystem`
 - [ ] No nested `fun`; no mega callback Content

@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -62,14 +61,4 @@ internal fun OnboardingIntroContent(
             )
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, heightDp = 640)
-@Composable
-private fun OnboardingIntroPreview() {
-    OnboardingIntroContent(
-        providerDisplayName = "GitHub",
-        onConnectClick = {},
-        onSkipClick = {},
-    )
 }

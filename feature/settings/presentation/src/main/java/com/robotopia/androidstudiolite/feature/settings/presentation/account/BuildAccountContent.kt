@@ -10,8 +10,6 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -21,8 +19,6 @@ import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.auth.model.AuthAccount
-import com.robotopia.androidstudiolite.feature.settings.presentation.preview.BuildAccountPreviewCase
-import com.robotopia.androidstudiolite.feature.settings.presentation.preview.BuildAccountPreviewProvider
 
 @Composable
 internal fun BuildAccountContent(
@@ -83,18 +79,4 @@ internal fun BuildAccountContent(
         }
         Spacer(modifier = Modifier.weight(1f))
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun BuildAccountContentPreview(
-    @PreviewParameter(BuildAccountPreviewProvider::class) preview: BuildAccountPreviewCase,
-) {
-    BuildAccountContent(
-        account = preview.account,
-        providerDisplayName = preview.providerDisplayName,
-        onBackClick = {},
-        onConnectClick = {},
-        onLogOutClick = {},
-    )
 }

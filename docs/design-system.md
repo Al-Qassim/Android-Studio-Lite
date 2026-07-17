@@ -13,7 +13,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable` (not under `component/`) |
 | Editor helpers | `designsystem/.../editor/` — e.g. `highlightCode` |
 | Feature UI | `feature/*/presentation/` — real screens; compose DS components |
-| Screen previews | `feature/*/presentation/.../preview/` — multi-state Compose previews that call **real** Screen/Content (not duplicated fake screens). Preview `backgroundColor` `0xFF2B2D30` (canvas). Do not name a folder `build` — gitignores `**/build/`. |
+| Screen previews | `feature/*/presentation/.../preview/` — `@Preview` composables + fixtures that call **real** Screen/Content (not on Screen/Content files; not duplicated fake screens). Preview `backgroundColor` `0xFF2B2D30` (canvas). Do not name a folder `build` — gitignores `**/build/`. |
 | Visual direction | JetBrains New UI / Islands Dark — radial canvas glow + rounded islands; `IslandScaffold` for product chrome |
 | Screen chrome | `IslandScaffold(topBar, body, footer?)` — edge-to-edge canvas under system bars; status/nav insets on top bar and island; one body island; optional footer under an inset divider; canvas glow soft-fades to transparent inside the scaffold |
 | Code coloring | `highlightCode(code)` / `CodeHighlightTransformation` — simple Kotlin syntax colors for the editor |

@@ -7,14 +7,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.SettingsRow
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
-import com.robotopia.androidstudiolite.feature.settings.presentation.preview.SettingsHomePreviewCase
-import com.robotopia.androidstudiolite.feature.settings.presentation.preview.SettingsHomePreviewProvider
 
 @Composable
 internal fun SettingsHomeContent(
@@ -48,16 +44,4 @@ internal fun SettingsHomeContent(
         }
         Spacer(modifier = Modifier.weight(1f))
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun SettingsHomeContentPreview(
-    @PreviewParameter(SettingsHomePreviewProvider::class) preview: SettingsHomePreviewCase,
-) {
-    SettingsHomeContent(
-        buildAccountSubtitle = preview.buildAccountSubtitle,
-        onBackClick = {},
-        onBuildAccountClick = {},
-    )
 }

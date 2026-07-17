@@ -11,8 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -24,8 +22,6 @@ import com.robotopia.androidstudiolite.designsystem.component.PhaseStatus
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
-import com.robotopia.androidstudiolite.feature.buildapk.presentation.preview.BuildProgressPreviewCase
-import com.robotopia.androidstudiolite.feature.buildapk.presentation.preview.BuildProgressPreviewProvider
 
 private val progressPhases = listOf(
     BuildPhase.Preparing,
@@ -295,19 +291,4 @@ private fun phaseStatus(
         phaseIndex == currentIndex -> PhaseStatus.Current
         else -> PhaseStatus.Upcoming
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun BuildProgressContentPreview(
-    @PreviewParameter(BuildProgressPreviewProvider::class) case: BuildProgressPreviewCase,
-) {
-    BuildProgressContent(
-        state = case.state,
-        onDismiss = {},
-        onCancel = {},
-        onInstall = {},
-        onRetry = case.onRetry,
-        onViewLog = if (case.state.logUrl != null) ({}) else null,
-    )
 }

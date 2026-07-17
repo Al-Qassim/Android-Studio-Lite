@@ -1,7 +1,11 @@
 package com.robotopia.androidstudiolite.feature.buildapk.presentation.preview
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.BuildProgressContent
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.BuildProgressUiState
 
 internal data class BuildProgressPreviewCase(
@@ -106,5 +110,20 @@ internal class BuildProgressPreviewProvider : PreviewParameterProvider<BuildProg
             ),
             onRetry = null,
         ),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
+@Composable
+private fun BuildProgressPreview(
+    @PreviewParameter(BuildProgressPreviewProvider::class) case: BuildProgressPreviewCase,
+) {
+    BuildProgressContent(
+        state = case.state,
+        onDismiss = {},
+        onCancel = {},
+        onInstall = {},
+        onRetry = case.onRetry,
+        onViewLog = if (case.state.logUrl != null) ({}) else null,
     )
 }

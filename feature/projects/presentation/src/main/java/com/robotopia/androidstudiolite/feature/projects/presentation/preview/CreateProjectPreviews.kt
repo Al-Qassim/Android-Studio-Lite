@@ -1,6 +1,10 @@
 package com.robotopia.androidstudiolite.feature.projects.presentation.preview
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.robotopia.androidstudiolite.feature.projects.presentation.create.CreateProjectContent
 import com.robotopia.androidstudiolite.feature.projects.presentation.create.CreateProjectUiState
 
 internal data class CreateProjectPreviewCase(
@@ -52,5 +56,20 @@ internal class CreateProjectPreviewProvider : PreviewParameterProvider<CreatePro
                 isCreating = true,
             ),
         ),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
+@Composable
+private fun CreateProjectPreview(
+    @PreviewParameter(CreateProjectPreviewProvider::class) preview: CreateProjectPreviewCase,
+) {
+    CreateProjectContent(
+        state = preview.state,
+        onCancel = {},
+        onNameChange = {},
+        onPackageNameChange = {},
+        onMinSdkChange = {},
+        onCreateClick = {},
     )
 }

@@ -10,8 +10,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
@@ -24,9 +22,6 @@ import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.ui.EditorBody
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.ui.EditorDialogs
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.ui.EditorOverflowMenu
-import com.robotopia.androidstudiolite.feature.editor.presentation.preview.EditorPreviewCase
-import com.robotopia.androidstudiolite.feature.editor.presentation.preview.EditorPreviewHost
-import com.robotopia.androidstudiolite.feature.editor.presentation.preview.EditorPreviewProvider
 import kotlinx.coroutines.delay
 
 @Composable
@@ -82,12 +77,4 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
 
     EditorOverflowMenu(state = state, autoSave = autoSave)
     EditorDialogs(state)
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun EditorPreview(
-    @PreviewParameter(EditorPreviewProvider::class) case: EditorPreviewCase,
-) {
-    EditorPreviewHost(case.state, case.document, case.autoSave)
 }

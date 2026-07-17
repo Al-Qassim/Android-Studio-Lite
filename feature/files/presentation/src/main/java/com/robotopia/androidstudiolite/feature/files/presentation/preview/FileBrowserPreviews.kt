@@ -3,6 +3,8 @@ package com.robotopia.androidstudiolite.feature.files.presentation.preview
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.robotopia.androidstudiolite.feature.files.api.FileExplorerService
 import com.robotopia.androidstudiolite.feature.files.model.DirectoryListing
@@ -132,8 +134,16 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
     )
 }
 
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
 @Composable
-internal fun FileBrowserPreviewHost(state: FileBrowserUiState) {
+private fun FileBrowserPreview(
+    @PreviewParameter(FileBrowserPreviewProvider::class) case: FileBrowserPreviewCase,
+) {
+    FileBrowserPreviewHost(case.state)
+}
+
+@Composable
+private fun FileBrowserPreviewHost(state: FileBrowserUiState) {
     val scope = rememberCoroutineScope()
     val context = remember(scope) {
         FileBrowserScreenContext(

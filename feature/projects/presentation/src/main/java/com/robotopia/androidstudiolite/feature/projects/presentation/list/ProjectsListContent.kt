@@ -14,8 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
@@ -30,8 +28,6 @@ import com.robotopia.androidstudiolite.designsystem.component.TopBarTitleAction
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
-import com.robotopia.androidstudiolite.feature.projects.presentation.preview.ProjectsListPreviewCase
-import com.robotopia.androidstudiolite.feature.projects.presentation.preview.ProjectsListPreviewProvider
 
 @Composable
 internal fun ProjectsListContent(
@@ -263,24 +259,4 @@ private fun ActionErrorDialog(
             onAction = onDismiss,
         )
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun ProjectsListContentPreview(
-    @PreviewParameter(ProjectsListPreviewProvider::class) preview: ProjectsListPreviewCase,
-) {
-    ProjectsListContent(
-        state = preview.state,
-        onCreateProject = {},
-        onOpenSettings = {},
-        onOpenClick = {},
-        onMenuOpen = {},
-        onMenuDismiss = {},
-        onRunMenuClick = {},
-        onDeleteMenuClick = {},
-        onDeleteCancel = {},
-        onDeleteConfirm = {},
-        onErrorDismiss = {},
-    )
 }

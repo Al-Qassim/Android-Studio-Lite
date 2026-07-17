@@ -1,8 +1,12 @@
 package com.robotopia.androidstudiolite.feature.projects.presentation.preview
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
+import com.robotopia.androidstudiolite.feature.projects.presentation.list.ProjectsListContent
 import com.robotopia.androidstudiolite.feature.projects.presentation.list.ProjectsListUiState
 
 internal data class ProjectsListPreviewCase(
@@ -66,5 +70,25 @@ internal class ProjectsListPreviewProvider : PreviewParameterProvider<ProjectsLi
                 actionError = "Project not found",
             ),
         ),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
+@Composable
+private fun ProjectsListPreview(
+    @PreviewParameter(ProjectsListPreviewProvider::class) preview: ProjectsListPreviewCase,
+) {
+    ProjectsListContent(
+        state = preview.state,
+        onCreateProject = {},
+        onOpenSettings = {},
+        onOpenClick = {},
+        onMenuOpen = {},
+        onMenuDismiss = {},
+        onRunMenuClick = {},
+        onDeleteMenuClick = {},
+        onDeleteCancel = {},
+        onDeleteConfirm = {},
+        onErrorDismiss = {},
     )
 }

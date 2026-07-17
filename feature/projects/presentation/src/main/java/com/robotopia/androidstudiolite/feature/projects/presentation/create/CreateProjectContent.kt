@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -19,8 +17,6 @@ import com.robotopia.androidstudiolite.designsystem.component.TextField
 import com.robotopia.androidstudiolite.designsystem.component.TextFieldVariant
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
-import com.robotopia.androidstudiolite.feature.projects.presentation.preview.CreateProjectPreviewCase
-import com.robotopia.androidstudiolite.feature.projects.presentation.preview.CreateProjectPreviewProvider
 
 @Composable
 internal fun CreateProjectContent(
@@ -99,19 +95,4 @@ internal fun CreateProjectContent(
         }
         Spacer(modifier = Modifier.weight(1f))
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun CreateProjectContentPreview(
-    @PreviewParameter(CreateProjectPreviewProvider::class) preview: CreateProjectPreviewCase,
-) {
-    CreateProjectContent(
-        state = preview.state,
-        onCancel = {},
-        onNameChange = {},
-        onPackageNameChange = {},
-        onMinSdkChange = {},
-        onCreateClick = {},
-    )
 }
