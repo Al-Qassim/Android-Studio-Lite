@@ -9,21 +9,26 @@ The main checkout (`AndroidStudioLite/`) is reserved for the human. Agents must 
 Default loop for ordinary work:
 
 1. Stay on the human’s current branch in the main checkout (shared-branch).
-2. Edit, then **commit** (see below).
-3. **Push** only when allowed (see *Commit local edits*). Never invent a feature branch just to push.
-4. Do **not** run `gh pr create` (or equivalent) unless asked.
+2. Edit and leave changes in the working tree until the user asks to commit.
+3. **Do not** run `gh pr create` (or equivalent) unless asked. Never invent a feature branch just to push.
 
 When the user later asks for a branch/PR, use *Feature branch + PR (only when asked)* below.
 
-## Commit local edits
+## Coding rules (git-adjacent)
 
-Do not leave repo file changes uncommitted at the end of a turn. After creating or editing files, **commit** them (see also `AGENTS.md` → *Commit after changes*).
+- **Never nest function declarations** — see `AGENTS.md` → *Coding rules*.
 
-**Local and remote stay in sync (when push is allowed)**
+## When to commit
 
-- On a non-`main` tracking branch: after each commit, **push** to `origin` on the same branch so local and remote match.
-- On `main`: **commit locally**; **do not push** unless the user explicitly asked to land work on `main`.
-- Skip commit/push only when the user said not to, or leftovers are secrets / junk that must not be committed.
+**Commit only when the user explicitly asks** (e.g. “commit”). Do not commit at end of turn, when a task looks done, or when they start a different request.
+
+Until then, keep iterating with uncommitted local edits.
+
+**After a commit the user asked for — push rules**
+
+- On a non-`main` tracking branch: **push** to `origin` on the same branch so local and remote match.
+- On `main`: **do not push** unless the user explicitly asked to land work on `main`.
+- Never commit secrets / generated junk.
 
 ## Shared-branch vs worktree
 

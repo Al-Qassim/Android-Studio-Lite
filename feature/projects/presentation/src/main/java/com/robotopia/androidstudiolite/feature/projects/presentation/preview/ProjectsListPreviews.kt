@@ -44,14 +44,19 @@ internal class ProjectsListPreviewProvider : PreviewParameterProvider<ProjectsLi
     override fun getDisplayName(index: Int): String = values.toList()[index].toString()
 
     override val values = sequenceOf(
-        ProjectsListPreviewCase("empty", ProjectsListUiState()),
+        ProjectsListPreviewCase("loading", ProjectsListUiState(isLoading = true)),
+        ProjectsListPreviewCase(
+            "empty",
+            ProjectsListUiState(isLoading = false),
+        ),
         ProjectsListPreviewCase(
             "with projects",
-            ProjectsListUiState(projects = previewProjects),
+            ProjectsListUiState(isLoading = false, projects = previewProjects),
         ),
         ProjectsListPreviewCase(
             "menu open",
             ProjectsListUiState(
+                isLoading = false,
                 projects = previewProjects,
                 menuProject = previewProjects.first(),
             ),
@@ -59,6 +64,7 @@ internal class ProjectsListPreviewProvider : PreviewParameterProvider<ProjectsLi
         ProjectsListPreviewCase(
             "delete confirm",
             ProjectsListUiState(
+                isLoading = false,
                 projects = previewProjects,
                 pendingDelete = previewProjects.first(),
             ),
@@ -66,6 +72,7 @@ internal class ProjectsListPreviewProvider : PreviewParameterProvider<ProjectsLi
         ProjectsListPreviewCase(
             "action error",
             ProjectsListUiState(
+                isLoading = false,
                 projects = previewProjects,
                 actionError = "Project not found",
             ),

@@ -86,6 +86,7 @@ private suspend fun collectProjects(
     projectService.observeProjects().collect { projects ->
         uiState.update { state ->
             state.copy(
+                isLoading = false,
                 projects = projects,
                 menuProject = state.menuProject?.takeIf { menu ->
                     projects.any { it.id == menu.id }

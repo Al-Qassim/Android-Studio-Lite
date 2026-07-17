@@ -5,6 +5,7 @@ import com.robotopia.androidstudiolite.feature.projects.model.Project
 import kotlinx.coroutines.flow.MutableStateFlow
 
 data class ProjectsListUiState(
+    val isLoading: Boolean = true,
     val projects: List<Project> = emptyList(),
     val menuProject: Project? = null,
     val pendingDelete: Project? = null,

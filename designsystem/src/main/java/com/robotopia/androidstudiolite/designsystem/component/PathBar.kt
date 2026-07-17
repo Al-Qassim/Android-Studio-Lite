@@ -60,12 +60,7 @@ internal fun collapsePathSegments(
     val parents = segments.dropLast(1)
     val currentWidth = measureWidth(current)
 
-    fun trailWidth(parts: List<String>): Int {
-        if (parts.isEmpty()) return 0
-        return parts.sumOf(measureWidth) + sepWidth * (parts.lastIndex)
-    }
-
-    if (trailWidth(segments) <= availableWidthPx) return segments
+    if (pathTrailWidth(segments, sepWidth, measureWidth) <= availableWidthPx) return segments
 
     // Current name alone needs the whole bar — drop every parent.
     if (currentWidth + sepWidth >= availableWidthPx) {
@@ -80,12 +75,21 @@ internal fun collapsePathSegments(
         } else {
             listOf(PathEllipsis) + kept
         }
-        if (trailWidth(leading) + sepWidth + currentWidth <= availableWidthPx) {
+        if (pathTrailWidth(leading, sepWidth, measureWidth) + sepWidth + currentWidth <= availableWidthPx) {
             return leading + current
         }
     }
 
     return listOf(current)
+}
+
+private fun pathTrailWidth(
+    parts: List<String>,
+    sepWidth: Int,
+    measureWidth: (String) -> Int,
+): Int {
+    if (parts.isEmpty()) return 0
+    return parts.sumOf(measureWidth) + sepWidth * parts.lastIndex
 }
 
 @Composable

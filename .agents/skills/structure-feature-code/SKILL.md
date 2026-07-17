@@ -58,7 +58,7 @@ Summary:
 - Context holds **resources**; UI state is passed as **`state`**.
 - Screen-specific UI/logic = context **extensions**; designsystem stays parameterized.
 - Host builds context with **`remember(…keys)`** + ViewModel; screen does not depend on a concrete VM.
-- **Never nest function declarations.**
+- **Never nest function declarations** (project-wide — see `AGENTS.md` → *Coding rules*).
 
 ### Thin screens (screen-context shape, no Context class)
 
@@ -111,11 +111,13 @@ When the screen grows many components (list + menus + dialogs), **add** a `*Scre
 
 ## 5. Incremental delivery (when on a PR)
 
+Only when the user asks to commit / ship a slice (see `/incremental-pr-delivery`):
+
 1. One focused change.
 2. Commit with a clear message.
 3. Push.
 4. Comment on the PR for that slice.
-5. Repeat.
+5. Repeat only after another explicit ask (unless they asked for a multi-slice loop).
 
 ## 6. Finish checks
 

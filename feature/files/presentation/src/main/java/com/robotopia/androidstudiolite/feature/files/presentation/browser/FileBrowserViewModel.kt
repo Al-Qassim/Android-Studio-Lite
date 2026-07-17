@@ -42,6 +42,7 @@ data class FileBrowserUiState(
     val root: ProjectRoot = ProjectRoot(""),
     val projectName: String = "",
     val currentRelativePath: String = "",
+    val isLoading: Boolean = true,
     val entries: List<FsNode> = emptyList(),
     val menuItem: FsNode? = null,
     val addMenuOpen: Boolean = false,

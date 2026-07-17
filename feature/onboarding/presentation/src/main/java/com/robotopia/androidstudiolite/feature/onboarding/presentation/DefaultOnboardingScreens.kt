@@ -29,14 +29,9 @@ class DefaultOnboardingScreens(
     override fun Onboarding(onFinished: () -> Unit) {
         var route by rememberSaveable { mutableStateOf(OnboardingRoute.Welcome) }
 
-        fun complete() {
-            onboardingStore.markCompleted()
-            onFinished()
-        }
-
         when (route) {
             OnboardingRoute.Welcome -> {
-                BackHandler(onBack = ::complete)
+                BackHandler(onBack = { finishOnboarding(onboardingStore, onFinished) })
                 OnboardingWelcomeContent(
                     onContinueClick = { route = OnboardingRoute.Intro },
                 )
@@ -47,16 +42,24 @@ class DefaultOnboardingScreens(
                 OnboardingIntroContent(
                     providerDisplayName = authSession.providerDisplayName,
                     onConnectClick = { route = OnboardingRoute.Connect },
-                    onSkipClick = ::complete,
+                    onSkipClick = { finishOnboarding(onboardingStore, onFinished) },
                 )
             }
 
             OnboardingRoute.Connect -> {
                 authScreens.ConnectAccount(
-                    onFinished = ::complete,
+                    onFinished = { finishOnboarding(onboardingStore, onFinished) },
                     onCancel = { route = OnboardingRoute.Intro },
                 )
             }
         }
     }
+}
+
+private fun finishOnboarding(
+    onboardingStore: OnboardingStore,
+    onFinished: () -> Unit,
+) {
+    onboardingStore.markCompleted()
+    onFinished()
 }

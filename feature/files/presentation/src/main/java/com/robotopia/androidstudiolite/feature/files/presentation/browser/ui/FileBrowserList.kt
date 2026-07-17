@@ -18,6 +18,7 @@ import com.robotopia.androidstudiolite.designsystem.component.ContextMenu
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.FileRow
 import com.robotopia.androidstudiolite.designsystem.component.FolderRow
+import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreenContext
@@ -35,10 +36,20 @@ import androidx.compose.ui.window.PopupProperties
 
 @Composable
 internal fun FileBrowserScreenContext.FileBrowserBody(state: FileBrowserUiState) {
-    if (state.entries.isEmpty()) {
-        FileBrowserEmpty()
-    } else {
-        FileBrowserList(state)
+    when {
+        state.isLoading -> FileBrowserLoading()
+        state.entries.isEmpty() -> FileBrowserEmpty()
+        else -> FileBrowserList(state)
+    }
+}
+
+@Composable
+private fun FileBrowserLoading() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        LoadingIndicator(label = "Loading files…")
     }
 }
 

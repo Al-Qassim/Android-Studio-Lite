@@ -32,19 +32,36 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
         return values.toList()[index].toString()
     }
     override val values = sequenceOf(
-        FileBrowserPreviewCase("empty", FileBrowserUiState(projectName = "MyApp")),
+        FileBrowserPreviewCase(
+            "loading",
+            FileBrowserUiState(projectName = "MyApp", isLoading = true),
+        ),
+        FileBrowserPreviewCase(
+            "empty",
+            FileBrowserUiState(projectName = "MyApp", isLoading = false),
+        ),
         FileBrowserPreviewCase(
             "add menu",
-            FileBrowserUiState(projectName = "MyApp", entries = previewEntries, addMenuOpen = true),
+            FileBrowserUiState(
+                projectName = "MyApp",
+                isLoading = false,
+                entries = previewEntries,
+                addMenuOpen = true,
+            ),
         ),
         FileBrowserPreviewCase(
             "filled",
-            FileBrowserUiState(projectName = "MyApp", entries = previewEntries),
+            FileBrowserUiState(
+                projectName = "MyApp",
+                isLoading = false,
+                entries = previewEntries,
+            ),
         ),
         FileBrowserPreviewCase(
             "nested path",
             FileBrowserUiState(
                 projectName = "MyApp",
+                isLoading = false,
                 currentRelativePath = "app/src/main",
                 entries = listOf(
                     FsNode.Folder(name = "java", relativePath = "app/src/main/java"),
@@ -56,6 +73,7 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
             "create file",
             FileBrowserUiState(
                 projectName = "MyApp",
+                isLoading = false,
                 entries = previewEntries,
                 dialog = FileBrowserDialog.CreateFile(name = "MainActivity.kt"),
             ),
@@ -64,6 +82,7 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
             "create file field error",
             FileBrowserUiState(
                 projectName = "MyApp",
+                isLoading = false,
                 entries = previewEntries,
                 dialog = FileBrowserDialog.CreateFile(
                     name = "bad/name",
@@ -75,6 +94,7 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
             "rename field error",
             FileBrowserUiState(
                 projectName = "MyApp",
+                isLoading = false,
                 entries = previewEntries,
                 dialog = FileBrowserDialog.Rename(
                     item = previewEntries.last(),
@@ -87,6 +107,7 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
             "menu open",
             FileBrowserUiState(
                 projectName = "MyApp",
+                isLoading = false,
                 entries = previewEntries,
                 menuItem = previewEntries.first(),
             ),
@@ -95,6 +116,7 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
             "delete confirm",
             FileBrowserUiState(
                 projectName = "MyApp",
+                isLoading = false,
                 entries = previewEntries,
                 dialog = FileBrowserDialog.DeleteConfirm(previewEntries.last()),
             ),
@@ -103,6 +125,7 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
             "move bar",
             FileBrowserUiState(
                 projectName = "MyApp",
+                isLoading = false,
                 entries = previewEntries,
                 clipboard = ClipboardState(
                     mode = ClipboardMode.Cut,
@@ -115,6 +138,7 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
             "copy bar",
             FileBrowserUiState(
                 projectName = "MyApp",
+                isLoading = false,
                 entries = previewEntries,
                 clipboard = ClipboardState(
                     mode = ClipboardMode.Copy,
@@ -127,6 +151,7 @@ internal class FileBrowserPreviewProvider : PreviewParameterProvider<FileBrowser
             "action error",
             FileBrowserUiState(
                 projectName = "MyApp",
+                isLoading = false,
                 entries = previewEntries,
                 actionError = "A file or folder with that name already exists",
             ),

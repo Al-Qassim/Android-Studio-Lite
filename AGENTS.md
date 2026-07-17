@@ -6,15 +6,19 @@
 
 Do not invent alternate process paths when a matching skill or linked doc exists.
 
-## Commit after changes
+## Coding rules
 
-Do **not** leave local file edits uncommitted when you finish a turn of work. Follow [`docs/agents/git-workflow.md`](docs/agents/git-workflow.md).
+- **Never nest function declarations** (`fun` inside another `fun` / composable). Helpers are file-level `private` / `internal`, or context / class members — not local functions. Lambdas for callbacks are fine.
 
-1. After you create or modify files in the repo, **commit** them on the human’s current branch. **Do not create a new branch or open a PR** unless the user explicitly asks.
-2. **Push** to `origin` on the same branch when that branch is not `main` (keep local/remote in sync). On `main`, commit locally and **do not push** unless the user asked to land work on `main`.
-3. Exception: skip commit/push only if the user explicitly said not to, or the only leftovers are secrets / generated junk that must not be committed.
-4. Prefer one focused commit per logical change; include the docs/skills/rules you hardened for the same correction in that commit when they belong together.
-5. **Component handoff:** if the user says **commit** and then instructs on a *different* UI component than the last one you were fixing, that means the previous component is approved — commit (and push if allowed) and move on (see `docs/design-system.md`).
+## When to commit
+
+Follow [`docs/agents/git-workflow.md`](docs/agents/git-workflow.md).
+
+1. **Commit only when the user explicitly asks** (e.g. “commit”). Never commit because a turn ended, a task finished, or the next request is unrelated.
+2. Leave work as local edits until then.
+3. **Do not create a new branch or open a PR** unless the user explicitly asks.
+4. **Push** only when allowed: on a non-`main` tracking branch after a commit the user asked for; on `main`, **do not push** unless the user asked to land work on `main`.
+5. Prefer one focused commit per logical change; include docs/skills/rules hardened for the same correction in that commit when they belong together.
 
 ## User correction = system error
 

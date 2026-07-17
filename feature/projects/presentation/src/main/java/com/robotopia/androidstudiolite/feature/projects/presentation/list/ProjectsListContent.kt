@@ -24,6 +24,7 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.DialogMessageAction
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
+import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.component.ProjectMenu
 import com.robotopia.androidstudiolite.designsystem.component.ProjectRow
 import com.robotopia.androidstudiolite.designsystem.component.TopBarTitleAction
@@ -95,10 +96,10 @@ private fun ProjectsListBody(
     onRunMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
-    if (state.projects.isEmpty()) {
-        ProjectsListEmpty()
-    } else {
-        ProjectsList(
+    when {
+        state.isLoading -> ProjectsListLoading()
+        state.projects.isEmpty() -> ProjectsListEmpty()
+        else -> ProjectsList(
             projects = state.projects,
             menuProjectId = state.menuProject?.id,
             onOpenClick = onOpenClick,
@@ -107,6 +108,16 @@ private fun ProjectsListBody(
             onRunMenuClick = onRunMenuClick,
             onDeleteMenuClick = onDeleteMenuClick,
         )
+    }
+}
+
+@Composable
+private fun ProjectsListLoading() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        LoadingIndicator(label = "Loading projects…")
     }
 }
 

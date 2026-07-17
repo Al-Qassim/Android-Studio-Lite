@@ -56,7 +56,7 @@ flowchart TB
 5. **Host owns the ViewModel and remembers the context.** Construct `*ScreenContext` with `remember(…keys)` in the host (and in preview hosts). Key every dependency the context closes over (`viewModel`, services, exit lambdas, etc.) so the instance is stable across recomposition but rebuilt when those inputs change. Do not allocate a fresh context on every composition — that drops any `var` fields on the context and wastes work.
 6. **`updateState` must apply to the flow’s current value** (`updater(it)`), never a composition-captured snapshot.
 7. **Previews:** `@Preview` composables, fixtures, and fakes live in the module’s `presentation/preview/` package and call the **real** Screen/Content (no duplicated fake screens in `:designsystem`; no `@Preview` on Screen/Content files). Preview hosts also `remember` the context.
-8. **No nested function declarations** (same as the rest of feature structure).
+8. **Never nest function declarations** (project-wide — see `AGENTS.md` → *Coding rules*).
 
 ## When to use
 

@@ -12,10 +12,14 @@ internal suspend fun FileBrowserScreenContext.collectListing(
     root: ProjectRoot,
     relativePath: String,
 ) {
+    updateState {
+        copy(isLoading = true, menuItem = null)
+    }
     fileExplorerService.observeListing(root, relativePath)
         .catch { error ->
             updateState {
                 copy(
+                    isLoading = false,
                     entries = emptyList(),
                     menuItem = null,
                     actionError = error.userMessageOrNull(TAG) ?: GENERIC_ERROR_MESSAGE,
@@ -25,6 +29,7 @@ internal suspend fun FileBrowserScreenContext.collectListing(
         .collect { listing ->
             updateState {
                 copy(
+                    isLoading = false,
                     currentRelativePath = listing.currentRelativePath,
                     entries = listing.entries,
                     menuItem = menuItem?.takeIf { menu ->

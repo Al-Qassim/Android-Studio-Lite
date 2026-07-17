@@ -2,11 +2,13 @@ package com.robotopia.androidstudiolite.feature.projects.presentation.create
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
@@ -33,6 +35,22 @@ internal fun CreateProjectContent(
                 title = "New project",
                 onBackClick = onCancel,
             )
+        },
+        footer = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Button(
+                    label = if (state.isCreating) "Creating…" else "Create project",
+                    onClick = onCreateClick,
+                    variant = if (state.isCreating) ButtonVariant.Disabled else ButtonVariant.Primary,
+                    enabled = !state.isCreating,
+                )
+            }
         },
     ) {
         Column(
@@ -79,14 +97,6 @@ internal fun CreateProjectContent(
                     style = Typography.Caption.copy(color = Colors.Danger),
                 )
             }
-
-            Button(
-                label = if (state.isCreating) "Creating…" else "Create project",
-                onClick = onCreateClick,
-                modifier = Modifier.fillMaxWidth(),
-                variant = if (state.isCreating) ButtonVariant.Disabled else ButtonVariant.Primary,
-                enabled = !state.isCreating,
-            )
 
             BasicText(
                 text = "Copies template into app storage",
