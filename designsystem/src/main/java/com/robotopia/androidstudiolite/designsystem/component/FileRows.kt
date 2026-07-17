@@ -1,9 +1,5 @@
 package com.robotopia.androidstudiolite.designsystem.component
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +21,6 @@ import com.robotopia.androidstudiolite.designsystem.icon.IconFile
 import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FileRow(
     name: String,
@@ -38,10 +33,13 @@ fun FileRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(44.dp)
-            .background(if (selected) Colors.Selection else Colors.Bg)
-            .rowClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(horizontal = 16.dp),
+            .insetClickable(
+                onClick = onClick,
+                selected = selected,
+                onLongClick = onLongClick,
+            )
+            .height(40.dp)
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconFile(tint = Colors.Muted, size = 20.dp)
@@ -59,7 +57,6 @@ fun FileRow(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FolderRow(
     name: String,
@@ -71,10 +68,13 @@ fun FolderRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(44.dp)
-            .background(if (selected) Colors.Selection else Colors.Bg)
-            .rowClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(horizontal = 16.dp),
+            .insetClickable(
+                onClick = onClick,
+                selected = selected,
+                onLongClick = onLongClick,
+            )
+            .height(40.dp)
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconFolder(tint = Colors.Muted, size = 20.dp)
@@ -88,17 +88,6 @@ fun FolderRow(
         )
     }
 }
-
-@OptIn(ExperimentalFoundationApi::class)
-private fun Modifier.rowClickable(
-    onClick: () -> Unit,
-    onLongClick: (() -> Unit)?,
-): Modifier =
-    if (onLongClick != null) {
-        combinedClickable(onClick = onClick, onLongClick = onLongClick)
-    } else {
-        clickable(onClick = onClick)
-    }
 
 @Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable

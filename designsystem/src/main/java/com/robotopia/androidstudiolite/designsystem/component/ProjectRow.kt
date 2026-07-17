@@ -1,8 +1,5 @@
 package com.robotopia.androidstudiolite.designsystem.component
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +22,6 @@ import com.robotopia.androidstudiolite.designsystem.typography.Typography
  * Flat project list row — large name, package subtitle, optional meta.
  * No icon chrome; sits flush on an island (no card border).
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProjectRow(
     name: String,
@@ -40,12 +36,12 @@ fun ProjectRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(if (selected) Colors.Selection else Colors.Bg)
-            .combinedClickable(
+            .insetClickable(
                 onClick = onClick,
+                selected = selected,
                 onLongClick = onLongClick,
             )
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {

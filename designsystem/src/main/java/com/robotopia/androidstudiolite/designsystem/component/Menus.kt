@@ -189,8 +189,14 @@ private fun MenuItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .insetClickable(
+                onClick = onClick,
+                enabled = enabled,
+                horizontalInset = 4.dp,
+                verticalInset = 1.dp,
+                corner = 6.dp,
+            )
             .height(MenuItemHeight)
-            .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = MenuHorizontalInset),
         verticalAlignment = Alignment.CenterVertically,
     ) {
