@@ -148,7 +148,7 @@ private data class IconPreviewItem(
     val content: @Composable () -> Unit,
 )
 
-@Preview(showBackground = true, backgroundColor = 0xFF0F1216, widthDp = 360)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360)
 @Composable
 private fun IconsPreview() {
     val items = listOf(
@@ -168,7 +168,7 @@ private fun IconsPreview() {
 
     Column(
         modifier = Modifier
-            .background(Color(0xFF0F1216))
+            .background(Color(0xFF1E1F22))
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {

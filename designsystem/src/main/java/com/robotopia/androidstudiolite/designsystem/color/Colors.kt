@@ -21,29 +21,44 @@ import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 /**
- * Android Studio Lite design tokens — dark-themed palette from Figma.
+ * Android Studio Lite design tokens — JetBrains New UI / Islands Dark family.
+ *
+ * Anchored to Android Studio’s dark chrome: shell `#1E1F22`, island surfaces
+ * `#2B2D30`, accent blue `#3574F0`, label gray `#DFE1E5`.
  */
 object Colors {
-    val Bg = Color(0xFF12171C)
+    /** App / page shell (IDE content / editor island). */
+    val Bg = Color(0xFF1E1F22)
     val Canvas = Bg
-    val Surface = Color(0xFF1F242B)
-    val Surface2 = Color(0xFF1A1F26)
+
+    /** Raised island (cards, dialogs, bars). */
+    val Surface = Color(0xFF2B2D30)
+    val Surface2 = Color(0xFF26282B)
     val Input = Surface2
-    val Menu = Color(0xFF242933)
-    val Editor = Color(0xFF0D0F14)
-    val Border = Color(0xFF404752)
-    val Text = Color(0xFFF2F5F7)
-    val Muted = Color(0xFF8C949E)
-    val Muted2 = Color(0xFF73808C)
+    val Menu = Color(0xFF2B2D30)
+
+    /** Code well — same family as IDE editor. */
+    val Editor = Color(0xFF1E1F22)
+
+    val Border = Color(0xFF43454A)
+    val Text = Color(0xFFDFE1E5)
+    val Muted = Color(0xFF6F737A)
+    val Muted2 = Color(0xFF5A5D63)
     val Gutter = Muted2
-    val Primary = Color(0xFF38B873)
-    val OnPrimary = Color(0xFF0D140F)
-    val Danger = Color(0xFFE55959)
-    val Warning = Color(0xFFE5A659)
-    val Selection = Color(0xFF1F3829)
-    val CodeString = Color(0xFF66CC8C)
-    val CodeAnnotation = Color(0xFF73B2F2)
-    val Disabled = Color(0xFF383D47)
+
+    /** Kit / New UI primary blue. */
+    val Primary = Color(0xFF3574F0)
+    val OnPrimary = Color(0xFFFFFFFF)
+
+    val Danger = Color(0xFFE35252)
+    val Warning = Color(0xFFF2C55C)
+
+    /** Selected row / tree (blue wash, not green). */
+    val Selection = Color(0xFF2E436E)
+
+    val CodeString = Color(0xFF6AAB73)
+    val CodeAnnotation = Color(0xFF57AAF7)
+    val Disabled = Color(0xFF4E5157)
 }
 
 private data class ColorSwatch(val name: String, val color: Color)
@@ -51,7 +66,7 @@ private data class ColorSwatch(val name: String, val color: Color)
 private fun Color.toHexLabel(): String =
     "#%06X".format(0xFFFFFF and toArgb())
 
-@Preview(showBackground = true, backgroundColor = 0xFF0F1216, widthDp = 360)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360)
 @Composable
 private fun ColorsPreview() {
     val swatches = listOf(
@@ -76,12 +91,12 @@ private fun ColorsPreview() {
 
     Column(
         modifier = Modifier
-            .background(Color(0xFF0F1216))
+            .background(Colors.Bg)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         BasicText(
-            text = "Colors",
+            text = "Colors · Islands Dark",
             style = Typography.Display.copy(color = Colors.Text),
         )
         Spacer(modifier = Modifier.height(8.dp))

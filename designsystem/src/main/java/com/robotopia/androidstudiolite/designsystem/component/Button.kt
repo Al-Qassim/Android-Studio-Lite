@@ -154,7 +154,7 @@ fun IconButton(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "Button · variants")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "Button · variants")
 @Composable
 private fun ButtonPreview() {
     Column(
@@ -171,7 +171,7 @@ private fun ButtonPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "Button · with icons")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "Button · with icons")
 @Composable
 private fun ButtonWithIconsPreview() {
     Column(
@@ -199,7 +199,7 @@ private fun ButtonWithIconsPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "IconButton · variants")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "IconButton · variants")
 @Composable
 private fun IconButtonPreview() {
     Row(

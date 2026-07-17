@@ -218,7 +218,7 @@ fun TopBarEditorMore(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "TitleAction · normal")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "TitleAction · normal")
 @Composable
 private fun TopBarTitleActionPreview() {
     TopBarTitleAction(
@@ -227,7 +227,7 @@ private fun TopBarTitleActionPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 280, name = "TitleAction · long title")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 280, name = "TitleAction · long title")
 @Composable
 private fun TopBarTitleActionLongPreview() {
     TopBarTitleAction(
@@ -235,19 +235,19 @@ private fun TopBarTitleActionLongPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "BackTitle · normal")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "BackTitle · normal")
 @Composable
 private fun TopBarBackTitlePreview() {
     TopBarBackTitle(title = "MyApp")
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 280, name = "BackTitle · long title")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 280, name = "BackTitle · long title")
 @Composable
 private fun TopBarBackTitleLongPreview() {
     TopBarBackTitle(title = "VeryLongAndroidStudioLiteProjectNameThatNeedsEllipsis")
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "BackTitleAdd · normal")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "BackTitleAdd · normal")
 @Composable
 private fun TopBarBackTitleAddPreview() {
     TopBarBackTitleAdd(
@@ -256,13 +256,13 @@ private fun TopBarBackTitleAddPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 360, name = "PathAdd · normal")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "PathAdd · normal")
 @Composable
 private fun TopBarPathAddPreview() {
     TopBarPathAdd(pathSegments = listOf("app", "src", "main", "java"))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 280, name = "PathAdd · deep (auto collapse)")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 280, name = "PathAdd · deep (auto collapse)")
 @Composable
 private fun TopBarPathAddDeepPreview() {
     TopBarPathAdd(
@@ -280,7 +280,7 @@ private fun TopBarPathAddDeepPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 280, name = "PathAdd · long name (auto ellipsis)")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 280, name = "PathAdd · long name (auto ellipsis)")
 @Composable
 private fun TopBarPathAddLongNamePreview() {
     TopBarPathAdd(
@@ -293,19 +293,19 @@ private fun TopBarPathAddLongNamePreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, widthDp = 200, name = "PathAdd · narrow")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 200, name = "PathAdd · narrow")
 @Composable
 private fun TopBarPathAddNarrowPreview() {
     TopBarPathAdd(pathSegments = listOf("app", "src", "main", "java", "com", "robotopia"))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 360, name = "EditorMore · normal")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "EditorMore · normal")
 @Composable
 private fun TopBarEditorMorePreview() {
     TopBarEditorMore(fileName = "MainActivity.kt", isDirty = true)
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 280, name = "EditorMore · long name")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 280, name = "EditorMore · long name")
 @Composable
 private fun TopBarEditorMoreLongPreview() {
     TopBarEditorMore(

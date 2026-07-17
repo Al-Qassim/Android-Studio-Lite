@@ -72,13 +72,13 @@ fun MoveBar(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "MoveBar · move")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "MoveBar · move")
 @Composable
 private fun MoveBarPreview() {
     MoveBar(name = "MainActivity.kt")
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "MoveBar · copy")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "MoveBar · copy")
 @Composable
 private fun MoveBarCopyPreview() {
     MoveBar(name = "Theme.kt", mode = TransferBarMode.Copy)

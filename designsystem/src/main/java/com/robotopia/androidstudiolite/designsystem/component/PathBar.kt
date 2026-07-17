@@ -204,31 +204,31 @@ fun CodeSample(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 360, name = "PathBar · root")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "PathBar · root")
 @Composable
 private fun PathBarRootPreview() {
     PathBar(segments = listOf("/"))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 360, name = "PathBar · short")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "PathBar · short")
 @Composable
 private fun PathBarShortPreview() {
     PathBar(segments = listOf("MyApp", "app"))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 360, name = "PathBar · directory")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "PathBar · directory")
 @Composable
 private fun PathBarDirectoryPreview() {
     PathBar(segments = listOf("app", "src", "main", "java"))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 360, name = "PathBar · file")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "PathBar · file")
 @Composable
 private fun PathBarFilePreview() {
     PathBar(segments = listOf("app", "src", "main", "java", "MainActivity.kt"))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 280, name = "PathBar · deep (auto collapse)")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 280, name = "PathBar · deep (auto collapse)")
 @Composable
 private fun PathBarDeepPreview() {
     PathBar(
@@ -247,7 +247,7 @@ private fun PathBarDeepPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 280, name = "PathBar · long name (auto ellipsis)")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 280, name = "PathBar · long name (auto ellipsis)")
 @Composable
 private fun PathBarLongNamePreview() {
     PathBar(
@@ -261,13 +261,13 @@ private fun PathBarLongNamePreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14, widthDp = 200, name = "PathBar · narrow")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 200, name = "PathBar · narrow")
 @Composable
 private fun PathBarNarrowPreview() {
     PathBar(segments = listOf("app", "src", "main", "java", "MainActivity.kt"))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable
 private fun CodeSamplePreview() {
     CodeSample(gutter = "12", code = "val name = \"ASL\"", stringHighlight = true)

@@ -67,7 +67,7 @@ fun LoadingIndicator(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D0F14)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable
 private fun LoadingIndicatorPreview() {
     LoadingIndicator(

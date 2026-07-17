@@ -145,7 +145,7 @@ fun DialogMessageAction(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · empty + location")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "DialogForm · empty + location")
 @Composable
 private fun DialogFormEmptyWithLocationPreview() {
     var value by remember { mutableStateOf("") }
@@ -160,7 +160,7 @@ private fun DialogFormEmptyWithLocationPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · no location")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "DialogForm · no location")
 @Composable
 private fun DialogFormNoLocationPreview() {
     var value by remember { mutableStateOf("") }
@@ -174,7 +174,7 @@ private fun DialogFormNoLocationPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · filled")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "DialogForm · filled")
 @Composable
 private fun DialogFormFilledPreview() {
     var value by remember { mutableStateOf("MainActivity.kt") }
@@ -189,7 +189,7 @@ private fun DialogFormFilledPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · error")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "DialogForm · error")
 @Composable
 private fun DialogFormErrorPreview() {
     var value by remember { mutableStateOf("Main Activity.kt") }
@@ -205,7 +205,7 @@ private fun DialogFormErrorPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C, name = "DialogForm · error, no location")
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "DialogForm · error, no location")
 @Composable
 private fun DialogFormErrorNoLocationPreview() {
     var value by remember { mutableStateOf("") }
@@ -220,7 +220,7 @@ private fun DialogFormErrorNoLocationPreview() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable
 private fun DialogMessageActionPreview() {
     DialogMessageAction(

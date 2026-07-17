@@ -74,7 +74,7 @@ private class ExampleScreenCaseProvider : PreviewParameterProvider<ExampleScreen
 @Preview(
     name = "Example screens",
     showBackground = true,
-    backgroundColor = 0xFF12171C,
+    backgroundColor = 0xFF1E1F22,
     widthDp = 360,
     heightDp = 640,
 )

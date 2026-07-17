@@ -184,25 +184,25 @@ private fun InsetMenuItem(
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable
 private fun ProjectMenuPreview() {
     ProjectMenu(modifier = Modifier.padding(16.dp))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable
 private fun ContextMenuPreview() {
     ContextMenu(modifier = Modifier.padding(16.dp))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable
 private fun CreateMenuPreview() {
     CreateMenu(modifier = Modifier.padding(16.dp))
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable
 private fun EditorMenuPreview() {
     EditorMenu(modifier = Modifier.padding(16.dp))

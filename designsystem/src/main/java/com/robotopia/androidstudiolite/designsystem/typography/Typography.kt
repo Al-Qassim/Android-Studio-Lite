@@ -143,7 +143,7 @@ private data class TypographyToken(
     val sample: String,
 )
 
-@Preview(showBackground = true, backgroundColor = 0xFF0F1216, widthDp = 360)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360)
 @Composable
 private fun TypographyPreview() {
     val tokens = listOf(

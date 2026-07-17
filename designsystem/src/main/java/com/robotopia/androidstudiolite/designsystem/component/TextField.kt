@@ -94,7 +94,7 @@ fun TextField(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF12171C)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22)
 @Composable
 private fun TextFieldPreview() {
     var form by remember { mutableStateOf("") }
