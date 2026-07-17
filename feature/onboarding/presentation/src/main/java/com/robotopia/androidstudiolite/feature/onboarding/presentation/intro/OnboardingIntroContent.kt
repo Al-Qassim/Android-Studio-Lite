@@ -2,23 +2,30 @@ package com.robotopia.androidstudiolite.feature.onboarding.presentation.intro
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
+import com.robotopia.androidstudiolite.designsystem.icon.IconCloud
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 @Composable
@@ -28,26 +35,7 @@ internal fun OnboardingIntroContent(
     onSkipClick: () -> Unit,
 ) {
     IslandScaffold(
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(Color.Transparent)
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                BasicText(
-                    text = "Android Studio Lite",
-                    style = Typography.TitleNav.copy(color = Colors.Text),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 4.dp),
-                )
-            }
-        },
+        topBar = { OnboardingAppTitleBar() },
         footer = {
             Row(
                 modifier = Modifier
@@ -68,21 +56,82 @@ internal fun OnboardingIntroContent(
             }
         },
     ) {
+        OnboardingCenteredMessage(
+            illustration = {
+                IconCloud(tint = Colors.Primary, size = 40.dp)
+            },
+            title = "Connect $providerDisplayName for cloud builds.",
+            body = "Optional — you can skip and connect later in Settings.",
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+internal fun OnboardingAppTitleBar() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .background(Color.Transparent)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        BasicText(
+            text = "Android Studio Lite",
+            style = Typography.TitleNav.copy(color = Colors.Text),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 4.dp),
+        )
+    }
+}
+
+@Composable
+internal fun OnboardingCenteredMessage(
+    illustration: @Composable () -> Unit,
+    title: String,
+    body: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .clip(CircleShape)
+                    .background(Colors.Surface),
+                contentAlignment = Alignment.Center,
+            ) {
+                illustration()
+            }
             BasicText(
-                text = "Connect $providerDisplayName for cloud builds.",
-                style = Typography.Headline.copy(color = Colors.Text),
+                text = title,
+                style = Typography.Headline.copy(
+                    color = Colors.Text,
+                    textAlign = TextAlign.Center,
+                ),
             )
             BasicText(
-                text = "Optional — you can skip and connect later in Settings.",
-                style = Typography.Body.copy(color = Colors.Muted),
+                text = body,
+                style = Typography.Body.copy(
+                    color = Colors.Muted,
+                    textAlign = TextAlign.Center,
+                ),
             )
         }
-        Spacer(modifier = Modifier.weight(1f))
     }
 }

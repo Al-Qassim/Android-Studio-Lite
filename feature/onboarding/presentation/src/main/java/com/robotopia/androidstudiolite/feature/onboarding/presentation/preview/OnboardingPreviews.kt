@@ -1,19 +1,12 @@
 package com.robotopia.androidstudiolite.feature.onboarding.presentation.preview
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -22,7 +15,9 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
-import com.robotopia.androidstudiolite.designsystem.typography.Typography
+import com.robotopia.androidstudiolite.designsystem.icon.IconApk
+import com.robotopia.androidstudiolite.feature.onboarding.presentation.intro.OnboardingAppTitleBar
+import com.robotopia.androidstudiolite.feature.onboarding.presentation.intro.OnboardingCenteredMessage
 import com.robotopia.androidstudiolite.feature.onboarding.presentation.intro.OnboardingIntroContent
 
 internal data class OnboardingIntroPreviewCase(
@@ -66,26 +61,7 @@ private fun OnboardingWelcomeContent(
     onContinueClick: () -> Unit,
 ) {
     IslandScaffold(
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(Color.Transparent)
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                BasicText(
-                    text = "Android Studio Lite",
-                    style = Typography.TitleNav.copy(color = Colors.Text),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 4.dp),
-                )
-            }
-        },
+        topBar = { OnboardingAppTitleBar() },
         footer = {
             Row(
                 modifier = Modifier
@@ -101,21 +77,15 @@ private fun OnboardingWelcomeContent(
             }
         },
     ) {
-        Column(
+        OnboardingCenteredMessage(
+            illustration = {
+                IconApk(tint = Colors.Primary, size = 40.dp)
+            },
+            title = "Edit and build Android apps on your phone.",
+            body = "Create a project, edit code, run a cloud build, and install the APK.",
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            BasicText(
-                text = "Edit and build Android apps on your phone.",
-                style = Typography.Headline.copy(color = Colors.Text),
-            )
-            BasicText(
-                text = "Create a project, edit code, run a cloud build, and install the APK.",
-                style = Typography.Body.copy(color = Colors.Muted),
-            )
-        }
-        Spacer(modifier = Modifier.weight(1f))
+                .weight(1f)
+                .fillMaxWidth(),
+        )
     }
 }
