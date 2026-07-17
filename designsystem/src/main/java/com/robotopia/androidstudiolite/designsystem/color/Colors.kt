@@ -60,7 +60,8 @@ object Colors {
     /** Run / play control (Android Studio green). */
     val Run = Color(0xFF499C54)
 
-    val Danger = Color(0xFFE35252)
+    /** Soft error red — less neon so it fits Islands Dark with Primary/Run. */
+    val Danger = Color(0xFFD17474)
     val Warning = Color(0xFFF2C55C)
 
     /** Selected row / tree (blue wash, not green). */
