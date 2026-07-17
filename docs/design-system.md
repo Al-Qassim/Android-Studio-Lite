@@ -12,6 +12,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Composable UI | `designsystem/.../component/` — bars, rows, dialogs, scaffold, etc. |
 | Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable`, `overlayEnter` (not under `component/`) |
 | Overlay motion | Menus / dialogs use `overlayEnter` (short fade + scale) on their surfaces — feature Popup/Dialog hosts stay thin |
+| Nav motion | Custom route hosts use `AnimatedContent` + `aslNavFade()` — enter/exit cross-fade; exit starts after a short delay |
 | Editor helpers | `designsystem/.../editor/` — e.g. `highlightCode` |
 | Feature UI | `feature/*/presentation/` — real screens; compose DS components |
 | Screen previews | `feature/*/presentation/.../preview/` — `@Preview` composables + fixtures that call **real** Screen/Content (not on Screen/Content files; not duplicated fake screens). Preview `backgroundColor` `0xFF2B2D30` (canvas). Do not name a folder `build` — gitignores `**/build/`. |

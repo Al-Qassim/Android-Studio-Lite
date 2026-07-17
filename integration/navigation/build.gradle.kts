@@ -33,10 +33,12 @@ dependencies {
     api(project(":feature:buildapk:api"))
     api(project(":feature:settings:api"))
     api(project(":feature:onboarding:api"))
+    implementation(project(":designsystem"))
     implementation(libs.koin.androidx.compose)
     implementation(libs.kotlinx.coroutines.core)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)
 }

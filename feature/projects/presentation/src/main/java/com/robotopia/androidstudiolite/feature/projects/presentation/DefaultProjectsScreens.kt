@@ -1,10 +1,14 @@
 package com.robotopia.androidstudiolite.feature.projects.presentation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.robotopia.androidstudiolite.designsystem.animation.aslNavFade
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
 import com.robotopia.androidstudiolite.feature.projects.model.Project
@@ -77,23 +81,30 @@ private fun ProjectsNavHost(
 ) {
     var route by rememberSaveable { mutableStateOf(ProjectsRoute.List) }
 
-    when (route) {
-        ProjectsRoute.List -> {
-            ProjectsListScreen(
-                projectService = projectService,
-                onOpenProject = onOpenProject,
-                onRunProject = onRunProject,
-                onCreateProject = { route = ProjectsRoute.Create },
-                onOpenSettings = onOpenSettings,
-            )
-        }
+    AnimatedContent(
+        targetState = route,
+        modifier = Modifier.fillMaxSize(),
+        transitionSpec = { aslNavFade() },
+        label = "projectsNav",
+    ) { current ->
+        when (current) {
+            ProjectsRoute.List -> {
+                ProjectsListScreen(
+                    projectService = projectService,
+                    onOpenProject = onOpenProject,
+                    onRunProject = onRunProject,
+                    onCreateProject = { route = ProjectsRoute.Create },
+                    onOpenSettings = onOpenSettings,
+                )
+            }
 
-        ProjectsRoute.Create -> {
-            CreateProjectScreen(
-                projectService = projectService,
-                onCreated = { route = ProjectsRoute.List },
-                onCancel = { route = ProjectsRoute.List },
-            )
+            ProjectsRoute.Create -> {
+                CreateProjectScreen(
+                    projectService = projectService,
+                    onCreated = { route = ProjectsRoute.List },
+                    onCancel = { route = ProjectsRoute.List },
+                )
+            }
         }
     }
 }

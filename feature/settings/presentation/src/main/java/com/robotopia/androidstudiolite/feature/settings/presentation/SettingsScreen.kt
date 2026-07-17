@@ -1,6 +1,8 @@
 package com.robotopia.androidstudiolite.feature.settings.presentation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -8,6 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.robotopia.androidstudiolite.designsystem.animation.aslNavFade
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
 import com.robotopia.androidstudiolite.feature.settings.presentation.account.BuildAccountContent
@@ -30,37 +34,44 @@ internal fun SettingsScreen(
     val account by authService.observeAccount().collectAsState(initial = null)
     val scope = rememberCoroutineScope()
 
-    when (route) {
-        SettingsRoute.Home -> {
-            BackHandler(onBack = onDismiss)
-            SettingsHomeContent(
-                buildAccountSubtitle = when {
-                    account == null -> "Not connected"
-                    else -> "${account!!.providerName} · ${account!!.identity}"
-                },
-                onBackClick = onDismiss,
-                onBuildAccountClick = { route = SettingsRoute.BuildAccount },
-            )
-        }
+    AnimatedContent(
+        targetState = route,
+        modifier = Modifier.fillMaxSize(),
+        transitionSpec = { aslNavFade() },
+        label = "settingsNav",
+    ) { current ->
+        when (current) {
+            SettingsRoute.Home -> {
+                BackHandler(onBack = onDismiss)
+                SettingsHomeContent(
+                    buildAccountSubtitle = when {
+                        account == null -> "Not connected"
+                        else -> "${account!!.providerName} · ${account!!.identity}"
+                    },
+                    onBackClick = onDismiss,
+                    onBuildAccountClick = { route = SettingsRoute.BuildAccount },
+                )
+            }
 
-        SettingsRoute.BuildAccount -> {
-            BackHandler(onBack = { route = SettingsRoute.Home })
-            BuildAccountContent(
-                account = account,
-                providerDisplayName = authService.providerDisplayName,
-                onBackClick = { route = SettingsRoute.Home },
-                onConnectClick = { route = SettingsRoute.Connect },
-                onLogOutClick = {
-                    scope.launch { authService.clearAccount() }
-                },
-            )
-        }
+            SettingsRoute.BuildAccount -> {
+                BackHandler(onBack = { route = SettingsRoute.Home })
+                BuildAccountContent(
+                    account = account,
+                    providerDisplayName = authService.providerDisplayName,
+                    onBackClick = { route = SettingsRoute.Home },
+                    onConnectClick = { route = SettingsRoute.Connect },
+                    onLogOutClick = {
+                        scope.launch { authService.clearAccount() }
+                    },
+                )
+            }
 
-        SettingsRoute.Connect -> {
-            authScreens.ConnectAccount(
-                onFinished = { route = SettingsRoute.BuildAccount },
-                onCancel = { route = SettingsRoute.BuildAccount },
-            )
+            SettingsRoute.Connect -> {
+                authScreens.ConnectAccount(
+                    onFinished = { route = SettingsRoute.BuildAccount },
+                    onCancel = { route = SettingsRoute.BuildAccount },
+                )
+            }
         }
     }
 }
