@@ -15,15 +15,17 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Feature UI | `feature/*/presentation/` — real screens; compose DS components |
 | Screen previews | `feature/*/presentation/.../preview/` — multi-state Compose previews that call **real** Screen/Content (not duplicated fake screens). Preview `backgroundColor` `0xFF2B2D30` (canvas). Do not name a folder `build` — gitignores `**/build/`. |
 | Visual direction | JetBrains New UI / Islands Dark — radial canvas glow + rounded islands; `IslandScaffold` for product chrome |
-| Screen chrome | `IslandScaffold(topBar, body, footer?)` — top bar on canvas; one body island; optional footer under an inset divider (same island). Canvas glow: solid sea + radial primary that **soft-fades to transparent inside the scaffold** (never hard-clip a non-zero alpha at the edges). |
+| Screen chrome | `IslandScaffold(topBar, body, footer?)` — top bar on canvas; one body island; optional footer under an inset divider (same island). Canvas glow: solid sea + radial primary that **soft-fades to transparent inside the scaffold** (never hard-clip a non-zero alpha at the edges). Draws **edge-to-edge** under system bars; applies status/nav insets to chrome (top bar / island), not the Activity. |
 | Code coloring | `highlightCode(code)` / `CodeHighlightTransformation` — simple Kotlin syntax colors for the editor |
+| Activity shell | `MainActivity` enables edge-to-edge with **transparent** system bars only — **no** design `background`, **no** `systemBars` padding. Screens (or `IslandScaffold`) own insets so canvas/gradients can sit behind the status bar. |
 
 ## Process
 
 1. Change tokens/components in `:designsystem` first when the look is shared.
 2. Wire features to DS components; avoid one-off colors/type when a token exists.
-3. Verify on device/emulator (`/design-review` — app screenshots vs DS intent / prior device shots, **not** Figma).
-4. Track work on implement tickets (e.g. Design System #37, then feature implement issues). No separate Figma design gate.
+3. Do **not** put product padding or background colors on the Activity root — that clips edge-to-edge chrome (e.g. canvas glow under the status bar). Apply `statusBars` / `navigationBars` / `systemBars` padding in the screen or scaffold.
+4. Verify on device/emulator (`/design-review` — app screenshots vs DS intent / prior device shots, **not** Figma). Confirm status-bar area shows canvas/glow, not a flat Activity scrim.
+5. Track work on implement tickets (e.g. Design System #37, then feature implement issues). No separate Figma design gate.
 
 ### Component approval while iterating
 

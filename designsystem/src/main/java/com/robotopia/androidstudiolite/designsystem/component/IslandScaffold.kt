@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,15 +28,18 @@ private val IslandEdge = 8.dp
 /** Radial glow sits at 20% of canvas width, pinned to the top edge. */
 private const val CanvasGlowCenterXFraction = 0.2f
 private const val CanvasGlowAlpha = 0.5f
+/** Glow radius as a fraction of the longer side — keeps the falloff inside bounds. */
+private const val CanvasGlowRadiusFraction = 0.95f
 
 /**
  * Islands-style screen chrome (Android Studio New UI).
  *
- * - **Canvas:** radial primary glow on a dark sea (no section dividers).
- * - **Top bar:** sits on the canvas (no rounded plate).
+ * - **Canvas:** radial primary glow on a dark sea (draws edge-to-edge under system bars).
+ * - **Top bar:** sits on the canvas below the status bar inset.
  * - **Body:** darker rounded island (files list, editor, …).
  * - **Footer:** optional strip inside the same island, under an [InsetDivider]
  *   (e.g. [MoveBar], Cancel) — not a second island.
+ * - **Insets:** status/navigation bar padding is applied here — not in the Activity.
  */
 @Composable
 fun IslandScaffold(
@@ -50,13 +55,21 @@ fun IslandScaffold(
             .fillMaxSize()
             .islandCanvasBackground(),
     ) {
-        topBar()
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding(),
+        ) {
+            topBar()
+        }
         IslandPanel(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
                 .padding(horizontal = edgePadding)
-                .padding(top = islandGap, bottom = edgePadding),
+                .padding(top = islandGap)
+                .navigationBarsPadding()
+                .padding(bottom = edgePadding),
         ) {
             Column(
                 modifier = Modifier
@@ -88,16 +101,22 @@ fun IslandPanel(
 }
 
 private fun Modifier.islandCanvasBackground(): Modifier = drawBehind {
+    // Solid sea first so edges never show a hard-clipped glow against a different color.
+    drawRect(color = Colors.CanvasBottom)
+    val center = Offset(
+        x = size.width * CanvasGlowCenterXFraction,
+        y = 0f,
+    )
+    val radius = maxOf(size.width, size.height) * CanvasGlowRadiusFraction
     drawRect(
         brush = Brush.radialGradient(
-            colors = listOf(
-                Colors.Primary.copy(alpha = CanvasGlowAlpha),
-                Colors.CanvasBottom,
+            colorStops = arrayOf(
+                0f to Colors.Primary.copy(alpha = CanvasGlowAlpha),
+                0.55f to Colors.Primary.copy(alpha = CanvasGlowAlpha * 0.35f),
+                1f to Colors.Primary.copy(alpha = 0f),
             ),
-            center = Offset(
-                x = size.width * CanvasGlowCenterXFraction,
-                y = 0f,
-            ),
+            center = center,
+            radius = radius,
         ),
     )
 }

@@ -1,6 +1,7 @@
 package com.robotopia.androidstudiolite.feature.editor.presentation.editor.ui
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +29,9 @@ internal fun EditorScreenContext.EditorOverflowMenu(state: EditorUiState, autoSa
             onSave = { saveDocument(state) },
             showEditorSettings = false,
             showRename = false,
-            modifier = Modifier.padding(top = 48.dp, end = 12.dp),
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(top = 48.dp, end = 12.dp),
         )
     }
 }

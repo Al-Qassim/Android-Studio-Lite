@@ -1,6 +1,7 @@
 package com.robotopia.androidstudiolite.feature.files.presentation.browser.ui
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +26,9 @@ internal fun FileBrowserScreenContext.FileBrowserAddMenu(state: FileBrowserUiSta
         CreateMenu(
             onNewFile = { openCreateFileDialog() },
             onNewFolder = { openCreateFolderDialog() },
-            modifier = Modifier.padding(top = 48.dp, end = 12.dp),
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(top = 48.dp, end = 12.dp),
         )
     }
 }
