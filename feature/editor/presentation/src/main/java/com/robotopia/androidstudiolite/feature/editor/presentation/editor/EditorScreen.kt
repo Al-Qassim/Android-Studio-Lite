@@ -4,16 +4,13 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
-import com.robotopia.androidstudiolite.designsystem.component.Toast
+import com.robotopia.androidstudiolite.designsystem.component.ToastBottom
 import com.robotopia.androidstudiolite.designsystem.component.TopBarEditorMore
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.dismissToast
 import com.robotopia.androidstudiolite.feature.editor.presentation.editor.logic.loadDocument
@@ -70,12 +67,9 @@ internal fun EditorScreenContext.EditorScreen(state: EditorUiState) {
         }
 
         state.toast?.let { toast ->
-            Toast(
+            ToastBottom(
                 message = toast.message,
                 variant = toast.variant,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 24.dp),
             )
         }
     }
