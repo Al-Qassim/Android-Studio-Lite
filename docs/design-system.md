@@ -9,6 +9,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Layer | Location |
 | --- | --- |
 | Tokens / components | `designsystem/` |
+| Example screen previews | `designsystem/.../preview/ExampleScreensPreviews.kt` (Compose Preview picker) |
 | Feature UI | `feature/*/presentation/` |
 | Visual direction | JetBrains New UI / Islands spirit — calm, compact, dark; implement in code |
 
