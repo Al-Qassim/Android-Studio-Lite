@@ -9,11 +9,6 @@ import androidx.activity.enableEdgeToEdge
 import com.robotopia.androidstudiolite.integration.navigation.IdeNavHost
 import com.robotopia.androidstudiolite.ui.theme.AndroidStudioLiteTheme
 
-/**
- * Activity shell only — no design padding or background.
- * Screens / [com.robotopia.androidstudiolite.designsystem.component.IslandScaffold]
- * draw canvas under the system bars and apply insets to interactive content.
- */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -25,21 +25,19 @@ private val IslandCorner = 12.dp
 private val IslandGap = 6.dp
 private val IslandEdge = 8.dp
 
-/** Radial glow sits at 20% of canvas width, pinned to the top edge. */
 private const val CanvasGlowCenterXFraction = 0.2f
 private const val CanvasGlowAlpha = 0.5f
-/** Glow radius as a fraction of the longer side — keeps the falloff inside bounds. */
 private const val CanvasGlowRadiusFraction = 0.95f
 
 /**
  * Islands-style screen chrome (Android Studio New UI).
  *
- * - **Canvas:** radial primary glow on a dark sea (draws edge-to-edge under system bars).
- * - **Top bar:** sits on the canvas below the status bar inset.
+ * - **Canvas:** radial primary glow on a dark sea, edge-to-edge under system bars.
+ * - **Top bar:** on the canvas, below the status-bar inset.
  * - **Body:** darker rounded island (files list, editor, …).
  * - **Footer:** optional strip inside the same island, under an [InsetDivider]
- *   (e.g. [MoveBar], Cancel) — not a second island.
- * - **Insets:** status/navigation bar padding is applied here — not in the Activity.
+ *   (e.g. [MoveBar], Cancel).
+ * - **Insets:** status and navigation bar padding for chrome content.
  */
 @Composable
 fun IslandScaffold(
@@ -101,7 +99,6 @@ fun IslandPanel(
 }
 
 private fun Modifier.islandCanvasBackground(): Modifier = drawBehind {
-    // Solid sea first so edges never show a hard-clipped glow against a different color.
     drawRect(color = Colors.CanvasBottom)
     val center = Offset(
         x = size.width * CanvasGlowCenterXFraction,
