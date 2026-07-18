@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 @Composable
@@ -30,14 +30,14 @@ fun EmptyState(
         BasicText(
             text = title,
             style = Typography.Subtitle.copy(
-                color = Colors.Text,
+                color = Theme.colors.Text,
                 textAlign = TextAlign.Center,
             ),
         )
         BasicText(
             text = hint,
             style = Typography.Body.copy(
-                color = Colors.Muted,
+                color = Theme.colors.Muted,
                 textAlign = TextAlign.Center,
             ),
         )

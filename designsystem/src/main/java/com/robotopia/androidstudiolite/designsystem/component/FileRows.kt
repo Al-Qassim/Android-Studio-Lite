@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconChevron
 import com.robotopia.androidstudiolite.designsystem.icon.IconFile
 import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
@@ -45,11 +45,11 @@ fun FileRow(
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconFile(tint = Colors.Muted, size = 20.dp)
+        IconFile(tint = Theme.colors.Muted, size = 20.dp)
         Spacer(modifier = Modifier.width(10.dp))
         BasicText(
             text = name,
-            style = Typography.Body.copy(color = Colors.Text),
+            style = Typography.Body.copy(color = Theme.colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -65,7 +65,7 @@ fun FileRow(
                 )
             }
             showChevron -> {
-                IconChevron(tint = Colors.Muted, size = 16.dp)
+                IconChevron(tint = Theme.colors.Muted, size = 16.dp)
             }
         }
     }
@@ -92,11 +92,11 @@ fun FolderRow(
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconFolder(tint = Colors.Muted, size = 20.dp)
+        IconFolder(tint = Theme.colors.Muted, size = 20.dp)
         Spacer(modifier = Modifier.width(10.dp))
         BasicText(
             text = name,
-            style = Typography.Body.copy(color = Colors.Text),
+            style = Typography.Body.copy(color = Theme.colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),

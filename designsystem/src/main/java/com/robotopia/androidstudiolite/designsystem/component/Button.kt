@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconAdd
 import com.robotopia.androidstudiolite.designsystem.icon.IconBack
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
@@ -57,23 +57,23 @@ fun Button(
     val shape = RoundedCornerShape(8.dp)
     val isEnabled = enabled && variant != ButtonVariant.Disabled
     val background = when (variant) {
-        ButtonVariant.Primary -> Colors.Primary
+        ButtonVariant.Primary -> Theme.colors.Primary
         ButtonVariant.Secondary -> Color.Transparent
-        ButtonVariant.Neutral -> Colors.Bg
-        ButtonVariant.Disabled -> Colors.Disabled
-        ButtonVariant.Danger -> Colors.Danger
+        ButtonVariant.Neutral -> Theme.colors.Bg
+        ButtonVariant.Disabled -> Theme.colors.Disabled
+        ButtonVariant.Danger -> Theme.colors.Danger
         ButtonVariant.DangerText, ButtonVariant.TextAction -> Color.Transparent
     }
     val contentColor = when (variant) {
-        ButtonVariant.Primary -> Colors.OnPrimary
-        ButtonVariant.Secondary, ButtonVariant.Neutral -> Colors.Text
-        ButtonVariant.Disabled -> Colors.Muted
-        ButtonVariant.Danger -> Colors.Text
-        ButtonVariant.DangerText -> Colors.Danger
-        ButtonVariant.TextAction -> Colors.Primary
+        ButtonVariant.Primary -> Theme.colors.OnPrimary
+        ButtonVariant.Secondary, ButtonVariant.Neutral -> Theme.colors.Text
+        ButtonVariant.Disabled -> Theme.colors.Muted
+        ButtonVariant.Danger -> Theme.colors.Text
+        ButtonVariant.DangerText -> Theme.colors.Danger
+        ButtonVariant.TextAction -> Theme.colors.Primary
     }
     val borderColor = when (variant) {
-        ButtonVariant.Secondary -> Colors.Border
+        ButtonVariant.Secondary -> Theme.colors.Border
         else -> Color.Transparent
     }
     val iconSize = 16.dp
@@ -120,18 +120,18 @@ fun IconButton(
 ) {
     val shape = RoundedCornerShape(8.dp)
     val background = when (variant) {
-        IconButtonVariant.Primary -> Colors.Primary
+        IconButtonVariant.Primary -> Theme.colors.Primary
         IconButtonVariant.Secondary -> Color.Transparent
         IconButtonVariant.Ghost, IconButtonVariant.Danger -> Color.Transparent
     }
     val contentColor = when (variant) {
-        IconButtonVariant.Primary -> Colors.OnPrimary
-        IconButtonVariant.Secondary -> Colors.Text
-        IconButtonVariant.Ghost -> Colors.Text
-        IconButtonVariant.Danger -> Colors.Danger
+        IconButtonVariant.Primary -> Theme.colors.OnPrimary
+        IconButtonVariant.Secondary -> Theme.colors.Text
+        IconButtonVariant.Ghost -> Theme.colors.Text
+        IconButtonVariant.Danger -> Theme.colors.Danger
     }
     val borderColor = when (variant) {
-        IconButtonVariant.Secondary -> Colors.Border
+        IconButtonVariant.Secondary -> Theme.colors.Border
         else -> Color.Transparent
     }
 

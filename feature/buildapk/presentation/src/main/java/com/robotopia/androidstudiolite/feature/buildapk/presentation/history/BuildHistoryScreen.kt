@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.robotopia.androidstudiolite.designsystem.animation.aslNavFade
+import com.robotopia.androidstudiolite.designsystem.animation.navFade
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildHistoryStore
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
@@ -34,7 +34,7 @@ internal fun BuildHistoryScreen(
     AnimatedContent(
         targetState = route,
         modifier = Modifier.fillMaxSize(),
-        transitionSpec = { aslNavFade() },
+        transitionSpec = { navFade() },
         label = "buildHistoryNav",
     ) { current ->
         when (current) {

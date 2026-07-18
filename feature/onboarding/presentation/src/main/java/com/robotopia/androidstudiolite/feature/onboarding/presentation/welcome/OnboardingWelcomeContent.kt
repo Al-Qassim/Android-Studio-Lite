@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
@@ -39,7 +39,7 @@ internal fun OnboardingWelcomeContent(
     ) {
         OnboardingCenteredMessage(
             illustration = {
-                IconApk(tint = Colors.Primary, size = 40.dp)
+                IconApk(tint = Theme.colors.Primary, size = 40.dp)
             },
             title = "Edit and build Android apps on your phone.",
             body = "Create a project, edit code, run a cloud build, and install the APK.",

@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.icon.IconWarning
@@ -19,17 +19,17 @@ internal fun BuildHistoryPhaseIcon(
     when (phase) {
         BuildPhase.ReadyToInstall -> IconSuccess(
             modifier = modifier,
-            tint = Colors.Run,
+            tint = Theme.colors.Run,
             size = size,
         )
         BuildPhase.Failed -> IconWarning(
             modifier = modifier,
-            tint = Colors.Danger,
+            tint = Theme.colors.Danger,
             size = size,
         )
         BuildPhase.Cancelled -> IconWarning(
             modifier = modifier,
-            tint = Colors.Muted,
+            tint = Theme.colors.Muted,
             size = size,
         )
         BuildPhase.Preparing,

@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 /** Compact surface card for project/account summaries. */
@@ -27,24 +27,24 @@ fun InfoCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(Colors.Surface2)
+            .background(Theme.colors.Surface2)
             .padding(horizontal = 14.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         if (!label.isNullOrBlank()) {
             BasicText(
                 text = label,
-                style = Typography.Label.copy(color = Colors.Muted),
+                style = Typography.Label.copy(color = Theme.colors.Muted),
             )
         }
         BasicText(
             text = title,
-            style = Typography.Subtitle.copy(color = Colors.Text),
+            style = Typography.Subtitle.copy(color = Theme.colors.Text),
         )
         if (!subtitle.isNullOrBlank()) {
             BasicText(
                 text = subtitle,
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(color = Theme.colors.Muted),
             )
         }
     }

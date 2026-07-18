@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 enum class TransferBarMode {
@@ -49,11 +49,11 @@ fun MoveBar(
     ) {
         BasicText(
             text = prefix,
-            style = Typography.BodyMedium.copy(color = Colors.Muted),
+            style = Typography.BodyMedium.copy(color = Theme.colors.Muted),
         )
         BasicText(
             text = name,
-            style = Typography.BodyStrong.copy(color = Colors.Text),
+            style = Typography.BodyStrong.copy(color = Theme.colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),

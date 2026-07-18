@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.robotopia.androidstudiolite.designsystem.animation.aslNavFade
+import com.robotopia.androidstudiolite.designsystem.animation.navFade
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
@@ -58,7 +58,7 @@ private fun ProjectsNavHost(
     AnimatedContent(
         targetState = route,
         modifier = Modifier.fillMaxSize(),
-        transitionSpec = { aslNavFade() },
+        transitionSpec = { navFade() },
         label = "projectsNav",
     ) { current ->
         when (current) {

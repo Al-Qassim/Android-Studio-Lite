@@ -5,7 +5,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Menu
 import com.robotopia.androidstudiolite.designsystem.component.MenuItem
 import com.robotopia.androidstudiolite.designsystem.icon.IconSave
@@ -56,7 +56,7 @@ internal fun EditorScreenContext.EditorOverflowMenu(
                     label = "Auto save",
                     onClick = { toggleAutoSave(state) },
                     trailing = if (autoSave) {
-                        { IconSuccess(tint = Colors.Primary, size = EditorMenuCheckSize) }
+                        { IconSuccess(tint = Theme.colors.Primary, size = EditorMenuCheckSize) }
                     } else {
                         null
                     },
@@ -67,7 +67,7 @@ internal fun EditorScreenContext.EditorOverflowMenu(
                     onClick = { toggleWrapText() },
                     icon = { tint, size -> IconWrapText(tint = tint, size = size) },
                     trailing = if (wrapText) {
-                        { IconSuccess(tint = Colors.Primary, size = EditorMenuCheckSize) }
+                        { IconSuccess(tint = Theme.colors.Primary, size = EditorMenuCheckSize) }
                     } else {
                         null
                     },

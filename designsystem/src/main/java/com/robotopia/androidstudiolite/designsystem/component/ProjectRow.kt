@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.modifier.insetClickable
@@ -54,14 +54,14 @@ fun ProjectRow(
         Column(modifier = Modifier.weight(1f)) {
             BasicText(
                 text = name,
-                style = Typography.Headline.copy(color = Colors.Text),
+                style = Typography.Headline.copy(color = Theme.colors.Text),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(modifier = Modifier.height(4.dp))
             BasicText(
                 text = packageName,
-                style = Typography.Code.copy(color = Colors.Muted),
+                style = Typography.Code.copy(color = Theme.colors.Muted),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -69,7 +69,7 @@ fun ProjectRow(
                 Spacer(modifier = Modifier.height(6.dp))
                 BasicText(
                     text = meta,
-                    style = Typography.Caption.copy(color = Colors.Muted2),
+                    style = Typography.Caption.copy(color = Theme.colors.Muted2),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -104,7 +104,7 @@ private fun ProjectRowPreview() {
             meta = "Opened yesterday",
             selected = true,
             onMenuClick = {},
-            leading = { IconSuccess(tint = Colors.Run, size = 20.dp) },
+            leading = { IconSuccess(tint = Theme.colors.Run, size = 20.dp) },
         )
         ProjectRow(
             name = "WeatherDemo",

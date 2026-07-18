@@ -8,7 +8,8 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.ColorScheme
+import com.robotopia.androidstudiolite.designsystem.color.DarkColorScheme
 
 private val KotlinKeywords = setOf(
     "as", "break", "class", "continue", "do", "else", "false", "for", "fun",
@@ -32,53 +33,56 @@ private val KotlinKeywords = setOf(
  * names (identifier followed by `(`). Not a full parser — good enough for
  * readable editing in Android Studio Lite.
  */
-fun highlightCode(code: String): AnnotatedString = buildAnnotatedString {
+fun highlightCode(
+    code: String,
+    colors: ColorScheme = DarkColorScheme,
+): AnnotatedString = buildAnnotatedString {
     var i = 0
     while (i < code.length) {
         when {
             code.startsWith("//", i) -> {
                 val end = code.indexOf('\n', i).let { if (it < 0) code.length else it }
-                appendStyled(code, i, end, Colors.CodeComment)
+                appendStyled(code, i, end, colors.CodeComment)
                 i = end
             }
             code.startsWith("/*", i) -> {
                 val end = code.indexOf("*/", i + 2).let { if (it < 0) code.length else it + 2 }
-                appendStyled(code, i, end, Colors.CodeComment)
+                appendStyled(code, i, end, colors.CodeComment)
                 i = end
             }
             code[i] == '"' -> {
                 val end = endOfString(code, i)
-                appendStyled(code, i, end, Colors.CodeString)
+                appendStyled(code, i, end, colors.CodeString)
                 i = end
             }
             code[i] == '\'' -> {
                 val end = endOfCharLiteral(code, i)
-                appendStyled(code, i, end, Colors.CodeString)
+                appendStyled(code, i, end, colors.CodeString)
                 i = end
             }
             code[i] == '@' -> {
                 val end = endOfIdentifier(code, i + 1)
-                appendStyled(code, i, end, Colors.CodeAnnotation)
+                appendStyled(code, i, end, colors.CodeAnnotation)
                 i = end
             }
             code[i].isDigit() -> {
                 val end = endOfNumber(code, i)
-                appendStyled(code, i, end, Colors.CodeNumber)
+                appendStyled(code, i, end, colors.CodeNumber)
                 i = end
             }
             code[i].isKotlinIdentStart() -> {
                 val end = endOfIdentifier(code, i)
                 val word = code.substring(i, end)
                 val color = when {
-                    word in KotlinKeywords -> Colors.CodeKeyword
-                    isFollowedByParen(code, end) -> Colors.CodeFunction
-                    else -> Colors.Text
+                    word in KotlinKeywords -> colors.CodeKeyword
+                    isFollowedByParen(code, end) -> colors.CodeFunction
+                    else -> colors.Text
                 }
                 appendStyled(code, i, end, color)
                 i = end
             }
             else -> {
-                withStyle(SpanStyle(color = Colors.Text)) {
+                withStyle(SpanStyle(color = colors.Text)) {
                     append(code[i])
                 }
                 i++
@@ -87,10 +91,15 @@ fun highlightCode(code: String): AnnotatedString = buildAnnotatedString {
     }
 }
 
-/** [VisualTransformation] that applies [highlightCode] without shifting offsets. */
-val CodeHighlightTransformation = VisualTransformation { text ->
-    TransformedText(highlightCode(text.text), OffsetMapping.Identity)
+/** [VisualTransformation] that applies [highlightCode] for [colors]. */
+fun codeHighlightTransformation(
+    colors: ColorScheme = DarkColorScheme,
+): VisualTransformation = VisualTransformation { text ->
+    TransformedText(highlightCode(text.text, colors), OffsetMapping.Identity)
 }
+
+/** Dark-scheme highlight transform (default product theme). */
+val CodeHighlightTransformation = codeHighlightTransformation(DarkColorScheme)
 
 private fun AnnotatedString.Builder.appendStyled(
     code: String,

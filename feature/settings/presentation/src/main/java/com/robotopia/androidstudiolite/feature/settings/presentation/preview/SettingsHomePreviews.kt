@@ -9,6 +9,7 @@ import com.robotopia.androidstudiolite.feature.settings.presentation.home.Settin
 internal data class SettingsHomePreviewCase(
     private val label: String,
     val buildAccountSubtitle: String,
+    val themeSubtitle: String,
 ) {
     override fun toString(): String = label
 }
@@ -17,8 +18,16 @@ internal class SettingsHomePreviewProvider : PreviewParameterProvider<SettingsHo
     override fun getDisplayName(index: Int): String = values.toList()[index].toString()
 
     override val values = sequenceOf(
-        SettingsHomePreviewCase("logged out", "Not connected"),
-        SettingsHomePreviewCase("connected", "GitHub · @alex-dev"),
+        SettingsHomePreviewCase(
+            label = "logged out",
+            buildAccountSubtitle = "Not connected",
+            themeSubtitle = "Dark",
+        ),
+        SettingsHomePreviewCase(
+            label = "connected · light",
+            buildAccountSubtitle = "GitHub · @alex-dev",
+            themeSubtitle = "Light",
+        ),
     )
 }
 
@@ -29,7 +38,9 @@ private fun SettingsHomePreview(
 ) {
     SettingsHomeContent(
         buildAccountSubtitle = preview.buildAccountSubtitle,
+        themeSubtitle = preview.themeSubtitle,
         onBackClick = {},
+        onThemeClick = {},
         onBuildAccountClick = {},
         onBuildHistoryClick = {},
     )

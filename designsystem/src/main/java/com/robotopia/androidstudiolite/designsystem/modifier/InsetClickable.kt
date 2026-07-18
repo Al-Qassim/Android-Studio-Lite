@@ -7,11 +7,12 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.LocalColorScheme
 
 private val DefaultInsetHorizontal = 4.dp
 private val DefaultInsetVertical = 2.dp
@@ -30,12 +31,13 @@ fun Modifier.insetClickable(
     horizontalInset: Dp = DefaultInsetHorizontal,
     verticalInset: Dp = DefaultInsetVertical,
     corner: Dp = DefaultCorner,
-): Modifier {
+): Modifier = composed {
+    val selection = LocalColorScheme.current.Selection
     val shape = RoundedCornerShape(corner)
-    return this
+    this
         .padding(horizontal = horizontalInset, vertical = verticalInset)
         .clip(shape)
-        .background(if (selected) Colors.Selection else Color.Transparent)
+        .background(if (selected) selection else Color.Transparent)
         .then(
             if (onLongClick != null) {
                 Modifier.combinedClickable(

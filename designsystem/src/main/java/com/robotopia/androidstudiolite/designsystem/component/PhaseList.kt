@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
@@ -43,7 +43,7 @@ fun PhaseList(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Colors.Surface)
+            .background(Theme.colors.Surface)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -67,10 +67,10 @@ private fun PhaseRow(
         BasicText(
             text = label,
             style = when (status) {
-                PhaseStatus.Current -> Typography.BodyStrong.copy(color = Colors.Text)
-                PhaseStatus.Complete -> Typography.Body.copy(color = Colors.Muted)
-                PhaseStatus.Upcoming -> Typography.Body.copy(color = Colors.Muted2)
-                PhaseStatus.Failed -> Typography.BodyStrong.copy(color = Colors.Danger)
+                PhaseStatus.Current -> Typography.BodyStrong.copy(color = Theme.colors.Text)
+                PhaseStatus.Complete -> Typography.Body.copy(color = Theme.colors.Muted)
+                PhaseStatus.Upcoming -> Typography.Body.copy(color = Theme.colors.Muted2)
+                PhaseStatus.Failed -> Typography.BodyStrong.copy(color = Theme.colors.Danger)
             },
         )
     }
@@ -79,7 +79,7 @@ private fun PhaseRow(
 @Composable
 private fun PhaseStatusIcon(status: PhaseStatus) {
     when (status) {
-        PhaseStatus.Complete -> IconSuccess(tint = Colors.Run, size = 16.dp)
+        PhaseStatus.Complete -> IconSuccess(tint = Theme.colors.Run, size = 16.dp)
         PhaseStatus.Current -> LoadingIndicator(size = 16.dp)
         PhaseStatus.Failed -> Box(
             modifier = Modifier.size(16.dp),
@@ -88,7 +88,7 @@ private fun PhaseStatusIcon(status: PhaseStatus) {
             BasicText(
                 text = "✕",
                 style = Typography.Caption.copy(
-                    color = Colors.Danger,
+                    color = Theme.colors.Danger,
                     textAlign = TextAlign.Center,
                 ),
             )
@@ -97,7 +97,7 @@ private fun PhaseStatusIcon(status: PhaseStatus) {
             modifier = Modifier
                 .size(16.dp)
                 .clip(RoundedCornerShape(999.dp))
-                .background(Colors.Disabled),
+                .background(Theme.colors.Disabled),
         )
     }
 }

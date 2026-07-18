@@ -9,12 +9,13 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Layer | Location |
 | --- | --- |
 | Tokens / components | `designsystem/` — tokens + reusable Compose components only (no product screens). UI type: Inter; code/gutter: JetBrains Mono (`Typography.Code` / `CodeGutter`). |
+| Color themes | `ColorScheme` + `Theme(colors) { … }` / `Theme.colors`. Schemes: `DarkColorScheme`, `LightColorScheme`, `DraculaColorScheme`. User picks in Settings → Theme (`ThemePreferences`); app root wraps with `Theme` so the whole IDE updates. Prefs default Dark. DS previews: `preview/ThemeExampleScreens.kt` + color swatches. |
 | Composable UI | `designsystem/.../component/` — bars, rows, dialogs, scaffold, etc. |
 | Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable`, `overlayEnter` (not under `component/`) |
 | Menus | One `Menu(items)` composable; items are `MenuItem.Button` or `MenuItem.Divider`. Screens build the list; DS keeps example previews only |
 | Overlay motion | Menus / dialogs use `overlayEnter` (short fade + scale) on their surfaces — feature Popup/Dialog hosts stay thin |
 | Popup position | Position menus with `Popup(offset = topEndPopupOffset(…))` — do **not** pad/statusBarsPadding the menu content. Top-bar menus (`includeStatusBars = true`) must be composed **outside** `IslandScaffold`’s body (sibling of the scaffold, like `FileBrowserAddMenu`) so the popup is window-scoped; row overflow menus stay inside their row `Box` without status-bar inset |
-| Nav motion | Custom route hosts use `AnimatedContent` + `aslNavFade()` — enter/exit cross-fade; exit starts after a short delay |
+| Nav motion | Custom route hosts use `AnimatedContent` + `navFade()` — enter/exit cross-fade; exit starts after a short delay |
 | Editor helpers | `designsystem/.../editor/` — e.g. `highlightCode` |
 | Feature UI | `feature/*/presentation/` — real screens; compose DS components |
 | Screen previews | `feature/*/presentation/.../preview/` — `@Preview` composables + fixtures that call **real** Screen/Content (not on Screen/Content files; not duplicated fake screens). Preview `backgroundColor` `0xFF2B2D30` (canvas). Do not name a folder `build` — gitignores `**/build/`. |

@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.robotopia.androidstudiolite.designsystem.animation.aslNavFade
+import com.robotopia.androidstudiolite.designsystem.animation.navFade
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildRequest
 import com.robotopia.androidstudiolite.feature.editor.api.EditorScreens
@@ -22,7 +22,7 @@ import com.robotopia.androidstudiolite.feature.settings.api.SettingsScreens
 import org.koin.compose.koinInject
 
 /**
- * IDE root: switches between feature sub-navigations with [aslNavFade].
+ * IDE root: switches between feature sub-navigations with [navFade].
  * Feature-internal multi-step hosts use the same fade.
  *
  * Cross-feature [IdeRoute] is [rememberSaveable] so Activity recreation
@@ -47,7 +47,7 @@ fun IdeNavHost() {
     AnimatedContent(
         targetState = route,
         modifier = Modifier.fillMaxSize(),
-        transitionSpec = { aslNavFade() },
+        transitionSpec = { navFade() },
         label = "ideNav",
     ) { current ->
         when (current) {

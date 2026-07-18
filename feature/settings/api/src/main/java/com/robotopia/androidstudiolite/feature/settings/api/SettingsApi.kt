@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 
 interface SettingsScreens {
     /**
-     * Settings hub. Owns in-feature navigation to sections (Build account today)
+     * Settings hub. Owns in-feature navigation (theme, build account, history)
      * and into auth Connect from Build account.
      */
     @Composable

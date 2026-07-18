@@ -1,35 +1,65 @@
 package com.robotopia.androidstudiolite.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import androidx.compose.runtime.remember
+import com.robotopia.androidstudiolite.designsystem.color.ColorScheme
+import com.robotopia.androidstudiolite.designsystem.color.DarkColorScheme
+import com.robotopia.androidstudiolite.designsystem.color.DraculaColorScheme
+import com.robotopia.androidstudiolite.designsystem.color.LightColorScheme
+import com.robotopia.androidstudiolite.designsystem.color.Theme
+import com.robotopia.androidstudiolite.feature.settings.api.AppTheme
 
-private val AslDarkColorScheme = darkColorScheme(
-    primary = Colors.Primary,
-    onPrimary = Colors.OnPrimary,
-    secondary = Colors.Muted,
-    onSecondary = Colors.Text,
-    background = Colors.Canvas,
-    onBackground = Colors.Text,
-    surface = Colors.Surface,
-    onSurface = Colors.Text,
-    error = Colors.Danger,
-    onError = Colors.Text,
-)
+fun AppTheme.toColorScheme(): ColorScheme = when (this) {
+    AppTheme.Dark -> DarkColorScheme
+    AppTheme.Light -> LightColorScheme
+    AppTheme.Dracula -> DraculaColorScheme
+}
+
+val AppTheme.usesLightSystemBars: Boolean
+    get() = this == AppTheme.Light
 
 @Composable
 fun AndroidStudioLiteTheme(
-    darkTheme: Boolean = true,
-    dynamicColor: Boolean = false,
+    appTheme: AppTheme = AppTheme.Dark,
     content: @Composable () -> Unit,
 ) {
-    // ASL is a dark IDE shell; ignore system/dynamic light schemes for v0.1.
-    val colorScheme = AslDarkColorScheme
+    val colors = remember(appTheme) { appTheme.toColorScheme() }
+    val materialScheme = remember(colors, appTheme) {
+        if (appTheme == AppTheme.Light) {
+            lightColorScheme(
+                primary = colors.Primary,
+                onPrimary = colors.OnPrimary,
+                secondary = colors.Muted,
+                onSecondary = colors.Text,
+                background = colors.Canvas,
+                onBackground = colors.Text,
+                surface = colors.Surface,
+                onSurface = colors.Text,
+                error = colors.Danger,
+                onError = colors.OnPrimary,
+            )
+        } else {
+            darkColorScheme(
+                primary = colors.Primary,
+                onPrimary = colors.OnPrimary,
+                secondary = colors.Muted,
+                onSecondary = colors.Text,
+                background = colors.Canvas,
+                onBackground = colors.Text,
+                surface = colors.Surface,
+                onSurface = colors.Text,
+                error = colors.Danger,
+                onError = colors.Text,
+            )
+        }
+    }
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = materialScheme,
         typography = Typography,
-        content = content,
-    )
+    ) {
+        Theme(colors = colors, content = content)
+    }
 }

@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconCopy
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
@@ -33,13 +33,13 @@ fun UserCodeRow(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(Colors.Surface2)
+            .background(Theme.colors.Surface2)
             .padding(horizontal = 10.dp, vertical = 10.dp),
     ) {
         BasicText(
             text = code,
             style = Typography.Headline.copy(
-                color = Colors.Text,
+                color = Theme.colors.Text,
                 fontSize = 24.sp,
                 lineHeight = 30.sp,
                 letterSpacing = 1.5.sp,
@@ -57,7 +57,7 @@ fun UserCodeRow(
                 .align(Alignment.CenterEnd)
                 .semantics { contentDescription = "Copy code" },
             variant = IconButtonVariant.Ghost,
-            icon = { _, size -> IconCopy(tint = Colors.Primary, size = size) },
+            icon = { _, size -> IconCopy(tint = Theme.colors.Primary, size = size) },
         )
     }
 }

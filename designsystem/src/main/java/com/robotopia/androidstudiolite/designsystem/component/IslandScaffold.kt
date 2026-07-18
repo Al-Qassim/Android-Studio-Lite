@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -19,7 +20,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
+import com.robotopia.androidstudiolite.designsystem.color.LocalColorScheme
 
 private val IslandCorner = 12.dp
 private val IslandGap = 6.dp
@@ -93,29 +95,33 @@ fun IslandPanel(
     Column(
         modifier = modifier
             .clip(shape)
-            .background(Colors.Bg),
+            .background(Theme.colors.Bg),
         content = content,
     )
 }
 
-private fun Modifier.islandCanvasBackground(): Modifier = drawBehind {
-    drawRect(color = Colors.CanvasBottom)
-    val center = Offset(
-        x = size.width * CanvasGlowCenterXFraction,
-        y = 0f,
-    )
-    val radius = maxOf(size.width, size.height) * CanvasGlowRadiusFraction
-    drawRect(
-        brush = Brush.radialGradient(
-            colorStops = arrayOf(
-                0f to Colors.Primary.copy(alpha = CanvasGlowAlpha),
-                0.55f to Colors.Primary.copy(alpha = CanvasGlowAlpha * 0.35f),
-                1f to Colors.Primary.copy(alpha = 0f),
+private fun Modifier.islandCanvasBackground(): Modifier = composed {
+    val canvasBottom = LocalColorScheme.current.CanvasBottom
+    val primary = LocalColorScheme.current.Primary
+    this.drawBehind {
+        drawRect(color = canvasBottom)
+        val center = Offset(
+            x = size.width * CanvasGlowCenterXFraction,
+            y = 0f,
+        )
+        val radius = maxOf(size.width, size.height) * CanvasGlowRadiusFraction
+        drawRect(
+            brush = Brush.radialGradient(
+                colorStops = arrayOf(
+                    0f to primary.copy(alpha = CanvasGlowAlpha),
+                    0.55f to primary.copy(alpha = CanvasGlowAlpha * 0.35f),
+                    1f to primary.copy(alpha = 0f),
+                ),
+                center = center,
+                radius = radius,
             ),
-            center = center,
-            radius = radius,
-        ),
-    )
+        )
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)

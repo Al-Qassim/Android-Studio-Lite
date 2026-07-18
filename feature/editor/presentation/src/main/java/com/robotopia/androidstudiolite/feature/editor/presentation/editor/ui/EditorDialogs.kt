@@ -18,7 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
@@ -58,17 +58,17 @@ private fun UnsavedLeaveDialog(
             .width(320.dp)
             .shadow(12.dp, shape)
             .clip(shape)
-            .background(Colors.Surface)
+            .background(Theme.colors.Surface)
             .padding(20.dp),
     ) {
         BasicText(
             text = "Unsaved changes",
-            style = Typography.Headline.copy(color = Colors.Text),
+            style = Typography.Headline.copy(color = Theme.colors.Text),
         )
         Spacer(modifier = Modifier.height(12.dp))
         BasicText(
             text = "$fileName has unsaved edits. Save before leaving?",
-            style = Typography.Body.copy(color = Colors.Muted),
+            style = Typography.Body.copy(color = Theme.colors.Muted),
         )
         Spacer(modifier = Modifier.height(20.dp))
         Row(

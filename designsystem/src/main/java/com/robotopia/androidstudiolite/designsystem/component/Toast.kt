@@ -15,7 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.icon.IconWarning
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
@@ -43,18 +43,18 @@ fun Toast(
         modifier = modifier
             .shadow(6.dp, shape)
             .clip(shape)
-            .background(Colors.Surface)
+            .background(Theme.colors.Surface)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         when (variant) {
-            ToastVariant.Success -> IconSuccess(tint = Colors.Primary, size = 18.dp)
-            ToastVariant.Error -> IconWarning(tint = Colors.Danger, size = 18.dp)
+            ToastVariant.Success -> IconSuccess(tint = Theme.colors.Primary, size = 18.dp)
+            ToastVariant.Error -> IconWarning(tint = Theme.colors.Danger, size = 18.dp)
         }
         BasicText(
             text = message,
-            style = Typography.BodyMedium.copy(color = Colors.Text),
+            style = Typography.BodyMedium.copy(color = Theme.colors.Text),
         )
     }
 }

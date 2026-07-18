@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.InfoCard
@@ -66,7 +66,7 @@ internal fun BuildAccountContent(
         ) {
             BasicText(
                 text = account?.providerName ?: providerDisplayName,
-                style = Typography.Headline.copy(color = Colors.Text),
+                style = Typography.Headline.copy(color = Theme.colors.Text),
             )
             if (account == null) {
                 InfoCard(title = "Not connected")

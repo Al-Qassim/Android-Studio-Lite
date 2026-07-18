@@ -26,14 +26,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.R
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 @Composable
 private fun VectorIcon(
     drawableResId: Int,
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) {
     Image(
@@ -47,112 +47,112 @@ private fun VectorIcon(
 @Composable
 fun IconBack(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_back, modifier, tint, size)
 
 @Composable
 fun IconAdd(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_add, modifier, tint, size)
 
 @Composable
 fun IconMore(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_more, modifier, tint, size)
 
 @Composable
 fun IconChevron(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_chevron, modifier, tint, size)
 
 @Composable
 fun IconFolder(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_folder, modifier, tint, size)
 
 @Composable
 fun IconFile(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_file, modifier, tint, size)
 
 @Composable
 fun IconRun(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Run,
+    tint: Color = Theme.colors.Run,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_run, modifier, tint, size)
 
 @Composable
 fun IconCloud(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_cloud, modifier, tint, size)
 
 @Composable
 fun IconSuccess(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_success, modifier, tint, size)
 
 @Composable
 fun IconCopy(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_copy, modifier, tint, size)
 
 @Composable
 fun IconSave(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_save, modifier, tint, size)
 
 @Composable
 fun IconWrapText(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_wrap_text, modifier, tint, size)
 
 @Composable
 fun IconSettings(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_settings, modifier, tint, size)
 
 @Composable
 fun IconApk(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_apk, modifier, tint, size)
 
 @Composable
 fun IconWarning(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_warning, modifier, tint, size)
 
 @Composable
 fun IconLocked(
     modifier: Modifier = Modifier,
-    tint: Color = Colors.Text,
+    tint: Color = Theme.colors.Text,
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_locked, modifier, tint, size)
 
@@ -190,11 +190,11 @@ private fun IconsPreview() {
     ) {
         BasicText(
             text = "Icons",
-            style = Typography.Display.copy(color = Colors.Text),
+            style = Typography.Display.copy(color = Theme.colors.Text),
         )
         BasicText(
             text = "Lucide SVG → Android vector drawables",
-            style = Typography.Caption.copy(color = Colors.Muted2),
+            style = Typography.Caption.copy(color = Theme.colors.Muted2),
         )
         Spacer(modifier = Modifier.height(8.dp))
         items.chunked(2).forEach { row ->
@@ -224,8 +224,8 @@ private fun IconPreviewCell(
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(Colors.Surface)
-            .border(1.dp, Colors.Border, RoundedCornerShape(8.dp))
+            .background(Theme.colors.Surface)
+            .border(1.dp, Theme.colors.Border, RoundedCornerShape(8.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -239,11 +239,11 @@ private fun IconPreviewCell(
         Column(modifier = Modifier.weight(1f)) {
             BasicText(
                 text = item.name,
-                style = Typography.BodyMedium.copy(color = Colors.Text),
+                style = Typography.BodyMedium.copy(color = Theme.colors.Text),
             )
             BasicText(
                 text = item.usage,
-                style = Typography.Caption.copy(color = Colors.Muted2),
+                style = Typography.Caption.copy(color = Theme.colors.Muted2),
             )
         }
     }

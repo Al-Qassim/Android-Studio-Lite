@@ -11,10 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
@@ -175,25 +176,25 @@ private fun HistoryDetailReadyBody(
             state.message?.takeIf { it.isNotBlank() }?.let { message ->
                 BasicText(
                     text = message,
-                    style = Typography.Body.copy(color = Colors.Muted),
+                    style = Typography.Body.copy(color = Theme.colors.Muted),
                 )
             }
             state.error?.takeIf { it.isNotBlank() }?.let { error ->
                 BasicText(
                     text = error,
-                    style = Typography.Body.copy(color = Colors.Danger),
+                    style = Typography.Body.copy(color = Theme.colors.Danger),
                 )
             }
             if (showInstall && !state.canInstall && !state.isInstalling) {
                 BasicText(
                     text = "APK is no longer available on this device.",
-                    style = Typography.Body.copy(color = Colors.Muted),
+                    style = Typography.Body.copy(color = Theme.colors.Muted),
                 )
             }
             state.installError?.takeIf { it.isNotBlank() }?.let { installError ->
                 BasicText(
                     text = installError,
-                    style = Typography.Body.copy(color = Colors.Danger),
+                    style = Typography.Body.copy(color = Theme.colors.Danger),
                 )
             }
             val logUrl = state.logUrl
@@ -228,7 +229,7 @@ private fun HistoryDetailStatusHeader(
             if (!providerName.isNullOrBlank()) {
                 BasicText(
                     text = "via $providerName",
-                    style = Typography.Caption.copy(color = Colors.Muted),
+                    style = Typography.Caption.copy(color = Theme.colors.Muted),
                 )
             }
         }
@@ -243,19 +244,21 @@ private fun HistoryDetailLine(
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         BasicText(
             text = label,
-            style = Typography.Caption.copy(color = Colors.Muted2),
+            style = Typography.Caption.copy(color = Theme.colors.Muted2),
         )
         BasicText(
             text = value,
-            style = Typography.Body.copy(color = Colors.Text),
+            style = Typography.Body.copy(color = Theme.colors.Text),
         )
     }
 }
 
+@Composable
+@ReadOnlyComposable
 private fun historyPhaseTitleColor(phase: BuildPhase) = when (phase) {
-    BuildPhase.Failed -> Colors.Danger
-    BuildPhase.ReadyToInstall -> Colors.Run
-    else -> Colors.Text
+    BuildPhase.Failed -> Theme.colors.Danger
+    BuildPhase.ReadyToInstall -> Theme.colors.Run
+    else -> Theme.colors.Text
 }
 
 private fun historyDetailPhaseItems(state: BuildHistoryDetailUiState) = when (state.phase) {

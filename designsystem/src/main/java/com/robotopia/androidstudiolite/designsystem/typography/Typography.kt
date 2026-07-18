@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.robotopia.androidstudiolite.designsystem.R
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 
 /**
  * Typography tokens: Inter for UI chrome, JetBrains Mono for code.
@@ -172,13 +172,13 @@ private fun TypographyPreview() {
 
     Column(
         modifier = Modifier
-            .background(Colors.Bg)
+            .background(Theme.colors.Bg)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         BasicText(
             text = "Typography",
-            style = Typography.Display.copy(color = Colors.Text),
+            style = Typography.Display.copy(color = Theme.colors.Text),
         )
         tokens.forEach { token ->
             TypographyPreviewRow(token)
@@ -191,17 +191,17 @@ private fun TypographyPreviewRow(token: TypographyToken) {
     Column(modifier = Modifier.fillMaxWidth()) {
         BasicText(
             text = token.name,
-            style = Typography.Label.copy(color = Colors.Muted),
+            style = Typography.Label.copy(color = Theme.colors.Muted),
         )
         Spacer(modifier = Modifier.height(2.dp))
         BasicText(
             text = token.sample,
-            style = token.style.copy(color = Colors.Text),
+            style = token.style.copy(color = Theme.colors.Text),
         )
         Spacer(modifier = Modifier.height(2.dp))
         BasicText(
             text = token.meta,
-            style = Typography.Caption.copy(color = Colors.Muted2),
+            style = Typography.Caption.copy(color = Theme.colors.Muted2),
         )
     }
 }

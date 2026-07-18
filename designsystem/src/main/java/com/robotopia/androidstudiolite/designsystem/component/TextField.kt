@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 enum class TextFieldVariant {
@@ -44,13 +44,13 @@ fun TextField(
     val shape = RoundedCornerShape(8.dp)
     val showError = isError || !errorMessage.isNullOrBlank()
     val borderColor = when {
-        showError -> Colors.Danger
-        variant == TextFieldVariant.Form -> Colors.Border
+        showError -> Theme.colors.Danger
+        variant == TextFieldVariant.Form -> Theme.colors.Border
         else -> null
     }
     val background = when (variant) {
-        TextFieldVariant.Form -> Colors.Input
-        TextFieldVariant.Dialog -> Colors.Surface2
+        TextFieldVariant.Form -> Theme.colors.Input
+        TextFieldVariant.Dialog -> Theme.colors.Surface2
     }
 
     Column(modifier = modifier) {
@@ -72,22 +72,22 @@ fun TextField(
             if (value.isEmpty() && placeholder.isNotEmpty()) {
                 BasicText(
                     text = placeholder,
-                    style = Typography.Body.copy(color = Colors.Muted),
+                    style = Typography.Body.copy(color = Theme.colors.Muted),
                 )
             }
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
                 singleLine = singleLine,
-                textStyle = Typography.Body.copy(color = Colors.Text),
-                cursorBrush = SolidColor(Colors.Primary),
+                textStyle = Typography.Body.copy(color = Theme.colors.Text),
+                cursorBrush = SolidColor(Theme.colors.Primary),
                 modifier = Modifier.fillMaxWidth(),
             )
         }
         if (!errorMessage.isNullOrBlank()) {
             BasicText(
                 text = errorMessage,
-                style = Typography.Caption.copy(color = Colors.Danger),
+                style = Typography.Caption.copy(color = Theme.colors.Danger),
                 modifier = Modifier.padding(top = 4.dp, start = 4.dp),
             )
         }

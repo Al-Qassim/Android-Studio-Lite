@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.DialogMessageAction
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
@@ -218,7 +218,7 @@ private fun ProjectsList(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp, horizontal = 16.dp)
                     .height(1.dp)
-                    .background(Colors.MenuDivider),
+                    .background(Theme.colors.MenuDivider),
             )
         }
     }

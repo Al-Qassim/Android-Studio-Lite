@@ -16,8 +16,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
-import com.robotopia.androidstudiolite.designsystem.editor.CodeHighlightTransformation
+import com.robotopia.androidstudiolite.designsystem.color.Theme
+import com.robotopia.androidstudiolite.designsystem.color.LocalColorScheme
+import com.robotopia.androidstudiolite.designsystem.editor.codeHighlightTransformation
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 /**
@@ -35,6 +36,8 @@ fun CodeEditorField(
 ) {
     val verticalScroll = rememberScrollState()
     val horizontalScroll = rememberScrollState()
+    val colors = LocalColorScheme.current
+    val highlight = remember(colors) { codeHighlightTransformation(colors) }
     val lineCount = remember(value) { value.count { it == '\n' } + 1 }
     val gutterText = remember(lineCount) {
         buildString(lineCount * 3) {
@@ -61,7 +64,7 @@ fun CodeEditorField(
         BasicText(
             text = gutterText,
             style = Typography.CodeGutter.copy(
-                color = Colors.Gutter,
+                color = Theme.colors.Gutter,
                 textAlign = TextAlign.End,
             ),
             modifier = Modifier
@@ -78,9 +81,9 @@ fun CodeEditorField(
             } else {
                 Modifier
             },
-            textStyle = Typography.Code.copy(color = Colors.Text),
-            cursorBrush = SolidColor(Colors.Primary),
-            visualTransformation = CodeHighlightTransformation,
+            textStyle = Typography.Code.copy(color = Theme.colors.Text),
+            cursorBrush = SolidColor(Theme.colors.Primary),
+            visualTransformation = highlight,
         )
     }
 }

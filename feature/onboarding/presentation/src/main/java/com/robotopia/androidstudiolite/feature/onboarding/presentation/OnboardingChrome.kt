@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 @Composable
@@ -35,7 +35,7 @@ internal fun OnboardingAppTitleBar() {
     ) {
         BasicText(
             text = "Android Studio Lite",
-            style = Typography.TitleNav.copy(color = Colors.Text),
+            style = Typography.TitleNav.copy(color = Theme.colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
@@ -67,7 +67,7 @@ internal fun OnboardingCenteredMessage(
                 modifier = Modifier
                     .size(96.dp)
                     .clip(CircleShape)
-                    .background(Colors.Surface),
+                    .background(Theme.colors.Surface),
                 contentAlignment = Alignment.Center,
             ) {
                 illustration()
@@ -75,14 +75,14 @@ internal fun OnboardingCenteredMessage(
             BasicText(
                 text = title,
                 style = Typography.Headline.copy(
-                    color = Colors.Text,
+                    color = Theme.colors.Text,
                     textAlign = TextAlign.Center,
                 ),
             )
             BasicText(
                 text = body,
                 style = Typography.Body.copy(
-                    color = Colors.Muted,
+                    color = Theme.colors.Muted,
                     textAlign = TextAlign.Center,
                 ),
             )

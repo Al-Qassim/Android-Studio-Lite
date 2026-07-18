@@ -62,6 +62,7 @@ include(":feature:auth:presentation")
 include(":feature:auth:di")
 
 include(":feature:settings:api")
+include(":feature:settings:data")
 include(":feature:settings:presentation")
 include(":feature:settings:di")
 

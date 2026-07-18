@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
@@ -142,7 +142,7 @@ private fun BuildActiveState(state: BuildProgressUiState) {
     ) {
         BuildProgressHeader(
             title = buildPhaseLabel(state.phase),
-            titleColor = Colors.Text,
+            titleColor = Theme.colors.Text,
             message = state.message,
             providerName = state.providerName,
         )
@@ -152,13 +152,13 @@ private fun BuildActiveState(state: BuildProgressUiState) {
         if (state.phase == BuildPhase.ReadyToInstall && state.isInstalling) {
             BasicText(
                 text = "Opening the package installer…",
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(color = Theme.colors.Muted),
             )
         }
         if (state.phase == BuildPhase.ReadyToInstall && !state.installError.isNullOrBlank()) {
             BasicText(
                 text = state.installError,
-                style = Typography.Body.copy(color = Colors.Danger),
+                style = Typography.Body.copy(color = Theme.colors.Danger),
             )
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -177,7 +177,7 @@ private fun BuildFailedState(
     ) {
         BuildProgressHeader(
             title = "Build failed",
-            titleColor = Colors.Danger,
+            titleColor = Theme.colors.Danger,
             message = state.error ?: state.message
                 ?: "Build failed. Open the build log.",
             providerName = state.providerName,
@@ -208,12 +208,12 @@ private fun BuildCancelledState(message: String?) {
     ) {
         BasicText(
             text = "Build cancelled",
-            style = Typography.Headline.copy(color = Colors.Text),
+            style = Typography.Headline.copy(color = Theme.colors.Text),
         )
         BasicText(
             text = message?.takeIf { it.isNotBlank() }
                 ?: "No APK was produced. You can start a new build when you're ready.",
-            style = Typography.Body.copy(color = Colors.Muted),
+            style = Typography.Body.copy(color = Theme.colors.Muted),
         )
     }
 }
@@ -233,13 +233,13 @@ private fun BuildProgressHeader(
         if (!message.isNullOrBlank()) {
             BasicText(
                 text = message,
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(color = Theme.colors.Muted),
             )
         }
         if (!providerName.isNullOrBlank()) {
             BasicText(
                 text = "via $providerName",
-                style = Typography.Caption.copy(color = Colors.Muted),
+                style = Typography.Caption.copy(color = Theme.colors.Muted),
             )
         }
     }

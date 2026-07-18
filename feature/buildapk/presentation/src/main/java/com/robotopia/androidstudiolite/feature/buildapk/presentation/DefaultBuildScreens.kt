@@ -10,7 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.robotopia.androidstudiolite.designsystem.animation.aslNavFade
+import com.robotopia.androidstudiolite.designsystem.animation.navFade
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthSession
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
@@ -55,7 +55,7 @@ class DefaultBuildScreens(
         AnimatedContent(
             targetState = step,
             modifier = Modifier.fillMaxSize(),
-            transitionSpec = { aslNavFade() },
+            transitionSpec = { navFade() },
             label = "buildNav",
         ) { current ->
             when (current) {

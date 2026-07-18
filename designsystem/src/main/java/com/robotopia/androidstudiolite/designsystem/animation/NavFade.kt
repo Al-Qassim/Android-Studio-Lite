@@ -15,7 +15,7 @@ private const val NavExitDelayMs = NavFadeMs
  * Cross-fade for custom route switches ([androidx.compose.animation.AnimatedContent]).
  * Enter fades immediately; exit fades with a short delay.
  */
-fun AnimatedContentTransitionScope<*>.aslNavFade(): ContentTransform =
+fun AnimatedContentTransitionScope<*>.navFade(): ContentTransform =
     fadeIn(animationSpec = tween(NavFadeMs)) togetherWith
         fadeOut(
             animationSpec = tween(

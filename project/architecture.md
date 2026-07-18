@@ -45,7 +45,7 @@ feature/
   editor/     model · api · data · presentation · di
   buildapk/   model · api · data · presentation · di
   auth/       model · api · data · presentation · di   # session + Connect (login) only
-  settings/   api · presentation · di                  # Settings hub + Build account + History entry
+  settings/   api · data · presentation · di           # Settings hub + Theme + Build account + History entry
   onboarding/ api · data · presentation · di           # first-launch Welcome → Connect / Skip
   github/     api · data · di                          # stateless GitHub helpers (device + build REST)
 integration/
@@ -208,6 +208,6 @@ Locked product decisions: `project/v0.1-implementation-plan.md` (and grilling no
 | Editor | `:feature:editor:api` | Session + files API |
 | Build | `:feature:buildapk:api` | GHA runner + Room history; `BuildService` + `BuildHistoryStore` |
 | Auth | `:feature:auth:api` | Session + Connect (login) only |
-| Settings | `:feature:settings:api` | Settings hub; Build account; embeds Build history |
+| Settings | `:feature:settings:api` | Settings hub; Theme prefs; Build account; embeds Build history |
 | Nav / DI / DB | `:integration:*` | Wire only |
 | UI kit / errors | `:designsystem`, `:core:error` | Shared |

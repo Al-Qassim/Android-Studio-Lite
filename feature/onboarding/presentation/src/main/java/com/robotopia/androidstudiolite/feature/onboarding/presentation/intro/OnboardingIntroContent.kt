@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
@@ -46,7 +46,7 @@ internal fun OnboardingIntroContent(
     ) {
         OnboardingCenteredMessage(
             illustration = {
-                IconCloud(tint = Colors.Primary, size = 40.dp)
+                IconCloud(tint = Theme.colors.Primary, size = 40.dp)
             },
             title = "Connect $providerDisplayName for cloud builds.",
             body = "Optional — you can skip and connect later in Settings.",

@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.InfoCard
@@ -83,7 +83,7 @@ internal fun BuildStartContent(
             if (!signedIn) {
                 BasicText(
                     text = "Connect a build account before starting a cloud build.",
-                    style = Typography.Body.copy(color = Colors.Muted),
+                    style = Typography.Body.copy(color = Theme.colors.Muted),
                 )
             }
         }

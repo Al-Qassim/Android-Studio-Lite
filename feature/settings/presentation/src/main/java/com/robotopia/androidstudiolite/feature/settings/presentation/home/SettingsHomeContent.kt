@@ -15,7 +15,9 @@ import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 @Composable
 internal fun SettingsHomeContent(
     buildAccountSubtitle: String,
+    themeSubtitle: String,
     onBackClick: () -> Unit,
+    onThemeClick: () -> Unit,
     onBuildAccountClick: () -> Unit,
     onBuildHistoryClick: () -> Unit,
 ) {
@@ -33,6 +35,11 @@ internal fun SettingsHomeContent(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            SettingsRow(
+                title = "Theme",
+                subtitle = themeSubtitle,
+                onClick = onThemeClick,
+            )
             SettingsRow(
                 title = "Build account",
                 subtitle = buildAccountSubtitle,

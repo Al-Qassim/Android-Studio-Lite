@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 
 private val DefaultInset = 12.dp
 
@@ -25,7 +25,7 @@ fun InsetDivider(
             .fillMaxWidth()
             .padding(horizontal = inset)
             .height(1.dp)
-            .background(Colors.Border),
+            .background(Theme.colors.Border),
     )
 }
 

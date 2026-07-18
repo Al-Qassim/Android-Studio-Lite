@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
@@ -61,7 +61,7 @@ internal fun CreateProjectContent(
         ) {
             BasicText(
                 text = "Single Activity + Compose",
-                style = Typography.Caption.copy(color = Colors.Muted),
+                style = Typography.Caption.copy(color = Theme.colors.Muted),
             )
 
             TextField(
@@ -94,13 +94,13 @@ internal fun CreateProjectContent(
             if (state.formError != null) {
                 BasicText(
                     text = state.formError,
-                    style = Typography.Caption.copy(color = Colors.Danger),
+                    style = Typography.Caption.copy(color = Theme.colors.Danger),
                 )
             }
 
             BasicText(
                 text = "Copies template into app storage",
-                style = Typography.Caption.copy(color = Colors.Muted2),
+                style = Typography.Caption.copy(color = Theme.colors.Muted2),
             )
         }
         Spacer(modifier = Modifier.weight(1f))

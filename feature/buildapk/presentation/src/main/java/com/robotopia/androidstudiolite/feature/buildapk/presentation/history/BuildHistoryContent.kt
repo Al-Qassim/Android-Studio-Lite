@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Menu
 import com.robotopia.androidstudiolite.designsystem.component.MenuItem
 import com.robotopia.androidstudiolite.designsystem.component.Button
@@ -183,7 +183,7 @@ private fun BuildHistoryList(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp, horizontal = 16.dp)
                     .height(1.dp)
-                    .background(Colors.MenuDivider),
+                    .background(Theme.colors.MenuDivider),
             )
         }
     }

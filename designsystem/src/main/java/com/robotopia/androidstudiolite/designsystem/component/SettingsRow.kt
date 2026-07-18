@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconChevron
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
@@ -32,7 +32,7 @@ fun SettingsRow(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(Colors.Surface2)
+            .background(Theme.colors.Surface2)
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -44,15 +44,15 @@ fun SettingsRow(
         ) {
             BasicText(
                 text = title,
-                style = Typography.Subtitle.copy(color = Colors.Text),
+                style = Typography.Subtitle.copy(color = Theme.colors.Text),
             )
             BasicText(
                 text = subtitle,
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(color = Theme.colors.Muted),
             )
         }
         IconChevron(
-            tint = Colors.Muted,
+            tint = Theme.colors.Muted,
             size = 18.dp,
             modifier = Modifier.size(18.dp),
         )

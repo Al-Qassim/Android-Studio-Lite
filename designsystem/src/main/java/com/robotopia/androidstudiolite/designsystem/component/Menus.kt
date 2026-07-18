@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconAdd
 import com.robotopia.androidstudiolite.designsystem.icon.IconCloud
 import com.robotopia.androidstudiolite.designsystem.icon.IconCopy
@@ -76,8 +76,8 @@ fun Menu(
             .overlayEnter(transformOrigin = TransformOrigin(pivotFractionX = 1f, pivotFractionY = 0f))
             .shadow(8.dp, shape)
             .clip(shape)
-            .background(Colors.Menu)
-            .border(1.dp, Colors.MenuBorder, shape)
+            .background(Theme.colors.Menu)
+            .border(1.dp, Theme.colors.MenuBorder, shape)
             .padding(vertical = MenuVerticalPad),
     ) {
         items.forEach { item ->
@@ -92,14 +92,14 @@ fun Menu(
 @Composable
 private fun MenuButtonRow(item: MenuItem.Button) {
     val color = when {
-        item.danger -> Colors.Danger
-        item.muted || !item.enabled -> Colors.Muted
-        else -> Colors.Text
+        item.danger -> Theme.colors.Danger
+        item.muted || !item.enabled -> Theme.colors.Muted
+        else -> Theme.colors.Text
     }
     val iconTint = when {
-        item.danger -> Colors.Danger
-        item.muted || !item.enabled -> Colors.Muted
-        else -> Colors.Muted
+        item.danger -> Theme.colors.Danger
+        item.muted || !item.enabled -> Theme.colors.Muted
+        else -> Theme.colors.Muted
     }
     Row(
         modifier = Modifier
@@ -140,7 +140,7 @@ private fun MenuDividerRow() {
             .fillMaxWidth()
             .padding(vertical = 4.dp, horizontal = MenuHorizontalInset)
             .height(1.dp)
-            .background(Colors.MenuDivider),
+            .background(Theme.colors.MenuDivider),
     )
 }
 
@@ -280,7 +280,7 @@ private fun editorMenuPreviewItems(
         label = "Auto save",
         onClick = {},
         trailing = if (autoSave) {
-            { IconSuccess(tint = Colors.Primary, size = MenuIconSize) }
+            { IconSuccess(tint = Theme.colors.Primary, size = MenuIconSize) }
         } else {
             null
         },
@@ -291,7 +291,7 @@ private fun editorMenuPreviewItems(
         onClick = {},
         icon = { tint, size -> IconWrapText(tint = tint, size = size) },
         trailing = if (wrapText) {
-            { IconSuccess(tint = Colors.Primary, size = MenuIconSize) }
+            { IconSuccess(tint = Theme.colors.Primary, size = MenuIconSize) }
         } else {
             null
         },

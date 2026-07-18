@@ -19,7 +19,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.editor.highlightCode
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
@@ -104,9 +104,9 @@ fun PathBar(
             .height(32.dp)
             .background(Color.Transparent)
             .padding(horizontal = 12.dp),
-        parentStyle = Typography.Code.copy(color = Colors.Muted),
-        currentStyle = Typography.Code.copy(color = Colors.Text),
-        separatorStyle = Typography.Code.copy(color = Colors.Muted2),
+        parentStyle = Typography.Code.copy(color = Theme.colors.Muted),
+        currentStyle = Typography.Code.copy(color = Theme.colors.Text),
+        separatorStyle = Typography.Code.copy(color = Theme.colors.Muted2),
     )
 }
 
@@ -198,7 +198,7 @@ fun CodeSample(
     ) {
         BasicText(
             text = gutter,
-            style = Typography.CodeGutter.copy(color = Colors.Gutter),
+            style = Typography.CodeGutter.copy(color = Theme.colors.Gutter),
             modifier = Modifier.padding(end = 12.dp),
         )
         BasicText(

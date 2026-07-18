@@ -18,7 +18,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconAdd
 import com.robotopia.androidstudiolite.designsystem.icon.IconBack
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
@@ -44,7 +44,7 @@ fun TopBarTitleAction(
     ) {
         BasicText(
             text = title,
-            style = Typography.TitleNav.copy(color = Colors.Text),
+            style = Typography.TitleNav.copy(color = Theme.colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
@@ -92,7 +92,7 @@ fun TopBarBackTitle(
         Spacer(modifier = Modifier.width(8.dp))
         BasicText(
             text = title,
-            style = Typography.TitleNav.copy(color = Colors.Text),
+            style = Typography.TitleNav.copy(color = Theme.colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -132,7 +132,7 @@ fun TopBarBackTitleAdd(
         Spacer(modifier = Modifier.width(8.dp))
         BasicText(
             text = title,
-            style = Typography.TitleNav.copy(color = Colors.Text),
+            style = Typography.TitleNav.copy(color = Theme.colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -141,7 +141,7 @@ fun TopBarBackTitleAdd(
             IconButton(
                 onClick = onRunClick,
                 variant = IconButtonVariant.Ghost,
-                icon = { _, size -> IconRun(tint = Colors.Run, size = size) },
+                icon = { _, size -> IconRun(tint = Theme.colors.Run, size = size) },
             )
         }
         IconButton(
@@ -180,9 +180,9 @@ fun TopBarPathAdd(
         PathTrail(
             segments = pathSegments,
             modifier = Modifier.weight(1f),
-            parentStyle = Typography.Body.copy(color = Colors.Muted),
-            currentStyle = Typography.BodyStrong.copy(color = Colors.Text),
-            separatorStyle = Typography.Body.copy(color = Colors.Muted2),
+            parentStyle = Typography.Body.copy(color = Theme.colors.Muted),
+            currentStyle = Typography.BodyStrong.copy(color = Theme.colors.Text),
+            separatorStyle = Typography.Body.copy(color = Theme.colors.Muted2),
         )
         IconButton(
             onClick = onAddClick,
@@ -217,7 +217,7 @@ fun TopBarEditorMore(
         Spacer(modifier = Modifier.width(8.dp))
         BasicText(
             text = if (isDirty) "$fileName •" else fileName,
-            style = Typography.TitleEditor.copy(color = Colors.Text),
+            style = Typography.TitleEditor.copy(color = Theme.colors.Text),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -226,7 +226,7 @@ fun TopBarEditorMore(
             IconButton(
                 onClick = onRunClick,
                 variant = IconButtonVariant.Ghost,
-                icon = { _, size -> IconRun(tint = Colors.Run, size = size) },
+                icon = { _, size -> IconRun(tint = Theme.colors.Run, size = size) },
             )
         }
         IconButton(

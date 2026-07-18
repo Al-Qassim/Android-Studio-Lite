@@ -25,7 +25,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.modifier.overlayEnter
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
@@ -52,7 +52,7 @@ fun DialogForm(
             Spacer(modifier = Modifier.height(6.dp))
             BasicText(
                 text = locationLabel,
-                style = Typography.Caption.copy(color = Colors.Muted),
+                style = Typography.Caption.copy(color = Theme.colors.Muted),
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -91,7 +91,7 @@ fun DialogMessageAction(
         Spacer(modifier = Modifier.height(12.dp))
         BasicText(
             text = message,
-            style = Typography.Body.copy(color = Colors.Muted),
+            style = Typography.Body.copy(color = Theme.colors.Muted),
         )
         Spacer(modifier = Modifier.height(16.dp))
         DialogActions(
@@ -120,8 +120,8 @@ private fun DialogSurface(
             .width(DialogWidth)
             .shadow(12.dp, shape)
             .clip(shape)
-            .background(Colors.Menu)
-            .border(1.dp, Colors.MenuBorder, shape)
+            .background(Theme.colors.Menu)
+            .border(1.dp, Theme.colors.MenuBorder, shape)
             .padding(DialogPadding),
         content = content,
     )
@@ -131,7 +131,7 @@ private fun DialogSurface(
 private fun DialogTitle(title: String) {
     BasicText(
         text = title,
-        style = Typography.BodyStrong.copy(color = Colors.Text),
+        style = Typography.BodyStrong.copy(color = Theme.colors.Text),
     )
 }
 

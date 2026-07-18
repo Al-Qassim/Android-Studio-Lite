@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -48,6 +48,7 @@ fun LoadingIndicator(
             brightSpoke = (brightSpoke + 1) % SpokeCount
         }
     }
+    val spokeColor = Theme.colors.Text
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -60,7 +61,6 @@ fun LoadingIndicator(
             val spokeRadius = spokeWidth / 2f
             val center = Offset(this.size.width / 2f, this.size.height / 2f)
             val spokeCenterRadius = (canvasSize / 2f) - (spokeLength / 2f) - spokeWidth * 0.15f
-            val spokeColor = Colors.Text
 
             repeat(SpokeCount) { index ->
                 val distance = (index - brightSpoke + SpokeCount) % SpokeCount
@@ -83,7 +83,7 @@ fun LoadingIndicator(
         if (!label.isNullOrBlank()) {
             BasicText(
                 text = label,
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(color = Theme.colors.Muted),
             )
         }
     }

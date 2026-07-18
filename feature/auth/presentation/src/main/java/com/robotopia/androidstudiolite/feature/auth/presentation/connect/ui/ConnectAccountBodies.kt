@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.InfoCard
@@ -58,7 +58,7 @@ internal fun ConnectShowCodeBody(
         ) {
             BasicText(
                 text = "Copy the code below",
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(color = Theme.colors.Muted),
             )
             UserCodeRow(
                 code = state.userCode,
@@ -66,7 +66,7 @@ internal fun ConnectShowCodeBody(
             )
             BasicText(
                 text = "Paste it at $verificationHost",
-                style = Typography.Body.copy(color = Colors.Muted),
+                style = Typography.Body.copy(color = Theme.colors.Muted),
             )
             Spacer(modifier = Modifier.height(4.dp))
             // Opening the provider also copies the user code so the user can paste
@@ -100,12 +100,12 @@ internal fun ConnectConnectedBody(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             IconSuccess(
-                tint = Colors.Primary,
+                tint = Theme.colors.Primary,
                 size = 48.dp,
             )
             BasicText(
                 text = "Connected",
-                style = Typography.Headline.copy(color = Colors.Text),
+                style = Typography.Headline.copy(color = Theme.colors.Text),
                 modifier = Modifier.fillMaxWidth(),
             )
             InfoCard(
@@ -134,12 +134,12 @@ internal fun ConnectFailedBody(
         ) {
             BasicText(
                 text = "Couldn't connect",
-                style = Typography.Headline.copy(color = Colors.Danger),
+                style = Typography.Headline.copy(color = Theme.colors.Danger),
             )
             BasicText(
                 text = state.message,
                 style = Typography.Body.copy(
-                    color = Colors.Muted,
+                    color = Theme.colors.Muted,
                     textAlign = TextAlign.Center,
                 ),
                 modifier = Modifier.fillMaxWidth(),

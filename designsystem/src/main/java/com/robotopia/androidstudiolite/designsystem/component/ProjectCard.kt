@@ -19,7 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
@@ -38,8 +38,8 @@ fun ProjectCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Colors.Surface)
-            .border(1.dp, Colors.Border, shape)
+            .background(Theme.colors.Surface)
+            .border(1.dp, Theme.colors.Border, shape)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
@@ -52,7 +52,7 @@ fun ProjectCard(
         ) {
             BasicText(
                 text = name,
-                style = Typography.Subtitle.copy(color = Colors.Text),
+                style = Typography.Subtitle.copy(color = Theme.colors.Text),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
@@ -70,14 +70,14 @@ fun ProjectCard(
         Spacer(modifier = Modifier.height(4.dp))
         BasicText(
             text = packageName,
-            style = Typography.Body.copy(color = Colors.Muted),
+            style = Typography.Body.copy(color = Theme.colors.Muted),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         Spacer(modifier = Modifier.height(8.dp))
         BasicText(
             text = meta,
-            style = Typography.Caption.copy(color = Colors.Muted2),
+            style = Typography.Caption.copy(color = Theme.colors.Muted2),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

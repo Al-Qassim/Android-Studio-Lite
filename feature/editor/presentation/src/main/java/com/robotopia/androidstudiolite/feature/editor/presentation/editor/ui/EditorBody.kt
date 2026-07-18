@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.CodeEditorField
@@ -43,7 +43,7 @@ internal fun EditorScreenContext.EditorBody(
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    IconWarning(tint = Colors.Danger, size = 32.dp)
+                    IconWarning(tint = Theme.colors.Danger, size = 32.dp)
                     EmptyState(
                         title = "Couldn't open file",
                         hint = state.loadError,
