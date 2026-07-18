@@ -20,6 +20,7 @@ internal fun ProjectsListScreen(
     onRunProject: (Project) -> Unit,
     onCreateProject: () -> Unit,
     onOpenSettings: () -> Unit,
+    onBuildHistory: (Project) -> Unit,
     viewModel: ProjectsListViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -52,6 +53,10 @@ internal fun ProjectsListScreen(
         onRunMenuClick = { project ->
             viewModel.uiState.update { it.copy(menuProject = null) }
             onRunProject(project)
+        },
+        onBuildHistoryMenuClick = { project ->
+            viewModel.uiState.update { it.copy(menuProject = null) }
+            onBuildHistory(project)
         },
         onDeleteMenuClick = { project ->
             viewModel.uiState.update {

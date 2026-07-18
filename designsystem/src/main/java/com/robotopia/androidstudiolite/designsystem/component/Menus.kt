@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.icon.IconCloud
 import com.robotopia.androidstudiolite.designsystem.icon.IconCopy
 import com.robotopia.androidstudiolite.designsystem.icon.IconFile
 import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
@@ -70,6 +71,7 @@ fun ContextMenu(
 fun ProjectMenu(
     onOpen: () -> Unit = {},
     onRun: () -> Unit = {},
+    onBuildHistory: () -> Unit = {},
     onDelete: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -83,6 +85,11 @@ fun ProjectMenu(
             label = "Run",
             onClick = onRun,
             icon = { tint, size -> IconRun(tint = tint, size = size) },
+        )
+        MenuItem(
+            label = "Build history",
+            onClick = onBuildHistory,
+            icon = { tint, size -> IconCloud(tint = tint, size = size) },
         )
         MenuDivider()
         MenuItem(label = "Delete", onClick = onDelete, danger = true)

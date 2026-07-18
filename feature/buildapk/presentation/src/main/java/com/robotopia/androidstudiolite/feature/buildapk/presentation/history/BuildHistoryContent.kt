@@ -1,7 +1,9 @@
 package com.robotopia.androidstudiolite.feature.buildapk.presentation.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +20,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.BuildHistoryMenu
+import com.robotopia.androidstudiolite.designsystem.component.Button
+import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.DialogMessageAction
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
@@ -41,6 +45,7 @@ internal fun BuildHistoryContent(
     onDeleteMenuClick: (BuildHistoryRowUi) -> Unit,
     onDeleteCancel: () -> Unit,
     onDeleteConfirm: () -> Unit,
+    onRetryLoad: () -> Unit,
 ) {
     IslandScaffold(
         topBar = {
@@ -61,6 +66,7 @@ internal fun BuildHistoryContent(
                 onMenuOpen = onMenuOpen,
                 onMenuDismiss = onMenuDismiss,
                 onDeleteMenuClick = onDeleteMenuClick,
+                onRetryLoad = onRetryLoad,
             )
         }
     }
@@ -82,9 +88,15 @@ private fun BuildHistoryBody(
     onMenuOpen: (BuildHistoryRowUi) -> Unit,
     onMenuDismiss: () -> Unit,
     onDeleteMenuClick: (BuildHistoryRowUi) -> Unit,
+    onRetryLoad: () -> Unit,
 ) {
+    val loadError = state.loadError
     when {
         state.isLoading -> BuildHistoryLoading()
+        loadError != null -> BuildHistoryLoadError(
+            message = loadError,
+            onRetryLoad = onRetryLoad,
+        )
         state.jobs.isEmpty() -> BuildHistoryEmpty()
         else -> BuildHistoryList(
             jobs = state.jobs,
@@ -104,6 +116,29 @@ private fun BuildHistoryLoading() {
         contentAlignment = Alignment.Center,
     ) {
         LoadingIndicator(label = "Loading builds…")
+    }
+}
+
+@Composable
+private fun BuildHistoryLoadError(
+    message: String,
+    onRetryLoad: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        EmptyState(
+            title = "Couldn't load history",
+            hint = message,
+        )
+        Button(
+            label = "Try again",
+            onClick = onRetryLoad,
+            variant = ButtonVariant.Secondary,
+            modifier = Modifier.padding(top = 8.dp),
+        )
     }
 }
 
@@ -168,6 +203,7 @@ private fun BuildHistoryListItem(
             packageName = job.phase.toHistoryLabel(),
             meta = job.timeLabel,
             onClick = { onJobClick(job) },
+            onLongClick = { onMenuOpen(job) },
             onMenuClick = { onMenuOpen(job) },
             leading = { BuildHistoryPhaseIcon(phase = job.phase) },
         )

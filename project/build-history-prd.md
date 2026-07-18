@@ -22,7 +22,7 @@ Ship **in-app build history** backed by a local Room store:
 3. Rejoin active jobs on the existing progress UI; show a terminal detail (summary + Install if the APK still exists).
 4. On process start, resume tracking of non-terminal jobs that have a provider resume payload; fail interrupted jobs that never got a cloud run id.
 5. Allow parallel builds; leaving progress without Cancel does not cancel the job.
-6. Embed one shared History UI (`BuildScreens.History`) from Settings, Build start, Projects overflow, and Files menu via each feature’s own nav-host route.
+6. Embed one shared History UI (`BuildScreens.History`) from Settings, Build start, and Projects overflow via each feature’s own nav-host route.
 
 ---
 
@@ -31,10 +31,9 @@ Ship **in-app build history** backed by a local Room store:
 1. As a user, I want a Build history entry in Settings, so that I can see builds across all projects.
 2. As a user, I want History from the Build start top bar, so that I can see builds for the current project while about to start another.
 3. As a user, I want “Build history” on a project’s overflow menu, so that I can open that project’s history without starting a build.
-4. As a user, I want “Build history” in the files browser top-bar menu, so that I can open history for the open project.
-5. As a user, I want History scoped by entry (Settings = all; project contexts = that project), so that I am not forced to filter on-screen in v1.
-6. As a user, I want each history row to show project name, phase/status, and a relative time, so that I can scan jobs quickly.
-7. As a user, I want the History list to update live while jobs run, so that I do not need to refresh manually.
+4. As a user, I want History scoped by entry (Settings = all; project contexts = that project), so that I am not forced to filter on-screen in v1.
+5. As a user, I want each history row to show project name, phase/status, and a relative time, so that I can scan jobs quickly.
+6. As a user, I want the History list to update live while jobs run, so that I do not need to refresh manually.
 8. As a user, I want tapping an active job to open the progress screen for that job, so that I can watch phases, cancel, or install when ready.
 9. As a user, I want tapping a terminal job to open a detail summary, so that I can see outcome, error, times, and optional log link.
 10. As a user, I want Install from terminal detail when the APK file/URI still exists, so that I can install without rebuilding.
@@ -59,7 +58,7 @@ Ship **in-app build history** backed by a local Room store:
 29. As an implementer, I want an internal coordinator behind both public APIs, so that Room writes and cancel/delete cannot cycle dependencies.
 30. As an implementer, I want `observeBuild` to be store-backed, so that Progress and History share one read path.
 31. As an implementer, I want opaque `providerId` + `resumeJson` on the entity, so that GitHub resume fields do not hardcode the schema to one provider.
-32. As an implementer, I want `ProjectListener.onProjectDeleted` after a successful project delete, with isolated listener errors, so that build cancel cannot block project deletion.
+32. As an implementer, I want `ProjectEventHooks` + `ProjectEventsListener.onProjectDeleted` after a successful project delete (`BuildService` registers the listener; not Koin `getAll()`), with isolated listener errors, so that build cancel cannot block project deletion.
 33. As an implementer, I want `BuildScreens.History(projectIdFilter, onDismiss)` with nested list → progress|detail, so that each feature host only mounts one route.
 34. As an implementer, I want History entity/DAO in buildapk data registered on `AslDatabase`, so that persistence matches the projects pattern.
 
@@ -69,16 +68,16 @@ Ship **in-app build history** backed by a local Room store:
 
 ### Architecture / modules
 
-- **Ownership:** `:feature:buildapk` owns History UI, Room entity/DAO, coordinator, GitHub runner, resume.
+- **Ownership:** `:feature:buildapk` owns History UI, Room entity/DAO, `BuildService` / `BuildHistoryStore` impls, GitHub cloud path, resume.
 - **Public API:**
-  - `BuildService` — `startBuild` / `cancelBuild` / `observeBuild` (job ops).
+  - `BuildService` — `startBuild` / `cancelBuild` / `cancelBuildsForProject` / `observeBuild` (job ops).
   - `BuildHistoryStore` — `observeHistory(projectId?)`, `observeJob` / `getJob`, `delete(jobId)` (cancel if active, remove row, keep APK).
   - `BuildScreens.History(projectIdFilter: String?, onDismiss)` — nested navigation List → Progress | Detail.
-- **Internals:** `BuildJobCoordinator` (name TBD) orchestrates start/cancel/resume/delete and Room writes. Thin facades implement the two public interfaces. Pure **runner** holds provider work (today’s GHA logic extracted); not a god-file.
-- **Reads:** Room is SoT. Runner writes each phase update. `observeBuild` maps store job → `BuildProgress`.
-- **DI product path:** coordinator + Room + GitHub runner. No `FakeBuildService` product path; tests mock `BuildService` / `BuildHistoryStore`.
-- **Projects hook:** `ProjectListener` in projects api; `deleteProject` succeeds first, then notifies; buildapk listener cancels in-flight for that id; exceptions isolated per listener.
-- **Hosts:** Settings, Build, Projects, and Files each add a History route in their nav host and embed `BuildScreens.History` (Settings filter `null`; others pass project id). Settings/Projects/Files depend on `buildapk:api` for screens (and store as needed inside buildapk presentation).
+- **Internals:** `BuildJobLogic` (ports it owns) + Room/GitHub adapters; `DefaultBuildService` wires them. `DefaultBuildHistoryStore` + `BuildHistoryEventHooks` (service registers cancel-on-delete). No coordinator façade.
+- **Reads:** Room is SoT. Service writes each phase update. `observeBuild` maps Room job → `BuildProgress`.
+- **DI product path:** `BuildService` + `BuildHistoryStore` + Room + GitHub. No `FakeBuildService` product path; tests mock the public APIs.
+- **Projects hook:** `ProjectEventHooks` + `ProjectEventsListener` in projects api; `DefaultBuildService` injects hooks and registers cancel-on-delete (not Koin `getAll()`); `deleteProject` succeeds first, then notifies; exceptions isolated per listener.
+- **Hosts:** Settings, Build, and Projects each add a History route in their nav host and embed `BuildScreens.History` (Settings filter `null`; others pass project id).
 
 ### Persistence
 
@@ -89,7 +88,7 @@ Ship **in-app build history** backed by a local Room store:
 
 ### Resume
 
-- Eager on `BuildService` / coordinator singleton init (process start).
+- Eager on `BuildService` singleton init (process start).
 - Non-terminal **with** usable resume payload → re-attach and keep updating.
 - Non-terminal **without** run id (Preparing/Uploading interrupted) → Failed (interrupted); do not auto-restart upload.
 - Missing token → keep last phase; resume when token available again.
@@ -102,7 +101,6 @@ Ship **in-app build history** backed by a local Room store:
 | Settings | All projects |
 | Build start top-bar | Current project |
 | Project overflow | That project |
-| Files menu | Open project |
 
 - Nested History stack owns Progress/Detail; feature hosts only the History root.
 - Back from Progress after Start: still dismisses whole Build feature (job keeps running).
@@ -123,7 +121,7 @@ Visual layout / Figma pass is **deferred**; wire behavior and copy to designsyst
 
 ### Testing Decisions
 
-- Prefer external behavior at `BuildService`, `BuildHistoryStore`, and `ProjectListener` notification after delete — not Room/runner internals.
+- Prefer external behavior at `BuildService`, `BuildHistoryStore`, and `ProjectEventHooks` notification after delete — not Room/runner internals.
 - Mock public APIs in unit tests; no FakeBuildService product double required for this feature.
 - Device/emulator: start build → leave progress → see job in History; kill app mid-build with run id → relaunch → phase continues; delete active row cancels; project delete cancels in-flight and keeps rows; Install from detail when APK present; system Back within History nested stack and hosting feature.
 - Prior art: buildapk progress presentation; projects delete confirm; Room via projects data.
@@ -146,4 +144,4 @@ Visual layout / Figma pass is **deferred**; wire behavior and copy to designsyst
 
 - Grilling file is the decision log; this PRD is the implementation-facing contract.
 - Update `cloud-build-prd.md` out-of-scope: in-app history is no longer deferred there — tracked by this PRD.
-- Suggested seam for tickets: `BuildHistoryStore` + coordinator resume/delete behavior first; then `BuildScreens.History` + host routes; then `ProjectListener` wiring.
+- Suggested seam for tickets: `BuildHistoryStore` + `BuildService` resume/delete behavior first; then `BuildScreens.History` + host routes; then runtime `ProjectEventHooks` wiring.

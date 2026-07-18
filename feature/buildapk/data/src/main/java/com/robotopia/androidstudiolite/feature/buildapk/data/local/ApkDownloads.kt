@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.buildapk.data
+package com.robotopia.androidstudiolite.feature.buildapk.data.local
 
 import android.content.ContentValues
 import android.content.Context

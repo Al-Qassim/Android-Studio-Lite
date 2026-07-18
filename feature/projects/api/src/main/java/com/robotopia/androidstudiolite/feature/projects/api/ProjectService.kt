@@ -36,18 +36,4 @@ interface ProjectsScreens {
         onRunProject: (Project) -> Unit,
         onOpenSettings: () -> Unit,
     )
-
-    @Composable
-    fun ProjectsList(
-        onOpenProject: (Project) -> Unit,
-        onRunProject: (Project) -> Unit,
-        onCreateProject: () -> Unit,
-        onOpenSettings: () -> Unit,
-    )
-
-    @Composable
-    fun CreateProject(
-        onCreated: (projectId: ProjectId) -> Unit,
-        onCancel: () -> Unit,
-    )
 }

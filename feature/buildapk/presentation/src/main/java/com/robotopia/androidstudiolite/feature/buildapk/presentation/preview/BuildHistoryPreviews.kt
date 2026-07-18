@@ -10,6 +10,7 @@ import com.robotopia.androidstudiolite.feature.buildapk.presentation.history.Bui
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.history.BuildHistoryDetailUiState
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.history.BuildHistoryRowUi
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.history.BuildHistoryUiState
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.history.logic.HISTORY_DETAIL_NOT_FOUND
 
 private val sampleJobs = listOf(
     BuildHistoryRowUi(
@@ -64,6 +65,12 @@ internal class BuildHistoryPreviewProvider : PreviewParameterProvider<BuildHisto
             state = BuildHistoryUiState(isLoading = true),
         ),
         BuildHistoryPreviewCase(
+            label = "load failed",
+            state = BuildHistoryUiState(
+                loadError = "Couldn't load build history. Try again.",
+            ),
+        ),
+        BuildHistoryPreviewCase(
             label = "list",
             state = BuildHistoryUiState(jobs = sampleJobs),
         ),
@@ -94,7 +101,6 @@ internal class BuildHistoryPreviewProvider : PreviewParameterProvider<BuildHisto
 internal data class BuildHistoryDetailPreviewCase(
     private val label: String,
     val state: BuildHistoryDetailUiState,
-    val onViewLog: ((String) -> Unit)?,
 ) {
     override fun toString(): String = label
 }
@@ -105,35 +111,56 @@ internal class BuildHistoryDetailPreviewProvider :
 
     override val values = sequenceOf(
         BuildHistoryDetailPreviewCase(
+            label = "loading",
+            state = BuildHistoryDetailUiState(isLoading = true),
+        ),
+        BuildHistoryDetailPreviewCase(
+            label = "not found",
+            state = BuildHistoryDetailUiState(
+                isLoading = false,
+                loadError = HISTORY_DETAIL_NOT_FOUND,
+            ),
+        ),
+        BuildHistoryDetailPreviewCase(
+            label = "load failed",
+            state = BuildHistoryDetailUiState(
+                isLoading = false,
+                loadError = "Couldn't load this build. Try again.",
+            ),
+        ),
+        BuildHistoryDetailPreviewCase(
             label = "ready · install",
             state = BuildHistoryDetailUiState(
+                isLoading = false,
                 projectName = "TodoApp",
                 phase = BuildPhase.ReadyToInstall,
                 providerName = "GitHub",
                 startedLabel = "Today, 10:02",
                 finishedLabel = "Today, 10:11",
                 message = "APK ready to install",
+                apkLocalPath = "/tmp/app.apk",
                 canInstall = true,
             ),
-            onViewLog = {},
         ),
         BuildHistoryDetailPreviewCase(
             label = "ready · installing",
             state = BuildHistoryDetailUiState(
+                isLoading = false,
                 projectName = "TodoApp",
                 phase = BuildPhase.ReadyToInstall,
                 providerName = "GitHub",
                 startedLabel = "Today, 10:02",
                 finishedLabel = "Today, 10:11",
                 message = "APK ready to install",
+                apkLocalPath = "/tmp/app.apk",
                 canInstall = true,
                 isInstalling = true,
             ),
-            onViewLog = null,
         ),
         BuildHistoryDetailPreviewCase(
             label = "ready · apk missing",
             state = BuildHistoryDetailUiState(
+                isLoading = false,
                 projectName = "TodoApp",
                 phase = BuildPhase.ReadyToInstall,
                 providerName = "GitHub",
@@ -142,24 +169,25 @@ internal class BuildHistoryDetailPreviewProvider :
                 message = "APK ready to install",
                 canInstall = false,
             ),
-            onViewLog = {},
         ),
         BuildHistoryDetailPreviewCase(
             label = "ready · install error",
             state = BuildHistoryDetailUiState(
+                isLoading = false,
                 projectName = "TodoApp",
                 phase = BuildPhase.ReadyToInstall,
                 providerName = "GitHub",
                 startedLabel = "Today, 10:02",
                 finishedLabel = "Today, 10:11",
+                apkLocalPath = "/tmp/app.apk",
                 canInstall = true,
                 installError = "Allow installs from this app, then tap Install again.",
             ),
-            onViewLog = null,
         ),
         BuildHistoryDetailPreviewCase(
-            label = "failed · with log",
+            label = "build failed · with log",
             state = BuildHistoryDetailUiState(
+                isLoading = false,
                 projectName = "WeatherDemo",
                 phase = BuildPhase.Failed,
                 providerName = "GitHub",
@@ -169,11 +197,11 @@ internal class BuildHistoryDetailPreviewProvider :
                 error = "Build failed. Open the build log.",
                 logUrl = "https://github.com/",
             ),
-            onViewLog = {},
         ),
         BuildHistoryDetailPreviewCase(
-            label = "failed · interrupted",
+            label = "build failed · interrupted",
             state = BuildHistoryDetailUiState(
+                isLoading = false,
                 projectName = "HelloCompose",
                 phase = BuildPhase.Failed,
                 providerName = "GitHub",
@@ -182,11 +210,11 @@ internal class BuildHistoryDetailPreviewProvider :
                 finishedLabel = "Today, 08:14",
                 error = "Build interrupted. Start a new build to try again.",
             ),
-            onViewLog = null,
         ),
         BuildHistoryDetailPreviewCase(
             label = "cancelled",
             state = BuildHistoryDetailUiState(
+                isLoading = false,
                 projectName = "HelloCompose",
                 phase = BuildPhase.Cancelled,
                 providerName = "GitHub",
@@ -195,7 +223,6 @@ internal class BuildHistoryDetailPreviewProvider :
                 finishedLabel = "3 days ago, 14:02",
                 message = "No APK was produced. You can start a new build when you're ready.",
             ),
-            onViewLog = null,
         ),
     )
 }
@@ -214,6 +241,7 @@ private fun BuildHistoryPreview(
         onDeleteMenuClick = {},
         onDeleteCancel = {},
         onDeleteConfirm = {},
+        onRetryLoad = {},
     )
 }
 
@@ -226,6 +254,7 @@ private fun BuildHistoryDetailPreview(
         state = preview.state,
         onBackClick = {},
         onInstall = {},
-        onViewLog = preview.onViewLog,
+        onViewLog = {},
+        onRetryLoad = {},
     )
 }

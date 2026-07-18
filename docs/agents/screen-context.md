@@ -51,12 +51,14 @@ flowchart TB
 1. **Context holds resources, not UI state.** Typical members: feature service/API, `updateState`, cross-feature callbacks (`onOpenFile`, `onNavigateBack`), `CoroutineScope`. UI state lives in the ViewModel / `UiState` and is passed as `state`. Mutable slots that must survive recomposition (e.g. a debounced job) live as `var` fields on the context instance.
 2. **Screen-specific composables are context extensions** and take **`state`** so recomposition stays correct:
    `FileBrowserScreenContext.FileBrowserBody(state: FileBrowserUiState)`.
-3. **Screen-specific logic is context extensions** under `logic/` (no nested `fun` inside composables).
+3. **Screen-specific logic is context extensions** under `logic/` (no nested `fun` inside composables). Screen files only **call** those functions — no observe/map/menu/delete/install bodies inlined in `@Composable`.
 4. **Design-system / shared UI stays parameterized** — not context extensions.
 5. **Host owns the ViewModel and remembers the context.** Construct `*ScreenContext` with `remember(…keys)` in the host (and in preview hosts). Key every dependency the context closes over (`viewModel`, services, exit lambdas, etc.) so the instance is stable across recomposition but rebuilt when those inputs change. Do not allocate a fresh context on every composition — that drops any `var` fields on the context and wastes work.
 6. **`updateState` must apply to the flow’s current value** (`updater(it)`), never a composition-captured snapshot.
-7. **Previews:** `@Preview` composables, fixtures, and fakes live in the module’s `presentation/preview/` package and call the **real** Screen/Content (no duplicated fake screens in `:designsystem`; no `@Preview` on Screen/Content files). Preview hosts also `remember` the context.
+7. **Previews:** `@Preview` composables, fixtures, and fakes live in the module’s `presentation/preview/` package and call the **real** Screen/Content (no duplicated fake screens in `:designsystem`; no `@Preview` on Screen/Content files). Preview hosts also `remember` the context. Include loading, error, empty, and happy paths.
 8. **Never nest function declarations** (project-wide — see `AGENTS.md` → *Coding rules*).
+9. **Flat `*UiState` data class** — `isLoading`, `loadError`, content fields (like `EditorUiState`). Do **not** use a sealed `Loading` / `Ready` / `Failed` hierarchy for screen UI state. Switch in UI with `when { state.isLoading → …; state.loadError != null → …; else → … }`.
+10. **Multi-step feature hosts are thin NavHosts** — `AnimatedContent` + route enum + child screens only (`ProjectsNavHost`, `SettingsScreen`, `BuildHistoryScreen`). Child screens own load/error/actions.
 
 ## When to use
 
@@ -78,13 +80,19 @@ Do **not** collapse a thin screen into one `*Content` with every `onClick` in th
 - Omitting `state` from a context UI composable (breaks targeted recomposition).
 - Constructing `*ScreenContext` without `remember` in the host (new instance every recomposition).
 - `remember`ing a context **without** keying unstable callbacks / services — stale exits or wrong dependencies. Prefer `remember(viewModel, service, onNavigateBack, …) { … }`.
+- Sealed screen `UiState` (`Loading` / `Ready` / `Failed`) instead of a flat data class with `isLoading` / `loadError`.
+- Stuffing list/detail/progress bodies into one host composable instead of a thin NavHost + child screens.
+- Blank UI or silent back-navigation while waiting on `collectAsState(initial = null)` with no Loading / loadError states.
 
 ## Checklist
 
 - [ ] `*ScreenContext` holds resources only
 - [ ] Host builds context with `remember(…keys)` + VM; screen is `Ctx.Screen(state)`
 - [ ] Screen-specific UI under `ui/` as context extensions with `state`
-- [ ] Logic under `logic/` as context extensions
+- [ ] Logic under `logic/` as context extensions (not inlined in Screen)
+- [ ] Flat `*UiState` with `isLoading` / `loadError` (no sealed lifecycle)
+- [ ] Loading, error, and ready/empty are shown in UI + previews
+- [ ] Multi-step hosts are thin NavHosts; children own wiring
 - [ ] Designsystem stays normal parameters
 - [ ] Previews: `@Preview` + fixtures in `presentation/preview/` only; preview host `remember`s context; no product screens in `:designsystem`
 - [ ] No nested `fun`; no mega callback Content

@@ -45,8 +45,7 @@ fun ProjectRow(
                 selected = selected,
                 onLongClick = onLongClick,
             )
-            .padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = if (leading != null) Alignment.Top else Alignment.CenterVertically,
+            .padding(horizontal = 12.dp, vertical = 12.dp)
     ) {
         if (leading != null) {
             leading()
@@ -83,6 +82,7 @@ fun ProjectRow(
                 size = 32.dp,
                 iconSize = 18.dp,
                 icon = { tint, size -> IconMore(tint = tint, size = size) },
+                modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
     }

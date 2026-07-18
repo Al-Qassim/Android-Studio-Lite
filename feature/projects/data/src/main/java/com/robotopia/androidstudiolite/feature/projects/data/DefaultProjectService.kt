@@ -17,6 +17,7 @@ import java.util.UUID
 class DefaultProjectService(
     private val context: Context,
     private val projectDao: ProjectDao,
+    private val projectEventHooks: DefaultProjectEventHooks,
 ) : ProjectService {
 
     override fun observeProjects(): Flow<List<Project>> =
@@ -74,6 +75,7 @@ class DefaultProjectService(
                 projectDao.upsert(entity)
                 throw t
             }
+            projectEventHooks.notifyProjectDeleted(id)
         }
     }
 

@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.buildapk.data
+package com.robotopia.androidstudiolite.feature.buildapk.data.fake
 
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
 

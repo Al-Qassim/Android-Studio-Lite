@@ -15,13 +15,13 @@ import org.koin.dsl.module
 val integrationDiModule = module {
     includes(
         databaseDiModule,
-        projectsDiModule,
-        filesDiModule,
-        editorDiModule,
         gitHubDiModule,
         authDiModule,
+        projectsDiModule,
+        buildApkDiModule,
+        filesDiModule,
+        editorDiModule,
         settingsDiModule,
         onboardingDiModule,
-        buildApkDiModule,
     )
 }

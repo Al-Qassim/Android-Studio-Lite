@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import com.robotopia.androidstudiolite.designsystem.animation.aslNavFade
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
+import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.settings.presentation.account.BuildAccountContent
 import com.robotopia.androidstudiolite.feature.settings.presentation.home.SettingsHomeContent
 import kotlinx.coroutines.launch
@@ -22,12 +23,14 @@ private enum class SettingsRoute {
     Home,
     BuildAccount,
     Connect,
+    BuildHistory,
 }
 
 @Composable
 internal fun SettingsScreen(
     authService: AuthService,
     authScreens: AuthScreens,
+    buildScreens: BuildScreens,
     onDismiss: () -> Unit,
 ) {
     var route by rememberSaveable { mutableStateOf(SettingsRoute.Home) }
@@ -50,6 +53,7 @@ internal fun SettingsScreen(
                     },
                     onBackClick = onDismiss,
                     onBuildAccountClick = { route = SettingsRoute.BuildAccount },
+                    onBuildHistoryClick = { route = SettingsRoute.BuildHistory },
                 )
             }
 
@@ -70,6 +74,13 @@ internal fun SettingsScreen(
                 authScreens.ConnectAccount(
                     onFinished = { route = SettingsRoute.BuildAccount },
                     onCancel = { route = SettingsRoute.BuildAccount },
+                )
+            }
+
+            SettingsRoute.BuildHistory -> {
+                buildScreens.History(
+                    projectIdFilter = null,
+                    onDismiss = { route = SettingsRoute.Home },
                 )
             }
         }

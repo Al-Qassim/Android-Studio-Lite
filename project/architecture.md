@@ -129,16 +129,16 @@ flowchart TB
 
 ### Build (`buildapk`)
 - `BuildService` + `BuildHistoryStore` + `ApkInstaller` in `:api`.
-- **Internals:** coordinator + Room-backed job rows + pure GitHub runner (facade implements `BuildService`; history API is separate). `observeBuild` is store-backed. See `project/build-history-prd.md`.
-- **Product data:** GitHub Actions runner — public sandbox `asl-builds-android-studio-lite`, ephemeral release, Actions `workflow_dispatch`, APK download. Resume payload stored as opaque `providerId` + JSON on the job row.
+- **Internals:** `BuildJobLogic` owns job lifecycle and depends only on ports it owns (`BuildJobRepository`, `CloudBuildGateway`). Adapters: `RoomBuildJobRepositoryAdapter` ← `BuildJobDao`, `GitHubCloudBuildGatewayAdapter` ← `GitHubClient`. `DefaultBuildService` wires adapters + auth + registers a history-delete hook. `DefaultBuildHistoryStore` observes/deletes rows and notifies `BuildHistoryEventHooks` (no dependency on `BuildService`). Data layout under `:feature:buildapk:data`: `job/` · `room/` · `github/` · `local/` · `service/` · `fake/`. See `project/build-history-prd.md`.
+- **Product data:** GitHub Actions — public sandbox `asl-builds-android-studio-lite`, ephemeral release, Actions `workflow_dispatch`, APK download. Resume payload stored as opaque `providerId` + JSON on the job row.
 - UI: start → progress; History via `BuildScreens.History` (nested list → progress|detail). On ready, progress/detail call `ApkInstaller`. Leaving progress without Cancel does not cancel; eager resume on process start.
-- **Hosts:** Settings / Build / Projects / Files each route to History in their own nav host (Settings = all projects; others pass project id).
+- **Hosts:** Settings / Build / Projects each route to History in their own nav host (Settings = all projects; others pass project id).
 
 ### Auth / Settings / Onboarding
 - **Auth:** Connect device flow + session (`accessToken` via `auth:api`).
 - **Settings:** hub + Build account (connect / log out) + Build history entry (embeds buildapk History).
 - **Onboarding:** first-launch Welcome → Connect / Skip; gate in `IdeNavHost`.
-- **Projects:** `ProjectListener` — after successful `deleteProject`, listeners run best-effort (buildapk cancels in-flight jobs for that id; history rows kept).
+- **Cross-feature hooks:** `ProjectEventHooks` + `ProjectEventsListener` in projects `:api`. `DefaultBuildService` injects `ProjectEventHooks` and [addListener]s cancel-on-project-delete when constructed (`createdAtStart`). Not via Koin `getAll()` multi-bind into `ProjectService`. After successful `deleteProject`, hooks notify best-effort; history rows kept.
 
 ### GitHub
 - Stateless `:feature:github` — device flow + build REST (`HttpGitHubClient`).
@@ -159,8 +159,7 @@ Busy-screen layout: `docs/agents/screen-context.md`. Feature conventions: `/stru
 ```text
 Projects
   ├─ open ──► Files ─┬─ open file ──► Editor ──► Build (return Editor)
-  │                  ├─ run ───────────────────► Build (return Files)
-  │                  └─ menu ──► History (project)
+  │                  └─ run ───────────────────► Build (return Files)
   ├─ overflow ──► History (project)
   └─ run ──────────────────────────────────────► Build (return Projects)
 Build ──► Start ─┬─ progress ──► (back exits Build; job keeps running)
@@ -203,8 +202,8 @@ Locked product decisions: `project/v0.1-implementation-plan.md` (and grilling no
 
 | Area | Public surface | Impl notes |
 | --- | --- | --- |
-| Projects | `:feature:projects:api` | Room + template FS; `ProjectListener` after delete |
-| Files | `:feature:files:api` | Sandboxed FS; History entry in browser menu |
+| Projects | `:feature:projects:api` | Room + template FS; `ProjectEventHooks` (runtime listeners) |
+| Files | `:feature:files:api` | Sandboxed FS |
 | Editor | `:feature:editor:api` | Session + files API |
 | Build | `:feature:buildapk:api` | GHA runner + Room history; `BuildService` + `BuildHistoryStore` |
 | Auth | `:feature:auth:api` | Session + Connect (login) only |

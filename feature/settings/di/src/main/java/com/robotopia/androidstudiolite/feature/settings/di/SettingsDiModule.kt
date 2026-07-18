@@ -9,6 +9,7 @@ val settingsDiModule = module {
         DefaultSettingsScreens(
             authService = get(),
             authScreens = get(),
+            buildScreens = get(),
         )
     }
 }

@@ -31,5 +31,6 @@ private fun SettingsHomePreview(
         buildAccountSubtitle = preview.buildAccountSubtitle,
         onBackClick = {},
         onBuildAccountClick = {},
+        onBuildHistoryClick = {},
     )
 }

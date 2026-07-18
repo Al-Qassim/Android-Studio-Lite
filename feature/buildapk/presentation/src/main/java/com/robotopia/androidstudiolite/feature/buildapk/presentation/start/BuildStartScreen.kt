@@ -18,6 +18,7 @@ internal fun BuildStartScreen(
     onBackClick: () -> Unit,
     onStartBuild: suspend () -> Unit,
     onConnectAccountClick: () -> Unit,
+    onHistoryClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var starting by remember { mutableStateOf(false) }
@@ -43,5 +44,6 @@ internal fun BuildStartScreen(
             }
         },
         onConnectAccountClick = onConnectAccountClick,
+        onHistoryClick = onHistoryClick,
     )
 }

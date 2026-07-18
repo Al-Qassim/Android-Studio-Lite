@@ -37,6 +37,7 @@ internal fun ProjectsListContent(
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
     onRunMenuClick: (Project) -> Unit,
+    onBuildHistoryMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
     onDeleteCancel: () -> Unit,
     onDeleteConfirm: () -> Unit,
@@ -62,6 +63,7 @@ internal fun ProjectsListContent(
                 onMenuOpen = onMenuOpen,
                 onMenuDismiss = onMenuDismiss,
                 onRunMenuClick = onRunMenuClick,
+                onBuildHistoryMenuClick = onBuildHistoryMenuClick,
                 onDeleteMenuClick = onDeleteMenuClick,
             )
         }
@@ -90,6 +92,7 @@ private fun ProjectsListBody(
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
     onRunMenuClick: (Project) -> Unit,
+    onBuildHistoryMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
     when {
@@ -102,6 +105,7 @@ private fun ProjectsListBody(
             onMenuOpen = onMenuOpen,
             onMenuDismiss = onMenuDismiss,
             onRunMenuClick = onRunMenuClick,
+            onBuildHistoryMenuClick = onBuildHistoryMenuClick,
             onDeleteMenuClick = onDeleteMenuClick,
         )
     }
@@ -138,6 +142,7 @@ private fun ProjectsList(
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
     onRunMenuClick: (Project) -> Unit,
+    onBuildHistoryMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
     LazyColumn(
@@ -152,6 +157,7 @@ private fun ProjectsList(
                 onMenuOpen = onMenuOpen,
                 onMenuDismiss = onMenuDismiss,
                 onRunMenuClick = onRunMenuClick,
+                onBuildHistoryMenuClick = onBuildHistoryMenuClick,
                 onDeleteMenuClick = onDeleteMenuClick,
             )
             Box(
@@ -173,6 +179,7 @@ private fun ProjectListItem(
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
     onRunMenuClick: (Project) -> Unit,
+    onBuildHistoryMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
     Box {
@@ -189,6 +196,7 @@ private fun ProjectListItem(
             ProjectOverflowMenu(
                 onOpen = { onOpenClick(project) },
                 onRun = { onRunMenuClick(project) },
+                onBuildHistory = { onBuildHistoryMenuClick(project) },
                 onDelete = { onDeleteMenuClick(project) },
                 onDismiss = onMenuDismiss,
             )
@@ -204,6 +212,7 @@ private val ProjectOverflowMenuEndOffset = 8.dp
 private fun ProjectOverflowMenu(
     onOpen: () -> Unit,
     onRun: () -> Unit,
+    onBuildHistory: () -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -219,6 +228,7 @@ private fun ProjectOverflowMenu(
         ProjectMenu(
             onOpen = onOpen,
             onRun = onRun,
+            onBuildHistory = onBuildHistory,
             onDelete = onDelete,
         )
     }

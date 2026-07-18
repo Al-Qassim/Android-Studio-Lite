@@ -15,19 +15,23 @@ data class BuildHistoryUiState(
     val menuJobId: String? = null,
     val pendingDelete: BuildHistoryRowUi? = null,
     val isLoading: Boolean = false,
+    val loadError: String? = null,
 )
 
 data class BuildHistoryDetailUiState(
-    val projectName: String,
-    val phase: BuildPhase,
-    val providerName: String? = null,
+    val isLoading: Boolean = true,
+    val loadError: String? = null,
+    val projectName: String = "",
+    val phase: BuildPhase = BuildPhase.ReadyToInstall,
     /** Last non-terminal phase reached — used for failed/cancelled phase list. */
     val lastActivePhase: BuildPhase? = null,
-    val startedLabel: String,
+    val providerName: String? = null,
+    val startedLabel: String = "",
     val finishedLabel: String? = null,
     val message: String? = null,
     val error: String? = null,
     val logUrl: String? = null,
+    val apkLocalPath: String? = null,
     val canInstall: Boolean = false,
     val isInstalling: Boolean = false,
     val installError: String? = null,

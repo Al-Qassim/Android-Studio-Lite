@@ -26,5 +26,5 @@ Stack highlights: Compose, Koin, feature modules (`model` / `api` / `data` / `pr
 ## How code is organized (pointer)
 
 - Feature modules own in-feature nav, data, and UI; app navigator only wires cross-feature exits.
-- Conventions: `/structure-feature-code`, busy screens: `docs/agents/screen-context.md`
+- **Implementing features:** `/implement` — requires `/structure-feature-code` (NavHost-only multi-step hosts, `logic/` not inline in Screen, flat `*UiState` with `isLoading`/`loadError`, `*Adapter` naming). Busy screens: `docs/agents/screen-context.md`.
 - Git / branches / PRs for agents: `docs/agents/git-workflow.md`

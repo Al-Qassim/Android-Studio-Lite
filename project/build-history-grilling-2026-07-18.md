@@ -11,7 +11,7 @@
 ## Goal (from discussion)
 
 - Build History lists all build jobs so far; updates live for in-flight jobs.
-- Accessible from Settings (all projects), Start Build, project overflow, and files browser menu.
+- Accessible from Settings (all projects), Start Build, and project overflow.
 - Leaving the build progress UI without Cancel does **not** cancel the job; job keeps running.
 - Metadata saved in a local DB; non-terminal jobs resume tracking after process death.
 - User can run more than one build at a time (in parallel).
@@ -193,11 +193,11 @@ All embed the same buildapk History UI. **No** single shared `IdeRoute.BuildHist
 
 **Conclusion: A** — Back from Progress (started from Start) still dismisses the Build feature; job keeps running. Rejoin via History from any entry.
 
-**Also decided here:** Project list overflow and Files browser top-bar dropdown each get “Build history” (scoped — Q21).
+**Also decided here:** Project list overflow gets “Build history” (scoped — Q21). Files browser does **not** expose History (removed after grilling).
 
 ---
 
-### Q21 — Scope for Projects / Files History entries
+### Q21 — Scope for Projects History entry
 
 **Options:** (A) scoped to that project · (B) unfiltered · (C) mixed  
 
@@ -261,14 +261,15 @@ All embed the same buildapk History UI. **No** single shared `IdeRoute.BuildHist
 
 ### Q29 — Cancel in-flight builds when a project is deleted
 
-**Options:** (A) ProjectService → buildapk · (B) UI calls both · (C) observeProjects diff · (hook) `ProjectListener` after delete  
+**Options:** (A) ProjectService → buildapk · (B) UI calls both · (C) observeProjects diff · (hook) listener after delete  
 
-**Conclusion:** Explicit hook — `ProjectListener` in `:feature:projects:api`.
+**Conclusion:** Explicit hook — `ProjectEventsListener` + `ProjectEventHooks` in `:feature:projects:api`.
 
 - `ProjectService.deleteProject` deletes the project **first**, then notifies listeners.
-- Buildapk registers a `ProjectListener` that cancels in-flight jobs for that id (history rows kept per Q8).
+- `DefaultBuildService` injects `ProjectEventHooks` and registers cancel-on-delete in `init` (`createdAtStart`) — **not** via Koin `getAll()` multi-bind into `ProjectService`.
+- Cancel uses `BuildService.cancelBuildsForProject` (history rows kept per Q8).
 - Listener exceptions are **isolated** (`runCatching` per listener): must not fail or roll back project delete; cancel remains best-effort.
-- Naming: `ProjectListener` (not `ProjectDeletionListener`); start with `onProjectDeleted` (can grow later).
+- Naming: `ProjectEventsListener` / `ProjectEventHooks`; start with `onProjectDeleted` (can grow later).
 
 ---
 
@@ -298,7 +299,7 @@ Start/Progress use `BuildService`; History list/detail/delete use `BuildHistoryS
 
 **Options:** (A) store → BuildService.cancel · (B) delete only via BuildService · (C) internal coordinator  
 
-**Conclusion: C** — Internal `BuildJobCoordinator` (name TBD) owns start / cancel / resume / delete-history / Room writes. Public `BuildService` and `BuildHistoryStore` are thin wrappers. Avoids `Store → BuildService → Store` dependency cycles.
+**Conclusion (revised):** `BuildJobLogic` owns job lifecycle behind ports it defines; Room and GitHub are adapters. `DefaultBuildService` wires adapters/auth/hooks. `DefaultBuildHistoryStore` does not depend on `BuildService` — it exposes `BuildHistoryEventHooks`; the service registers cancel-on-delete at runtime.
 
 ---
 
@@ -341,7 +342,7 @@ Start/Progress use `BuildService`; History list/detail/delete use `BuildHistoryS
 | Process death | Resume non-terminal jobs |
 | Tap row | Active → Progress; terminal → Detail |
 | Scope | Entry-only; Settings = all; project entries = that project |
-| Entries | Settings · Start Build top-bar · Project overflow · Files menu |
+| Entries | Settings · Start Build top-bar · Project overflow |
 | Terminal detail | Summary + Install if APK exists |
 | Delete | Overflow + confirm; active ⇒ cancel + remove; keep APK file |
 | Notifications | None in v1 (future) |
@@ -353,16 +354,16 @@ Start/Progress use `BuildService`; History list/detail/delete use `BuildHistoryS
 | Back from Progress (from Start) | Exit Build feature (unchanged) |
 | Retention | Until user deletes |
 | List row | Compact (name · phase · time) |
-| Architecture | Store = SoT; thin `BuildService` facade + pure runner |
+| Architecture | Room = SoT; `BuildService` + `BuildHistoryStore` hold impl |
 | UI APIs | Job ops → `BuildService`; history → store; `BuildScreens.History(...)` |
-| Sync | Facade writes store on create/phase/terminal |
+| Sync | Service writes Room on create/phase/terminal |
 | Resume timing | Eager on `BuildService` singleton init |
 | Resume pre-runId | Mark Failed (interrupted); don’t auto-restart |
 | Persist for resume | `runId`, repo, release id/tag (+ phase fields / logUrl / apk path) |
-| Project delete → builds | `ProjectListener.onProjectDeleted` after successful delete; errors isolated |
+| Project delete → builds | Runtime `ProjectEventHooks` → `cancelBuildsForProject`; errors isolated |
 | History API | Public `BuildHistoryStore` (+ `BuildHistoryItem`); `BuildService` stays job-ops |
-| Progress reads | `observeBuild` is store-backed (Room → `BuildProgress`) |
-| Internals | `BuildJobCoordinator` behind `BuildService` + `BuildHistoryStore` |
+| Progress reads | `observeBuild` is Room-backed (`BuildProgress`) |
+| Internals | `BuildJobLogic` + Room/GitHub adapters; history hooks for cancel-on-delete |
 | Resume payload | Opaque `providerId` + `resumeJson` on history row |
 | Tests | Mock `BuildService` / `BuildHistoryStore`; no FakeBuildService product path |
 | Room | Entity/DAO in buildapk data; registered on `AslDatabase` |

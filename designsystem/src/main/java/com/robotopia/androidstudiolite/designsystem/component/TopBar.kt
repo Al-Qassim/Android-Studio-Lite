@@ -73,6 +73,8 @@ fun TopBarBackTitle(
     title: String,
     onBackClick: () -> Unit = {},
     modifier: Modifier = Modifier,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -95,6 +97,13 @@ fun TopBarBackTitle(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (actionLabel != null && onActionClick != null) {
+            Button(
+                label = actionLabel,
+                onClick = onActionClick,
+                variant = ButtonVariant.TextAction,
+            )
+        }
     }
 }
 

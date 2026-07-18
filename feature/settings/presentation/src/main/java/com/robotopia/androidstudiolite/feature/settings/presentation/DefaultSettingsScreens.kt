@@ -3,11 +3,13 @@ package com.robotopia.androidstudiolite.feature.settings.presentation
 import androidx.compose.runtime.Composable
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
+import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.settings.api.SettingsScreens
 
 class DefaultSettingsScreens(
     private val authService: AuthService,
     private val authScreens: AuthScreens,
+    private val buildScreens: BuildScreens,
 ) : SettingsScreens {
 
     @Composable
@@ -17,6 +19,7 @@ class DefaultSettingsScreens(
         SettingsScreen(
             authService = authService,
             authScreens = authScreens,
+            buildScreens = buildScreens,
             onDismiss = onDismiss,
         )
     }

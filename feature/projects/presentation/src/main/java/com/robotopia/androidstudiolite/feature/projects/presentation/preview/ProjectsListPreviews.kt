@@ -93,6 +93,7 @@ private fun ProjectsListPreview(
         onMenuOpen = {},
         onMenuDismiss = {},
         onRunMenuClick = {},
+        onBuildHistoryMenuClick = {},
         onDeleteMenuClick = {},
         onDeleteCancel = {},
         onDeleteConfirm = {},
