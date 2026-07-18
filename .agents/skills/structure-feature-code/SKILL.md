@@ -118,8 +118,9 @@ When the screen grows many components (list + menus + dialogs), **add** a `*Scre
 When feature logic depends on Room / network / filesystem behind a seam:
 
 1. Define **ports** next to the logic that owns them (interfaces + domain types).
-2. Name concrete implementations **`…Adapter`** explicitly (`RoomBuildJobRepositoryAdapter`, `GitHubCloudBuildGatewayAdapter`).
+2. Name concrete implementations **`…Adapter`** explicitly (`RoomBuildJobRepositoryAdapter`, `GitHubBuildEngineAdapter`).
 3. Feature services wire adapters; do not make unrelated stores depend on services they only need for side effects — use event hooks instead.
+4. Engine-agnostic job lifecycle: credentials and account observation stay **inside** the engine adapter (e.g. `GitHubBuildEngineAdapter` + `AuthSession`). Do **not** put `AuthSession` / access tokens on `DefaultBuildService`. Eager resume runs without an account; engines optionally emit `observeResumeHints()` for cloud sign-in re-attach. Bind `BuildJobRepository` + `BuildEngine` in DI; do not nest a separate `BuildJobLogic` type beside the service.
 
 ## 5. Incremental delivery (when on a PR)
 

@@ -11,34 +11,8 @@ internal fun BuildPhase.isTerminal(): Boolean = when (this) {
     else -> false
 }
 
-/** Remote repo as the build-job logic sees it (provider-neutral). */
-internal data class RemoteRepo(
-    val owner: String,
-    val name: String,
-)
-
-internal data class RemoteRelease(
-    val id: Long,
-    val tag: String,
-    val uploadUrlTemplate: String,
-)
-
-internal data class RemoteRun(
-    val id: Long,
-    val status: String,
-    val conclusion: String?,
-    val htmlUrl: String?,
-)
-
-/** Opaque-enough resume cursor for re-attaching a non-terminal job. */
-internal data class BuildResume(
-    val repo: RemoteRepo,
-    val runId: Long? = null,
-    val release: RemoteRelease? = null,
-)
-
-/** Full job record for the build-job logic — no Room / GitHub types. */
-internal data class BuildJobSnapshot(
+/** Full job record for the build service — no Room / engine vendor types. */
+data class BuildJobSnapshot(
     val jobId: String,
     val projectId: String,
     val projectName: String,
@@ -50,17 +24,19 @@ internal data class BuildJobSnapshot(
     val apkLocalPath: String? = null,
     val logUrl: String? = null,
     val providerName: String? = null,
-    val resume: BuildResume? = null,
+    val providerId: String = "github",
+    /** Opaque engine resume cursor (JSON string owned by the engine). */
+    val resumeCursor: String? = null,
     val lastActivePhase: BuildPhase? = null,
     val startedAtEpochMs: Long,
     val finishedAtEpochMs: Long? = null,
 )
 
 /**
- * Persistence port owned by [BuildJobLogic].
+ * Persistence port for build jobs.
  * Adapters map Room entities ↔ [BuildJobSnapshot].
  */
-internal interface BuildJobRepository {
+interface BuildJobRepository {
     fun observe(jobId: String): Flow<BuildJobSnapshot?>
     suspend fun get(jobId: String): BuildJobSnapshot?
     suspend fun save(job: BuildJobSnapshot)
@@ -68,41 +44,51 @@ internal interface BuildJobRepository {
     suspend fun nonTerminalForProject(projectId: String): List<BuildJobSnapshot>
 }
 
+/** Project + job identity the engine needs to run or resume a build. */
+data class BuildEngineSession(
+    val jobId: String,
+    val projectName: String,
+    val packageName: String,
+    val projectRootPath: String,
+)
+
+/** Engine → service progress tick. [resumeCursor] is opaque to the service/Room. */
+data class BuildEngineUpdate(
+    val phase: BuildPhase,
+    val message: String? = null,
+    val logUrl: String? = null,
+    val apkLocalPath: String? = null,
+    val resumeCursor: String? = null,
+)
+
 /**
- * Cloud + local artifact port owned by [BuildJobLogic].
- * Adapters map GitHub / filesystem details.
+ * Build backend port.
+ * No credentials on this interface — engines that need auth pull it themselves.
  */
-internal interface CloudBuildGateway {
-    suspend fun prepareSandbox(token: String): RemoteRepo
+interface BuildEngine {
+    val providerId: String
+    val providerDisplayName: String
 
-    suspend fun uploadProjectZip(
-        token: String,
-        repo: RemoteRepo,
-        releaseTag: String,
-        projectRootPath: String,
-        jobId: String,
-    ): RemoteRelease
+    fun canResume(resumeCursor: String?): Boolean
 
-    suspend fun dispatchBuild(token: String, repo: RemoteRepo, releaseTag: String)
+    /**
+     * Emits when the service should retry attaching non-terminal jobs
+     * (e.g. cloud engine after sign-in). Local engines may never emit.
+     * Eager resume on process start is separate and always runs.
+     */
+    fun observeResumeHints(): Flow<Unit>
 
-    suspend fun findLatestRun(
-        token: String,
-        repo: RemoteRepo,
-        notBeforeEpochMs: Long,
-    ): RemoteRun?
+    suspend fun execute(
+        session: BuildEngineSession,
+        onUpdate: suspend (BuildEngineUpdate) -> Unit,
+    )
 
-    suspend fun getRun(token: String, repo: RemoteRepo, runId: Long): RemoteRun
+    suspend fun resume(
+        session: BuildEngineSession,
+        resumeCursor: String,
+        onUpdate: suspend (BuildEngineUpdate) -> Unit,
+    )
 
-    suspend fun cancelRun(token: String, repo: RemoteRepo, runId: Long)
-
-    /** Downloads the APK and publishes it; returns the installable local path/URI. */
-    suspend fun downloadAndPublishApk(
-        token: String,
-        repo: RemoteRepo,
-        releaseTag: String,
-        projectName: String,
-        jobId: String,
-    ): String
-
-    suspend fun deleteRelease(token: String, repo: RemoteRepo, release: RemoteRelease)
+    /** Best-effort remote cancel/cleanup for the opaque cursor. */
+    suspend fun cancel(resumeCursor: String?)
 }

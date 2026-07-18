@@ -73,7 +73,7 @@ Ship **in-app build history** backed by a local Room store:
   - `BuildService` — `startBuild` / `cancelBuild` / `cancelBuildsForProject` / `observeBuild` (job ops).
   - `BuildHistoryStore` — `observeHistory(projectId?)`, `observeJob` / `getJob`, `delete(jobId)` (cancel if active, remove row, keep APK).
   - `BuildScreens.History(projectIdFilter: String?, onDismiss)` — nested navigation List → Progress | Detail.
-- **Internals:** `BuildJobLogic` (ports it owns) + Room/GitHub adapters; `DefaultBuildService` wires them. `DefaultBuildHistoryStore` + `BuildHistoryEventHooks` (service registers cancel-on-delete). No coordinator façade.
+- **Internals:** `DefaultBuildService` owns job lifecycle via injected `BuildJobRepository` + `BuildEngine` (Room/GitHub adapters bound in DI). `DefaultBuildHistoryStore` + `BuildHistoryEventHooks` (service registers cancel-on-delete). No coordinator façade / separate `BuildJobLogic`.
 - **Reads:** Room is SoT. Service writes each phase update. `observeBuild` maps Room job → `BuildProgress`.
 - **DI product path:** `BuildService` + `BuildHistoryStore` + Room + GitHub. No `FakeBuildService` product path; tests mock the public APIs.
 - **Projects hook:** `ProjectEventHooks` + `ProjectEventsListener` in projects api; `DefaultBuildService` injects hooks and registers cancel-on-delete (not Koin `getAll()`); `deleteProject` succeeds first, then notifies; exceptions isolated per listener.

@@ -299,7 +299,7 @@ Start/Progress use `BuildService`; History list/detail/delete use `BuildHistoryS
 
 **Options:** (A) store → BuildService.cancel · (B) delete only via BuildService · (C) internal coordinator  
 
-**Conclusion (revised):** `BuildJobLogic` owns job lifecycle behind ports it defines; Room and GitHub are adapters. `DefaultBuildService` wires adapters/auth/hooks. `DefaultBuildHistoryStore` does not depend on `BuildService` — it exposes `BuildHistoryEventHooks`; the service registers cancel-on-delete at runtime.
+**Conclusion (revised):** `DefaultBuildService` owns job lifecycle behind injected ports (`BuildJobRepository`, `BuildEngine`); Room and GitHub are adapters bound in DI. `DefaultBuildHistoryStore` does not depend on `BuildService` — it exposes `BuildHistoryEventHooks`; the service registers cancel-on-delete at runtime.
 
 ---
 
@@ -363,7 +363,7 @@ Start/Progress use `BuildService`; History list/detail/delete use `BuildHistoryS
 | Project delete → builds | Runtime `ProjectEventHooks` → `cancelBuildsForProject`; errors isolated |
 | History API | Public `BuildHistoryStore` (+ `BuildHistoryItem`); `BuildService` stays job-ops |
 | Progress reads | `observeBuild` is Room-backed (`BuildProgress`) |
-| Internals | `BuildJobLogic` + Room/GitHub adapters; history hooks for cancel-on-delete |
+| Internals | `DefaultBuildService` + Room/GitHub adapters (DI); history hooks for cancel-on-delete |
 | Resume payload | Opaque `providerId` + `resumeJson` on history row |
 | Tests | Mock `BuildService` / `BuildHistoryStore`; no FakeBuildService product path |
 | Room | Entity/DAO in buildapk data; registered on `AslDatabase` |

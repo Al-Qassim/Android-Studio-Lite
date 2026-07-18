@@ -5,6 +5,10 @@ import com.robotopia.androidstudiolite.feature.buildapk.api.BuildHistoryEventHoo
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildHistoryStore
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
+import com.robotopia.androidstudiolite.feature.buildapk.data.github.GitHubBuildEngineAdapter
+import com.robotopia.androidstudiolite.feature.buildapk.data.job.BuildEngine
+import com.robotopia.androidstudiolite.feature.buildapk.data.job.BuildJobRepository
+import com.robotopia.androidstudiolite.feature.buildapk.data.room.RoomBuildJobRepositoryAdapter
 import com.robotopia.androidstudiolite.feature.buildapk.data.service.DefaultApkInstaller
 import com.robotopia.androidstudiolite.feature.buildapk.data.service.DefaultBuildHistoryEventHooks
 import com.robotopia.androidstudiolite.feature.buildapk.data.service.DefaultBuildHistoryStore
@@ -26,12 +30,18 @@ val buildApkDiModule = module {
             historyEventHooks = get(),
         )
     }
+    single<BuildJobRepository> { RoomBuildJobRepositoryAdapter(buildJobDao = get()) }
+    single<BuildEngine> {
+        GitHubBuildEngineAdapter(
+            context = androidContext(),
+            gitHubClient = get(),
+            authSession = get(),
+        )
+    }
     single<BuildService>(createdAtStart = true) {
         DefaultBuildService(
-            context = androidContext(),
-            authSession = get(),
-            gitHubClient = get(),
-            buildJobDao = get(),
+            jobs = get(),
+            engine = get(),
             historyEventHooks = get(),
             projectEventHooks = get(),
         )
