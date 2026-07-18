@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,12 +17,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
+import com.robotopia.androidstudiolite.designsystem.icon.IconSuccess
 import com.robotopia.androidstudiolite.designsystem.modifier.insetClickable
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 
 /**
  * Flat project list row — large name, package subtitle, optional meta.
- * No icon chrome; sits flush on an island (no card border).
+ * Optional [leading] status/icon chrome; sits flush on an island (no card border).
  */
 @Composable
 fun ProjectRow(
@@ -33,6 +35,7 @@ fun ProjectRow(
     selected: Boolean = false,
     onLongClick: (() -> Unit)? = null,
     onMenuClick: (() -> Unit)? = null,
+    leading: (@Composable () -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -43,8 +46,12 @@ fun ProjectRow(
                 onLongClick = onLongClick,
             )
             .padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = if (leading != null) Alignment.Top else Alignment.CenterVertically,
     ) {
+        if (leading != null) {
+            leading()
+            Spacer(modifier = Modifier.width(12.dp))
+        }
         Column(modifier = Modifier.weight(1f)) {
             BasicText(
                 text = name,
@@ -97,6 +104,7 @@ private fun ProjectRowPreview() {
             meta = "Opened yesterday",
             selected = true,
             onMenuClick = {},
+            leading = { IconSuccess(tint = Colors.Run, size = 20.dp) },
         )
         ProjectRow(
             name = "WeatherDemo",

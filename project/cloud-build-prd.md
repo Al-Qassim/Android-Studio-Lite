@@ -124,7 +124,7 @@ Avoid new top-level seams; extend these.
 
 ## Out of Scope
 
-- In-app build history  
+- In-app build history — **moved** to [`build-history-prd.md`](build-history-prd.md)  
 - Exact OAuth App registration checklist / redirect settings runbook  
 - Workflow YAML pin details (image, SDK packages, Gradle versions) — own later  
 - GitHub App least-privilege upgrade  

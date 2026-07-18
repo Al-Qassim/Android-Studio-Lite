@@ -110,6 +110,16 @@ fun CreateMenu(
 }
 
 @Composable
+fun BuildHistoryMenu(
+    onDelete: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    DropdownMenu(modifier = modifier.width(200.dp)) {
+        MenuItem(label = "Delete", onClick = onDelete, danger = true)
+    }
+}
+
+@Composable
 fun EditorMenu(
     autoSave: Boolean = false,
     wrapText: Boolean = false,
@@ -254,6 +264,12 @@ private fun MenuDivider() {
 @Composable
 private fun ProjectMenuPreview() {
     ProjectMenu(modifier = Modifier.padding(16.dp))
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "BuildHistoryMenu")
+@Composable
+private fun BuildHistoryMenuPreview() {
+    BuildHistoryMenu(modifier = Modifier.padding(16.dp))
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "ContextMenu")
