@@ -32,6 +32,8 @@ android {
         }
     }
     compileOptions {
+        // Needed so JGit (java.nio.file etc.) runs on minSdk 26 via desugar_jdk_libs_nio.
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -45,6 +47,7 @@ dependencies {
     implementation(project(":feature:settings:api"))
     implementation(project(":integration:di"))
     implementation(project(":integration:navigation"))
+    coreLibraryDesugaring(libs.desugar.jdk.libs.nio)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(platform(libs.androidx.compose.bom))
