@@ -47,6 +47,9 @@ internal fun ProjectsListContent(
     onDeleteMenuClick: (Project) -> Unit,
     onDeleteCancel: () -> Unit,
     onDeleteConfirm: () -> Unit,
+    onExportDismiss: () -> Unit,
+    onExportOpenFolder: () -> Unit,
+    onExportShare: () -> Unit,
     onErrorDismiss: () -> Unit,
 ) {
     IslandScaffold(
@@ -73,17 +76,18 @@ internal fun ProjectsListContent(
                 onBuildHistoryMenuClick = onBuildHistoryMenuClick,
                 onDeleteMenuClick = onDeleteMenuClick,
             )
-            if (state.hubMenuOpen) {
-                ProjectsHubOverflowMenu(
-                    onNewProject = onNewProject,
-                    onImportProject = onImportProject,
-                    onDismiss = onHubMenuDismiss,
-                )
-            }
             state.toastMessage?.let { message ->
                 ToastBottom(message = message)
             }
         }
+    }
+
+    if (state.hubMenuOpen) {
+        ProjectsHubOverflowMenu(
+            onNewProject = onNewProject,
+            onImportProject = onImportProject,
+            onDismiss = onHubMenuDismiss,
+        )
     }
 
     state.pendingDelete?.let { project ->
@@ -91,6 +95,16 @@ internal fun ProjectsListContent(
             projectName = project.name,
             onCancel = onDeleteCancel,
             onConfirm = onDeleteConfirm,
+        )
+    }
+
+    state.pendingExport?.let { export ->
+        ExportProjectDialog(
+            displayName = export.displayName,
+            savedToDownloads = export.downloadsUri != null,
+            onDismiss = onExportDismiss,
+            onOpenFolder = onExportOpenFolder,
+            onShare = onExportShare,
         )
     }
 
@@ -313,6 +327,31 @@ private fun DeleteProjectDialog(
             dangerAction = true,
             onCancel = onCancel,
             onAction = onConfirm,
+        )
+    }
+}
+
+@Composable
+private fun ExportProjectDialog(
+    displayName: String,
+    savedToDownloads: Boolean,
+    onDismiss: () -> Unit,
+    onOpenFolder: () -> Unit,
+    onShare: () -> Unit,
+) {
+    val message = if (savedToDownloads) {
+        "Saved “$displayName” to Downloads/AndroidStudioLite. Open the folder or share it with another app."
+    } else {
+        "Packaged “$displayName”. Share it with another app, or open Downloads to look for a saved copy."
+    }
+    Dialog(onDismissRequest = onDismiss) {
+        DialogMessageAction(
+            title = "Project exported",
+            message = message,
+            cancelLabel = "Open folder",
+            actionLabel = "Share",
+            onCancel = onOpenFolder,
+            onAction = onShare,
         )
     }
 }

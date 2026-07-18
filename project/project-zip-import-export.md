@@ -6,7 +6,7 @@ Simple on-device backup/share for ASL projects. Owned by `:feature:projects`.
 
 | Action | Entry | Result |
 | --- | --- | --- |
-| Export | Project overflow → **Export…** | Zip to cache (skip `build/`, `.gradle/`, etc.) + copy under `Downloads/AndroidStudioLite/` (API 29+) + system sharesheet |
+| Export | Project overflow → **Export…** | Zip to cache (skip `build/`, `.gradle/`, etc.) + copy under `Downloads/AndroidStudioLite/` (API 29+) → dialog: **Open folder** (Downloads) or **Share** (system sharesheet) |
 | Import | Projects **+** → **Import project** | SAF zip picker → validate → register in Room + files dir → appears in list |
 
 ## Rules

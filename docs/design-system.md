@@ -12,7 +12,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Composable UI | `designsystem/.../component/` — bars, rows, dialogs, scaffold, etc. |
 | Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable`, `overlayEnter` (not under `component/`) |
 | Overlay motion | Menus / dialogs use `overlayEnter` (short fade + scale) on their surfaces — feature Popup/Dialog hosts stay thin |
-| Popup position | Position menus with `Popup(offset = topEndPopupOffset(…))` — do **not** pad/statusBarsPadding the menu content. Use `includeStatusBars = true` for window-scoped top-bar menus |
+| Popup position | Position menus with `Popup(offset = topEndPopupOffset(…))` — do **not** pad/statusBarsPadding the menu content. Top-bar menus (`includeStatusBars = true`) must be composed **outside** `IslandScaffold`’s body (sibling of the scaffold, like `FileBrowserAddMenu`) so the popup is window-scoped; row overflow menus stay inside their row `Box` without status-bar inset |
 | Nav motion | Custom route hosts use `AnimatedContent` + `aslNavFade()` — enter/exit cross-fade; exit starts after a short delay |
 | Editor helpers | `designsystem/.../editor/` — e.g. `highlightCode` |
 | Feature UI | `feature/*/presentation/` — real screens; compose DS components |

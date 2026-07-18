@@ -14,8 +14,8 @@ data class ProjectsListUiState(
     val isBusy: Boolean = false,
     val actionError: String? = null,
     val toastMessage: String? = null,
-    /** Set by export logic; Screen consumes once to launch the sharesheet. */
-    val pendingShare: ProjectExportResult? = null,
+    /** Set after a successful export; Content shows Open folder / Share. */
+    val pendingExport: ProjectExportResult? = null,
 )
 
 /** Holds list UI state across configuration changes. No business/UI logic. */

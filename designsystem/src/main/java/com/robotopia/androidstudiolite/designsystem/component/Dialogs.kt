@@ -83,6 +83,7 @@ fun DialogMessageAction(
     onCancel: () -> Unit = {},
     onAction: () -> Unit = {},
     modifier: Modifier = Modifier,
+    cancelLabel: String = "Cancel",
     dangerAction: Boolean = false,
 ) {
     DialogSurface(modifier = modifier) {
@@ -94,7 +95,7 @@ fun DialogMessageAction(
         )
         Spacer(modifier = Modifier.height(16.dp))
         DialogActions(
-            cancelLabel = "Cancel",
+            cancelLabel = cancelLabel,
             onCancel = onCancel,
             actionLabel = actionLabel,
             onAction = onAction,

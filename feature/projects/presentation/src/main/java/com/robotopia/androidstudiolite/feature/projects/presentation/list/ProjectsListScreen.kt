@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.feature.projects.presentation.list
 
+import android.app.DownloadManager
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
@@ -60,12 +61,6 @@ internal fun ProjectsListScreen(
             delay(TOAST_DURATION_MS)
             viewModel.uiState.update { it.copy(toastMessage = null) }
         }
-    }
-
-    LaunchedEffect(state.pendingShare) {
-        val share = state.pendingShare ?: return@LaunchedEffect
-        viewModel.uiState.update { it.copy(pendingShare = null) }
-        shareProjectZip(context = context, export = share)
     }
 
     ProjectsListContent(
@@ -142,6 +137,18 @@ internal fun ProjectsListScreen(
                 )
             }
         },
+        onExportDismiss = {
+            viewModel.uiState.update { it.copy(pendingExport = null) }
+        },
+        onExportOpenFolder = {
+            viewModel.uiState.update { it.copy(pendingExport = null) }
+            openExportFolder(context)
+        },
+        onExportShare = {
+            val export = viewModel.uiState.value.pendingExport ?: return@ProjectsListContent
+            viewModel.uiState.update { it.copy(pendingExport = null) }
+            shareProjectZip(context = context, export = export)
+        },
         onErrorDismiss = {
             viewModel.uiState.update { it.copy(actionError = null) }
         },
@@ -205,16 +212,10 @@ private suspend fun exportProject(
     uiState.update { it.copy(isBusy = true, actionError = null) }
     try {
         val result = projectService.exportProject(project.id)
-        val toast = if (result.downloadsUri != null) {
-            "Saved to Downloads — choose where to share"
-        } else {
-            "Project packaged — choose where to share"
-        }
         uiState.update {
             it.copy(
                 isBusy = false,
-                pendingShare = result,
-                toastMessage = toast,
+                pendingExport = result,
             )
         }
     } catch (error: CancellationException) {
@@ -277,6 +278,14 @@ private fun shareProjectZip(
     context.startActivity(
         Intent.createChooser(send, "Export project").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
     )
+}
+
+private fun openExportFolder(context: Context) {
+    val intent = Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    runCatching {
+        context.startActivity(intent)
+    }
 }
 
 private const val TAG = "ProjectsList"

@@ -5,6 +5,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.robotopia.androidstudiolite.feature.projects.model.Project
+import com.robotopia.androidstudiolite.feature.projects.model.ProjectExportResult
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import com.robotopia.androidstudiolite.feature.projects.presentation.list.ProjectsListContent
 import com.robotopia.androidstudiolite.feature.projects.presentation.list.ProjectsListUiState
@@ -86,6 +87,18 @@ internal class ProjectsListPreviewProvider : PreviewParameterProvider<ProjectsLi
             ),
         ),
         ProjectsListPreviewCase(
+            "export done",
+            ProjectsListUiState(
+                isLoading = false,
+                projects = previewProjects,
+                pendingExport = ProjectExportResult(
+                    localZipPath = "/cache/HelloCompose.zip",
+                    displayName = "HelloCompose.zip",
+                    downloadsUri = "content://downloads/1",
+                ),
+            ),
+        ),
+        ProjectsListPreviewCase(
             "toast",
             ProjectsListUiState(
                 isLoading = false,
@@ -125,6 +138,9 @@ private fun ProjectsListPreview(
         onDeleteMenuClick = {},
         onDeleteCancel = {},
         onDeleteConfirm = {},
+        onExportDismiss = {},
+        onExportOpenFolder = {},
+        onExportShare = {},
         onErrorDismiss = {},
     )
 }
