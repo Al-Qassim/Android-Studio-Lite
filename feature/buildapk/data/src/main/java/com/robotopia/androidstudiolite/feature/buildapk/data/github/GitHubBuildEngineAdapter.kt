@@ -61,7 +61,14 @@ class GitHubBuildEngineAdapter(
             val releaseTag = uploadProject(session, token, repo, onUpdate) { cursor = it }
             awaitRemoteBuild(token, repo, releaseTag, cursor, onUpdate) { cursor = it }
             if (!coroutineContext.isActive) return
-            downloadReadyApk(session, token, repo, releaseTag, onUpdate)
+            downloadReadyApk(
+                session = session,
+                token = token,
+                repo = repo,
+                releaseTag = releaseTag,
+                onUpdate = onUpdate,
+                resumeCursor = cursor?.encode(),
+            )
         } finally {
             cleanupRelease(token, cursor)
         }
@@ -81,23 +88,49 @@ class GitHubBuildEngineAdapter(
             ?: throw AppException("Build interrupted. Start a new build to try again.")
         val repo = cursor.toRepoRef()
         try {
-            onUpdate(
-                BuildEngineUpdate(
-                    phase = BuildPhase.Building,
-                    message = "Resuming remote build…",
-                    resumeCursor = cursor.encode(),
-                ),
-            )
-            pollUntilBuildSucceeds(
+            val run = gitHubClient.getWorkflowRun(token, repo, runId)
+            val buildFinished = run.status == "completed" && run.conclusion == "success"
+            if (buildFinished) {
+                // Interrupted during/after download: remote build already succeeded —
+                // re-fetch the APK from the release and finish ReadyToInstall.
+                onUpdate(
+                    BuildEngineUpdate(
+                        phase = BuildPhase.Downloading,
+                        message = "Resuming APK download…",
+                        logUrl = run.htmlUrl,
+                        resumeCursor = cursor.encode(),
+                    ),
+                )
+            } else {
+                onUpdate(
+                    BuildEngineUpdate(
+                        phase = BuildPhase.Building,
+                        message = "Resuming remote build…",
+                        logUrl = run.htmlUrl,
+                        resumeCursor = cursor.encode(),
+                    ),
+                )
+                if (run.status == "completed") {
+                    throw AppException("Build failed. Open the build log.")
+                }
+                pollUntilBuildSucceeds(
+                    token = token,
+                    repo = repo,
+                    runId = runId,
+                    initialLogUrl = run.htmlUrl,
+                    resumeCursor = { cursor.encode() },
+                    onUpdate = onUpdate,
+                )
+            }
+            if (!coroutineContext.isActive) return
+            downloadReadyApk(
+                session = session,
                 token = token,
                 repo = repo,
-                runId = runId,
-                initialLogUrl = null,
-                resumeCursor = { cursor.encode() },
+                releaseTag = releaseTag,
                 onUpdate = onUpdate,
+                resumeCursor = cursor.encode(),
             )
-            if (!coroutineContext.isActive) return
-            downloadReadyApk(session, token, repo, releaseTag, onUpdate)
         } finally {
             cleanupRelease(token, cursor)
         }
@@ -320,11 +353,13 @@ class GitHubBuildEngineAdapter(
         repo: GitHubRepoRef,
         releaseTag: String,
         onUpdate: suspend (BuildEngineUpdate) -> Unit,
+        resumeCursor: String?,
     ) {
         onUpdate(
             BuildEngineUpdate(
                 phase = BuildPhase.Downloading,
                 message = "Downloading APK…",
+                resumeCursor = resumeCursor,
             ),
         )
         val tempApk = File(appContext.cacheDir, "buildapk/asl-${session.jobId}.apk")
@@ -341,6 +376,7 @@ class GitHubBuildEngineAdapter(
                 phase = BuildPhase.ReadyToInstall,
                 message = "APK saved to Downloads",
                 apkLocalPath = downloadsUri,
+                resumeCursor = resumeCursor,
             ),
         )
     }

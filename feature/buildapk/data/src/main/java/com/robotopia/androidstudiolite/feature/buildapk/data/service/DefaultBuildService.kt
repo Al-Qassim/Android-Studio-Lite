@@ -42,7 +42,6 @@ class DefaultBuildService(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val runners = ConcurrentHashMap<String, Job>()
     private val resumeMutex = Mutex()
-    private var resumeStarted = false
 
     init {
         historyEventHooks.addListener(
@@ -55,12 +54,11 @@ class DefaultBuildService(
                 cancelBuildsForProject(projectId.value)
             },
         )
-        // Always attempt resume on process start (works for local / no-account engines).
-        startEagerResume()
-        // Engine-specific hints (e.g. cloud sign-in) may trigger another attach pass.
+
         scope.launch {
             engine.observeResumeHints().collect {
-                resumeEligibleJobs()
+                if (resumeMutex.isLocked) return@collect
+                resumeMutex.withLock { claimAndLaunchResumes() }
             }
         }
     }
@@ -95,21 +93,25 @@ class DefaultBuildService(
             ),
         )
         runners[jobId] = scope.launch {
-            runEngine(
-                jobId = jobId,
-                session = BuildEngineSession(
+            try {
+                runEngine(
                     jobId = jobId,
-                    projectName = request.projectName,
-                    packageName = request.packageName,
-                    projectRootPath = request.projectRoot.absolutePath,
-                ),
-                providerName = providerName,
-                block = { session ->
-                    engine.execute(session) { update ->
-                        persistEngineUpdate(jobId, update)
-                    }
-                },
-            )
+                    session = BuildEngineSession(
+                        jobId = jobId,
+                        projectName = request.projectName,
+                        packageName = request.packageName,
+                        projectRootPath = request.projectRoot.absolutePath,
+                    ),
+                    providerName = providerName,
+                    block = { session ->
+                        engine.execute(session) { update ->
+                            persistEngineUpdate(jobId, update)
+                        }
+                    },
+                )
+            } finally {
+                runners.remove(jobId)
+            }
         }
         return jobId
     }
@@ -124,7 +126,7 @@ class DefaultBuildService(
             progress = BuildProgress(
                 jobId = jobId,
                 phase = BuildPhase.Cancelled,
-                message = "No APK was produced. You can start a new build when you're ready.",
+                message = "No APK was produced. build have been canceled.",
                 providerName = existing.providerName,
                 logUrl = existing.logUrl,
             ),
@@ -139,23 +141,7 @@ class DefaultBuildService(
         }
     }
 
-    private fun startEagerResume() {
-        scope.launch { ensureResumeStarted() }
-    }
-
-    private fun resumeEligibleJobs() {
-        scope.launch { resumeEligibleJobsInternal() }
-    }
-
-    private suspend fun ensureResumeStarted() {
-        resumeMutex.withLock {
-            if (resumeStarted) return
-            resumeStarted = true
-        }
-        resumeEligibleJobsInternal()
-    }
-
-    private suspend fun resumeEligibleJobsInternal() {
+    private suspend fun claimAndLaunchResumes() {
         for (job in jobs.nonTerminal()) {
             if (runners.containsKey(job.jobId)) continue
             val cursor = job.resumeCursor
@@ -175,25 +161,39 @@ class DefaultBuildService(
                 continue
             }
             val resumeCursor = cursor ?: continue
-            runners[job.jobId] = scope.launch {
-                runEngine(
-                    jobId = job.jobId,
-                    session = BuildEngineSession(
-                        jobId = job.jobId,
-                        projectName = job.projectName,
-                        packageName = job.packageName,
-                        projectRootPath = job.projectRootPath,
-                    ),
-                    providerName = job.providerName,
-                    block = { session ->
-                        engine.resume(
-                            session = session,
-                            resumeCursor = resumeCursor,
-                            onUpdate = { update -> persistEngineUpdate(job.jobId, update) },
-                        )
-                    },
-                )
+            // Claim before launch so a concurrent resume pass cannot double-start.
+            val claim = Job()
+            if (runners.putIfAbsent(job.jobId, claim) != null) {
+                claim.cancel()
+                continue
             }
+            val launched = scope.launch {
+                try {
+                    runEngine(
+                        jobId = job.jobId,
+                        session = BuildEngineSession(
+                            jobId = job.jobId,
+                            projectName = job.projectName,
+                            packageName = job.packageName,
+                            projectRootPath = job.projectRootPath,
+                        ),
+                        providerName = job.providerName,
+                        block = { session ->
+                            engine.resume(
+                                session = session,
+                                resumeCursor = resumeCursor,
+                                onUpdate = { update -> persistEngineUpdate(job.jobId, update) },
+                            )
+                        },
+                    )
+                } finally {
+                    runners.remove(job.jobId)
+                }
+            }
+            if (!runners.replace(job.jobId, claim, launched)) {
+                launched.cancel()
+            }
+            claim.complete()
         }
     }
 
@@ -217,8 +217,6 @@ class DefaultBuildService(
             if (current != BuildPhase.Cancelled) {
                 failJob(jobId, "Build failed. Open the build log.", providerName)
             }
-        } finally {
-            runners.remove(jobId)
         }
     }
 
