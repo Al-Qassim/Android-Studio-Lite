@@ -25,3 +25,15 @@ data class CreateProjectFieldErrors(
     val hasErrors: Boolean
         get() = name != null || packageName != null || minSdk != null
 }
+
+/**
+ * Result of exporting a project as a zip.
+ *
+ * [localZipPath] is an app-cache file suitable for [androidx.core.content.FileProvider] sharing.
+ * [downloadsUri] is a MediaStore content URI when the zip was also saved to Downloads.
+ */
+data class ProjectExportResult(
+    val localZipPath: String,
+    val displayName: String,
+    val downloadsUri: String?,
+)

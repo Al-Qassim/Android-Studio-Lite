@@ -114,6 +114,7 @@ flowchart TB
 
 ### Projects
 - Metadata in Room; project trees under app-private storage; scaffolds an empty Compose template.
+- Zip export / import (v1): overflow **Export…** (Downloads + sharesheet); hub **+** menu → New / Import (SAF). Zip skips build/IDE junk; import requires `settings.gradle(.kts)`; name collisions get a numeric suffix. Packaging lives in `:feature:projects:data` (`ProjectArchive`) — separate from cloud-build zipper in buildapk.
 - UI: list ↔ create (internal nav).
 - Exits: open → Files; run → Build (can skip Files/Editor).
 

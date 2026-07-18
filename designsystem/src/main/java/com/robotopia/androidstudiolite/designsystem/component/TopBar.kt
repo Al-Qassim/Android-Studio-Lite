@@ -62,7 +62,7 @@ fun TopBarTitleAction(
         IconButton(
             onClick = onActionClick,
             variant = IconButtonVariant.Ghost,
-            modifier = Modifier.semantics { contentDescription = "New project" },
+            modifier = Modifier.semantics { contentDescription = "Add project" },
             icon = { tint, size -> IconAdd(tint = tint, size = size) },
         )
     }
