@@ -27,6 +27,7 @@ dependencies {
     api(project(":feature:settings:api"))
     implementation(project(":feature:auth:api"))
     implementation(project(":feature:auth:model"))
+    implementation(project(":feature:buildapk:api"))
     implementation(project(":designsystem"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

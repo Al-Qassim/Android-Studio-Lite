@@ -23,5 +23,6 @@ dependencies {
     api(project(":feature:settings:api"))
     implementation(project(":feature:settings:presentation"))
     implementation(project(":feature:auth:api"))
+    implementation(project(":feature:buildapk:api"))
     implementation(libs.koin.android)
 }

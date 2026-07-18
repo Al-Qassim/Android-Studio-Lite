@@ -14,9 +14,11 @@ import com.robotopia.androidstudiolite.designsystem.animation.aslNavFade
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthSession
 import com.robotopia.androidstudiolite.feature.buildapk.api.ApkInstaller
+import com.robotopia.androidstudiolite.feature.buildapk.api.BuildHistoryStore
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildService
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildRequest
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.history.BuildHistoryScreen
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.progress.BuildProgressScreen
 import com.robotopia.androidstudiolite.feature.buildapk.presentation.start.BuildStartScreen
 import kotlinx.coroutines.launch
@@ -25,10 +27,12 @@ private enum class BuildStep {
     Start,
     Connect,
     Progress,
+    History,
 }
 
 class DefaultBuildScreens(
     private val buildService: BuildService,
+    private val buildHistoryStore: BuildHistoryStore,
     private val apkInstaller: ApkInstaller,
     private val authSession: AuthSession,
     private val authScreens: AuthScreens,
@@ -69,6 +73,9 @@ class DefaultBuildScreens(
                         onConnectAccountClick = {
                             step = BuildStep.Connect
                         },
+                        onHistoryClick = {
+                            step = BuildStep.History
+                        },
                     )
                 }
 
@@ -91,6 +98,13 @@ class DefaultBuildScreens(
                         },
                     )
                 }
+
+                BuildStep.History -> {
+                    History(
+                        projectIdFilter = request.projectId.value,
+                        onDismiss = { step = BuildStep.Start },
+                    )
+                }
             }
         }
     }
@@ -107,6 +121,20 @@ class DefaultBuildScreens(
             apkInstaller = apkInstaller,
             onDismiss = onDismiss,
             onRetry = onRetry,
+        )
+    }
+
+    @Composable
+    override fun History(
+        projectIdFilter: String?,
+        onDismiss: () -> Unit,
+    ) {
+        BuildHistoryScreen(
+            projectIdFilter = projectIdFilter,
+            buildHistoryStore = buildHistoryStore,
+            buildService = buildService,
+            apkInstaller = apkInstaller,
+            onDismiss = onDismiss,
         )
     }
 }

@@ -22,6 +22,7 @@ android {
 
 dependencies {
     api(project(":feature:projects:data"))
+    api(project(":feature:buildapk:data"))
     api(libs.androidx.room.runtime)
     api(libs.androidx.room.ktx)
     implementation(libs.androidx.core.ktx)

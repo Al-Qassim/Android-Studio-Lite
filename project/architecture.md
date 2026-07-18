@@ -45,7 +45,7 @@ feature/
   editor/     model · api · data · presentation · di
   buildapk/   model · api · data · presentation · di
   auth/       model · api · data · presentation · di   # session + Connect (login) only
-  settings/   api · presentation · di                  # Settings hub + Build account (uses auth)
+  settings/   api · presentation · di                  # Settings hub + Build account + History entry
   onboarding/ api · data · presentation · di           # first-launch Welcome → Connect / Skip
   github/     api · data · di                          # stateless GitHub helpers (device + build REST)
 integration/
@@ -129,14 +129,17 @@ flowchart TB
 - Exits: back → Files; run → Build.
 
 ### Build (`buildapk`)
-- `BuildService` + `ApkInstaller` in `:api`.
-- **Product data:** `GitHubActionsBuildService` — public sandbox `asl-builds-android-studio-lite`, ephemeral release, Actions `workflow_dispatch`, APK download (`FakeBuildService` remains for tests).
-- UI: start → progress; on ready, `BuildProgressScreen` calls `ApkInstaller` (loading + user-safe install errors / unknown-sources hint). Nav host only dismisses.
+- `BuildService` + `BuildHistoryStore` + `ApkInstaller` in `:api`.
+- **Internals:** `DefaultBuildService` is the job lifecycle (persist, runners, cancel, resume attach) and implements `BuildService`. It depends on injected ports (`BuildJobRepository`, `BuildEngine`) — no `AuthSession` / tokens on the service. Eager resume always runs on process start (local engines need no account). Engines may emit resume hints (GitHub after sign-in). Koin binds adapters: `RoomBuildJobRepositoryAdapter` ← `BuildJobDao`, `GitHubBuildEngineAdapter` ← `GitHubClient` + `AuthSession` (engine owns auth). Service also registers history/project-delete hooks. `DefaultBuildHistoryStore` observes/deletes rows and notifies `BuildHistoryEventHooks` (no dependency on `BuildService`). Data layout under `:feature:buildapk:data`: `job/` · `room/` · `github/` · `local/` · `service/` · `fake/`. See `project/build-history-prd.md`.
+- **Product data:** GitHub Actions — public sandbox `asl-builds-android-studio-lite`, ephemeral release, Actions `workflow_dispatch`, APK download. Resume cursor stored as opaque `providerId` + JSON on the job row (engine-owned; service/Room treat it as a string).
+- UI: start → progress; History via `BuildScreens.History` (nested list → progress|detail). On ready, progress/detail call `ApkInstaller`. Leaving progress without Cancel does not cancel; eager resume on process start.
+- **Hosts:** Settings / Build / Projects each route to History in their own nav host (Settings = all projects; others pass project id).
 
 ### Auth / Settings / Onboarding
 - **Auth:** Connect device flow + session (`accessToken` via `auth:api`).
-- **Settings:** hub + Build account (connect / log out).
+- **Settings:** hub + Build account (connect / log out) + Build history entry (embeds buildapk History).
 - **Onboarding:** first-launch Welcome → Connect / Skip; gate in `IdeNavHost`.
+- **Cross-feature hooks:** `ProjectEventHooks` + `ProjectEventsListener` in projects `:api`. `DefaultBuildService` injects `ProjectEventHooks` and [addListener]s cancel-on-project-delete when constructed (`createdAtStart`). Not via Koin `getAll()` multi-bind into `ProjectService`. After successful `deleteProject`, hooks notify best-effort; history rows kept.
 
 ### GitHub
 - Stateless `:feature:github` — device flow + build REST (`HttpGitHubClient`).
@@ -149,7 +152,7 @@ Busy-screen layout: `docs/agents/screen-context.md`. Feature conventions: `/stru
 
 | Module | Role |
 | --- | --- |
-| `:integration:database` | `AslDatabase` — today projects entity/DAO only |
+| `:integration:database` | `AslDatabase` — feature entities/DAOs (projects; build jobs when history ships) |
 | `:integration:di` | `integrationDiModule` — only module `:app` starts |
 | `:integration:navigation` | `IdeNavHost` — Onboarding / Projects / Files / Editor / Build / Settings. Cross-feature `IdeRoute` is `@Serializable` and restored via `IdeRouteSaver` (JSON). Feature sub-routes use `rememberSaveable`. Deep routes carry project fields (no host-side `getProject`). Editor session is closed by the editor feature when its screen leaves composition — not by the nav host. |
 | `:app` | `AslApplication`, `MainActivity`, theme bridge, FileProvider / install permission |
@@ -158,8 +161,12 @@ Busy-screen layout: `docs/agents/screen-context.md`. Feature conventions: `/stru
 Projects
   ├─ open ──► Files ─┬─ open file ──► Editor ──► Build (return Editor)
   │                  └─ run ───────────────────► Build (return Files)
+  ├─ overflow ──► History (project)
   └─ run ──────────────────────────────────────► Build (return Projects)
-Build (owns ApkInstaller) ──► system install UI ; dismiss ──► returnTo
+Build ──► Start ─┬─ progress ──► (back exits Build; job keeps running)
+                 └─ History (project) ──► progress | detail
+Settings ──► History (all projects)
+Build (owns ApkInstaller + History) ──► system install UI ; dismiss ──► returnTo
 ```
 
 ---
@@ -171,7 +178,8 @@ Build (owns ApkInstaller) ──► system install UI ; dismiss ──► return
 | Project metadata | Room via `:feature:projects:data` |
 | Project files | App-private FS; CRUD via `:feature:files:data` |
 | Editor buffer | Memory in `:feature:editor:data`; disk via files API |
-| Build artifacts | Local cache + demo asset in `:feature:buildapk:data` |
+| Build artifacts | Local cache + Downloads publish in `:feature:buildapk:data` |
+| Build job history | Room via `:feature:buildapk:data` (registered on `AslDatabase`) |
 | Auth session | SharedPreferences in `:feature:auth:data` (stub device flow) |
 | Onboarding completion | SharedPreferences in `:feature:onboarding:data` |
 | GitHub OAuth client id | `github.oauth.clientId` in gitignored `local.properties` → `auth:data` `BuildConfig.GITHUB_OAUTH_CLIENT_ID` (see `local.properties.example`) |
@@ -185,7 +193,7 @@ Build (owns ApkInstaller) ──► system install UI ; dismiss ──► return
 
 ## 8. Out of scope / later
 
-Git, AI assistant, syntax highlighting, optional private sandbox (`#27`), Documents storage, Gradle wrappers in generated projects.
+Git, AI assistant, syntax highlighting, optional private sandbox (`#27`), Documents storage, Gradle wrappers in generated projects. Build-history notifications / on-screen filter are deferred (`build-history-prd.md`).
 
 Locked product decisions: `project/v0.1-implementation-plan.md` (and grilling notes under `project/` when relevant).
 
@@ -195,11 +203,11 @@ Locked product decisions: `project/v0.1-implementation-plan.md` (and grilling no
 
 | Area | Public surface | Impl notes |
 | --- | --- | --- |
-| Projects | `:feature:projects:api` | Room + template FS |
+| Projects | `:feature:projects:api` | Room + template FS; `ProjectEventHooks` (runtime listeners) |
 | Files | `:feature:files:api` | Sandboxed FS |
 | Editor | `:feature:editor:api` | Session + files API |
-| Build | `:feature:buildapk:api` | GHA product path; fake + demo APK for tests |
+| Build | `:feature:buildapk:api` | GHA runner + Room history; `BuildService` + `BuildHistoryStore` |
 | Auth | `:feature:auth:api` | Session + Connect (login) only |
-| Settings | `:feature:settings:api` | Settings hub; Build account section (uses auth) |
+| Settings | `:feature:settings:api` | Settings hub; Build account; embeds Build history |
 | Nav / DI / DB | `:integration:*` | Wire only |
 | UI kit / errors | `:designsystem`, `:core:error` | Shared |

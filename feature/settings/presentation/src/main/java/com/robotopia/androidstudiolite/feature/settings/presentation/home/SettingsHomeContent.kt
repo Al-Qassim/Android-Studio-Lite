@@ -17,6 +17,7 @@ internal fun SettingsHomeContent(
     buildAccountSubtitle: String,
     onBackClick: () -> Unit,
     onBuildAccountClick: () -> Unit,
+    onBuildHistoryClick: () -> Unit,
 ) {
     IslandScaffold(
         topBar = {
@@ -36,6 +37,11 @@ internal fun SettingsHomeContent(
                 title = "Build account",
                 subtitle = buildAccountSubtitle,
                 onClick = onBuildAccountClick,
+            )
+            SettingsRow(
+                title = "Build history",
+                subtitle = "Past and running builds",
+                onClick = onBuildHistoryClick,
             )
             SettingsRow(
                 title = "About",

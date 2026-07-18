@@ -16,21 +16,12 @@ import com.robotopia.androidstudiolite.designsystem.color.Colors
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
-import com.robotopia.androidstudiolite.designsystem.component.PhaseItem
 import com.robotopia.androidstudiolite.designsystem.component.PhaseList
-import com.robotopia.androidstudiolite.designsystem.component.PhaseStatus
 import com.robotopia.androidstudiolite.designsystem.component.TopBarBackTitle
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.buildapk.model.BuildPhase
-
-private val progressPhases = listOf(
-    BuildPhase.Preparing,
-    BuildPhase.Uploading,
-    BuildPhase.Queued,
-    BuildPhase.Building,
-    BuildPhase.Downloading,
-    BuildPhase.ReadyToInstall,
-)
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.buildPhaseItems
+import com.robotopia.androidstudiolite.feature.buildapk.presentation.buildPhaseLabel
 
 @Composable
 internal fun BuildProgressContent(
@@ -150,16 +141,13 @@ private fun BuildActiveState(state: BuildProgressUiState) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         BuildProgressHeader(
-            title = phaseLabel(state.phase),
+            title = buildPhaseLabel(state.phase),
             titleColor = Colors.Text,
             message = state.message,
             providerName = state.providerName,
         )
         PhaseList(
-            phases = toPhaseItems(
-                currentPhase = state.phase,
-                failedAtPhase = null,
-            ),
+            phases = buildPhaseItems(currentPhase = state.phase),
         )
         if (state.phase == BuildPhase.ReadyToInstall && state.isInstalling) {
             BasicText(
@@ -195,7 +183,7 @@ private fun BuildFailedState(
             providerName = state.providerName,
         )
         PhaseList(
-            phases = toPhaseItems(
+            phases = buildPhaseItems(
                 currentPhase = state.phase,
                 failedAtPhase = state.failedAtPhase ?: BuildPhase.Building,
             ),
@@ -254,54 +242,5 @@ private fun BuildProgressHeader(
                 style = Typography.Caption.copy(color = Colors.Muted),
             )
         }
-    }
-}
-
-private fun toPhaseItems(
-    currentPhase: BuildPhase,
-    failedAtPhase: BuildPhase?,
-): List<PhaseItem> =
-    progressPhases.map { phase ->
-        PhaseItem(
-            label = phaseLabel(phase),
-            status = phaseStatus(
-                phase = phase,
-                current = currentPhase,
-                failedAtPhase = failedAtPhase,
-            ),
-        )
-    }
-
-private fun phaseLabel(phase: BuildPhase): String = when (phase) {
-    BuildPhase.Preparing -> "Preparing"
-    BuildPhase.Uploading -> "Uploading"
-    BuildPhase.Queued -> "Queued"
-    BuildPhase.Building -> "Building"
-    BuildPhase.Downloading -> "Downloading"
-    BuildPhase.ReadyToInstall -> "Ready to install"
-    BuildPhase.Failed -> "Failed"
-    BuildPhase.Cancelled -> "Cancelled"
-}
-
-private fun phaseStatus(
-    phase: BuildPhase,
-    current: BuildPhase,
-    failedAtPhase: BuildPhase?,
-): PhaseStatus {
-    val phaseIndex = progressPhases.indexOf(phase)
-    if (failedAtPhase != null) {
-        val failedIndex = progressPhases.indexOf(failedAtPhase).coerceAtLeast(0)
-        return when {
-            phaseIndex < failedIndex -> PhaseStatus.Complete
-            phaseIndex == failedIndex -> PhaseStatus.Failed
-            else -> PhaseStatus.Upcoming
-        }
-    }
-    val currentIndex = progressPhases.indexOf(current).coerceAtLeast(0)
-    return when {
-        current == BuildPhase.ReadyToInstall && phaseIndex <= currentIndex -> PhaseStatus.Complete
-        phaseIndex < currentIndex -> PhaseStatus.Complete
-        phaseIndex == currentIndex -> PhaseStatus.Current
-        else -> PhaseStatus.Upcoming
     }
 }

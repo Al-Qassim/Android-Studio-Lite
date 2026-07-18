@@ -29,12 +29,15 @@ internal fun BuildStartContent(
     onBackClick: () -> Unit,
     onStartBuildClick: () -> Unit,
     onConnectAccountClick: () -> Unit,
+    onHistoryClick: () -> Unit,
 ) {
     IslandScaffold(
         topBar = {
             TopBarBackTitle(
                 title = "Build",
                 onBackClick = onBackClick,
+                actionLabel = "History",
+                onActionClick = onHistoryClick,
             )
         },
         footer = {

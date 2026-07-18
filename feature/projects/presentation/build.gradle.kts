@@ -26,6 +26,7 @@ android {
 dependencies {
     api(project(":feature:projects:api"))
     api(project(":feature:projects:model"))
+    implementation(project(":feature:buildapk:api"))
     implementation(project(":core:error"))
     implementation(project(":designsystem"))
     implementation(platform(libs.androidx.compose.bom))

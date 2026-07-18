@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.buildapk.data
+package com.robotopia.androidstudiolite.feature.buildapk.data.service
 
 import android.content.Context
 import android.content.Intent

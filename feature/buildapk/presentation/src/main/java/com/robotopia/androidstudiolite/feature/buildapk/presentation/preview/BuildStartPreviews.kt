@@ -41,5 +41,6 @@ private fun BuildStartPreview(
         onBackClick = {},
         onStartBuildClick = {},
         onConnectAccountClick = {},
+        onHistoryClick = {},
     )
 }

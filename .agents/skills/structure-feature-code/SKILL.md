@@ -16,9 +16,11 @@ Reusable conventions for feature modules (mobile or similar layered apps). Adapt
 
 1. Split by role: **model** (types) · **api** (contracts) · **data** (impl) · **presentation** (UI) · **di** (bindings) — or the project’s equivalent.
 2. Each feature owns its **in-feature** navigation (e.g. list ↔ create).
-3. The app / integration navigator only wires **cross-feature** exits. No feature toasts, dialogs, or internal routes in the root host.
-4. **`:model` / `:api` do not shape themselves around UI layout.** Progress/result types carry domain facts the caller needs for the next action (e.g. challenge code + URI to open). Do not add fields only so a later screen can redraw chrome that the presentation layer can retain from an earlier emission. UI state may keep display data; the public model must not.
-5. **Comments describe the present.** KDoc/comments say what the type or function is for now. Do not narrate removed fields, old mistakes, “why we didn’t put X here,” or contrast against a discarded approach.
+3. A screen that hosts **inner screens** (list ↔ detail ↔ progress) is a thin **NavHost** only: `AnimatedContent` / route enum + child screen calls — same shape as `ProjectsNavHost` / `SettingsScreen` / `BuildHistoryScreen`. Do **not** put observe/menu/install bodies in that host file; each child screen owns its wiring + `logic/`.
+4. The app / integration navigator only wires **cross-feature** exits. No feature toasts, dialogs, or internal routes in the root host.
+5. **Cross-feature event hooks use a producer-owned registry** in `:api` (`addListener` / `removeListener`). Consumers inject that registry and register in their own construction (e.g. `DefaultBuildService` + `ProjectEventHooks`). Do **not** bind consumer listeners into the producer via Koin `getAll()` multi-bind.
+6. **`:model` / `:api` do not shape themselves around UI layout.** Progress/result types carry domain facts the caller needs for the next action (e.g. challenge code + URI to open). Do not add fields only so a later screen can redraw chrome that the presentation layer can retain from an earlier emission. UI state may keep display data; the public model must not.
+7. **Comments describe the present.** KDoc/comments say what the type or function is for now. Do not narrate removed fields, old mistakes, “why we didn’t put X here,” or contrast against a discarded approach.
 
 ## 2. Errors
 
@@ -80,7 +82,7 @@ Rules (same as Screen Context, adapted):
 2. **Screen wires resources** (service, exits, clipboard/uri) and calls **`logic/`**; compose **`ui/`** from `state`.
 3. **Do not** use a mega `*Content(state, onA, onB, onC, …)` that funnels every callback through one parameter list.
 4. **`ui/`** pieces take `state` (or the relevant subtype) plus only the actions that piece needs.
-5. **`logic/`** is top-level functions (not nested `fun` inside composables).
+5. **`logic/`** is top-level functions (not nested `fun` inside composables). Screen composables only **call** those functions — no observe/map/menu/delete/install/navigate bodies inlined in the `@Composable`. Reference: `BuildProgressScreen` + `progress/logic/`, `BuildHistoryScreen` + `history/logic/`.
 6. Design-system stays parameterized.
 7. Prefer this shape over a single Screen+Content file even when the screen is small (Connect, Settings hub, Build account).
 
@@ -108,6 +110,17 @@ When the screen grows many components (list + menus + dialogs), **add** a `*Scre
 - Holds UI state across configuration changes only.
 - No service calls, validation, or navigation side effects unless the human explicitly asks otherwise.
 - May take route/args in the constructor (host passes them via DI) so the screen does not need a `LaunchedEffect` to seed state.
+- **Screen `*UiState` is a flat `data class`** with flags/fields (`isLoading`, `loadError`, content fields) — same shape as `EditorUiState` / `BuildHistoryDetailUiState`. Do **not** model screen lifecycle as a sealed class/interface (`Loading` / `Ready` / `Failed`). Content switches with `when { state.isLoading → …; state.loadError != null → …; else → … }`.
+- **Async load is visible:** start `isLoading = true`; on miss set a user-safe `loadError` (not-found copy is fine); on failure set `loadError` from `userMessageOrNull` / generic string; never leave a blank body while `collectAsState(initial = null)` races.
+
+### Data ports & adapters
+
+When feature logic depends on Room / network / filesystem behind a seam:
+
+1. Define **ports** next to the logic that owns them (interfaces + domain types).
+2. Name concrete implementations **`…Adapter`** explicitly (`RoomBuildJobRepositoryAdapter`, `GitHubBuildEngineAdapter`).
+3. Feature services wire adapters; do not make unrelated stores depend on services they only need for side effects — use event hooks instead.
+4. Engine-agnostic job lifecycle: credentials and account observation stay **inside** the engine adapter (e.g. `GitHubBuildEngineAdapter` + `AuthSession`). Do **not** put `AuthSession` / access tokens on `DefaultBuildService`. Eager resume runs without an account; engines optionally emit `observeResumeHints()` for cloud sign-in re-attach. Bind `BuildJobRepository` + `BuildEngine` in DI; do not nest a separate `BuildJobLogic` type beside the service.
 
 ## 5. Incremental delivery (when on a PR)
 
@@ -132,11 +145,16 @@ Before calling UI/code work done:
 
 - [ ] Provider-shaped screens: no vendor in presentation identifiers or hardcoded chrome; name/URI from API (previews may fixture the current provider)
 - [ ] Feature owns sub-navigation; root host stays thin
+- [ ] Inner multi-step host is NavHost-only; child screens own observe/actions
+- [ ] Screen calls `logic/` — no observe/map/menu/delete/install bodies inlined in `@Composable`
+- [ ] Flat `*UiState` (`isLoading` / `loadError` + fields) — no sealed Loading/Ready/Failed
+- [ ] Async screens show Loading, loadError (retry when useful), empty/not-found — not blank/`null` flash
+- [ ] Ports ↔ `*Adapter` naming when introducing data seams
 - [ ] `:model` / `:api` carry domain facts only — not fields added solely for redrawing UI chrome
 - [ ] Validation only in data/domain; API exposed for UI
 - [ ] User-safe errors (UI message vs log-only unexpected)
 - [ ] State holder is state-only
-- [ ] Host builds context with `remember(…keys)` + VM; busy screen → Screen Context (`docs/agents/screen-context.md`); thin screen → small Screen/Content OK
+- [ ] Host builds context with `remember(…keys)` + VM; busy screen → Screen Context (`docs/agents/screen-context.md`); thin screen → `ui/` + `logic/`
 - [ ] No nested function declarations (helpers at file / private top level)
 - [ ] Multi-state previews (`@Preview` + fixtures in `presentation/preview/` only; no product screens in `:designsystem`)
 - [ ] Touched files free of deprecation/error diagnostics; compile (+ install if UI) before done

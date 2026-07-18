@@ -1,4 +1,4 @@
-package com.robotopia.androidstudiolite.feature.buildapk.data
+package com.robotopia.androidstudiolite.feature.buildapk.data.fake
 
 import android.content.Context
 import com.robotopia.androidstudiolite.core.error.AppException
@@ -68,6 +68,10 @@ class FakeBuildService(
                 message = "No APK was produced. You can start a new build when you're ready.",
             )
         }
+    }
+
+    override suspend fun cancelBuildsForProject(projectId: String) {
+        // Fake jobs are not keyed by project id.
     }
 
     private suspend fun runTimedBuild(

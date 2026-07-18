@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -24,8 +25,12 @@ dependencies {
     api(project(":feature:buildapk:model"))
     implementation(project(":feature:auth:api"))
     implementation(project(":feature:github:api"))
+    implementation(project(":feature:projects:api"))
     implementation(project(":core:error"))
+    api(libs.androidx.room.runtime)
+    api(libs.androidx.room.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
 }
