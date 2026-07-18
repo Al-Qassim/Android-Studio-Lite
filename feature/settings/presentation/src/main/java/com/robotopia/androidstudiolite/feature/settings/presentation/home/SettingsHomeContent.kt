@@ -20,6 +20,7 @@ internal fun SettingsHomeContent(
     onThemeClick: () -> Unit,
     onBuildAccountClick: () -> Unit,
     onBuildHistoryClick: () -> Unit,
+    onAboutClick: () -> Unit,
 ) {
     IslandScaffold(
         topBar = {
@@ -53,6 +54,7 @@ internal fun SettingsHomeContent(
             SettingsRow(
                 title = "About",
                 subtitle = "Android Studio Lite",
+                onClick = onAboutClick,
             )
         }
         Spacer(modifier = Modifier.weight(1f))

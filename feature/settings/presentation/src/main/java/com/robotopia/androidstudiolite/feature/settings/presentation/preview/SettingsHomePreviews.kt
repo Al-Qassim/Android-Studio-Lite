@@ -43,5 +43,6 @@ private fun SettingsHomePreview(
         onThemeClick = {},
         onBuildAccountClick = {},
         onBuildHistoryClick = {},
+        onAboutClick = {},
     )
 }

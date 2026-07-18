@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.feature.settings.presentation
 
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,12 +12,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robotopia.androidstudiolite.designsystem.animation.navFade
 import com.robotopia.androidstudiolite.feature.auth.api.AuthScreens
 import com.robotopia.androidstudiolite.feature.auth.api.AuthService
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
 import com.robotopia.androidstudiolite.feature.settings.api.ThemePreferences
+import com.robotopia.androidstudiolite.feature.settings.presentation.about.AboutContent
 import com.robotopia.androidstudiolite.feature.settings.presentation.account.BuildAccountContent
 import com.robotopia.androidstudiolite.feature.settings.presentation.home.SettingsHomeContent
 import com.robotopia.androidstudiolite.feature.settings.presentation.theme.ThemeSettingsContent
@@ -28,6 +31,7 @@ private enum class SettingsRoute {
     BuildAccount,
     Connect,
     BuildHistory,
+    About,
 }
 
 @Composable
@@ -42,6 +46,7 @@ internal fun SettingsScreen(
     val account by authService.observeAccount().collectAsState(initial = null)
     val theme by themePreferences.theme.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val versionLabel = appVersionLabel(LocalContext.current)
 
     AnimatedContent(
         targetState = route,
@@ -62,6 +67,7 @@ internal fun SettingsScreen(
                     onThemeClick = { route = SettingsRoute.Theme },
                     onBuildAccountClick = { route = SettingsRoute.BuildAccount },
                     onBuildHistoryClick = { route = SettingsRoute.BuildHistory },
+                    onAboutClick = { route = SettingsRoute.About },
                 )
             }
 
@@ -100,6 +106,22 @@ internal fun SettingsScreen(
                     onDismiss = { route = SettingsRoute.Home },
                 )
             }
+
+            SettingsRoute.About -> {
+                BackHandler(onBack = { route = SettingsRoute.Home })
+                AboutContent(
+                    versionLabel = versionLabel,
+                    onBackClick = { route = SettingsRoute.Home },
+                )
+            }
         }
     }
+}
+
+private fun appVersionLabel(context: Context): String {
+    val packageInfo = runCatching {
+        context.packageManager.getPackageInfo(context.packageName, 0)
+    }.getOrNull()
+    val versionName = packageInfo?.versionName?.takeIf { it.isNotBlank() } ?: "—"
+    return "Version $versionName"
 }
