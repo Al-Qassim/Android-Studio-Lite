@@ -23,6 +23,8 @@ import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.component.ProjectMenu
 import com.robotopia.androidstudiolite.designsystem.component.ProjectRow
+import com.robotopia.androidstudiolite.designsystem.component.ProjectsHubMenu
+import com.robotopia.androidstudiolite.designsystem.component.ToastBottom
 import com.robotopia.androidstudiolite.designsystem.component.TopBarTitleAction
 import com.robotopia.androidstudiolite.designsystem.popup.topEndPopupOffset
 import com.robotopia.androidstudiolite.feature.projects.model.Project
@@ -31,12 +33,16 @@ import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 @Composable
 internal fun ProjectsListContent(
     state: ProjectsListUiState,
-    onCreateProject: () -> Unit,
     onOpenSettings: () -> Unit,
+    onHubMenuOpen: () -> Unit,
+    onHubMenuDismiss: () -> Unit,
+    onNewProject: () -> Unit,
+    onImportProject: () -> Unit,
     onOpenClick: (Project) -> Unit,
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
     onRunMenuClick: (Project) -> Unit,
+    onExportMenuClick: (Project) -> Unit,
     onBuildHistoryMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
     onDeleteCancel: () -> Unit,
@@ -47,7 +53,7 @@ internal fun ProjectsListContent(
         topBar = {
             TopBarTitleAction(
                 title = "Projects",
-                onActionClick = onCreateProject,
+                onActionClick = onHubMenuOpen,
                 onSettingsClick = onOpenSettings,
             )
         },
@@ -63,9 +69,20 @@ internal fun ProjectsListContent(
                 onMenuOpen = onMenuOpen,
                 onMenuDismiss = onMenuDismiss,
                 onRunMenuClick = onRunMenuClick,
+                onExportMenuClick = onExportMenuClick,
                 onBuildHistoryMenuClick = onBuildHistoryMenuClick,
                 onDeleteMenuClick = onDeleteMenuClick,
             )
+            if (state.hubMenuOpen) {
+                ProjectsHubOverflowMenu(
+                    onNewProject = onNewProject,
+                    onImportProject = onImportProject,
+                    onDismiss = onHubMenuDismiss,
+                )
+            }
+            state.toastMessage?.let { message ->
+                ToastBottom(message = message)
+            }
         }
     }
 
@@ -83,6 +100,19 @@ internal fun ProjectsListContent(
             onDismiss = onErrorDismiss,
         )
     }
+
+    if (state.isBusy) {
+        Dialog(onDismissRequest = {}) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                LoadingIndicator(label = "Working…")
+            }
+        }
+    }
 }
 
 @Composable
@@ -92,6 +122,7 @@ private fun ProjectsListBody(
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
     onRunMenuClick: (Project) -> Unit,
+    onExportMenuClick: (Project) -> Unit,
     onBuildHistoryMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
@@ -105,6 +136,7 @@ private fun ProjectsListBody(
             onMenuOpen = onMenuOpen,
             onMenuDismiss = onMenuDismiss,
             onRunMenuClick = onRunMenuClick,
+            onExportMenuClick = onExportMenuClick,
             onBuildHistoryMenuClick = onBuildHistoryMenuClick,
             onDeleteMenuClick = onDeleteMenuClick,
         )
@@ -129,7 +161,7 @@ private fun ProjectsListEmpty() {
     ) {
         EmptyState(
             title = "No projects yet",
-            hint = "Tap + to create your first project.",
+            hint = "Tap + to create or import a project.",
         )
     }
 }
@@ -142,6 +174,7 @@ private fun ProjectsList(
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
     onRunMenuClick: (Project) -> Unit,
+    onExportMenuClick: (Project) -> Unit,
     onBuildHistoryMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
@@ -157,6 +190,7 @@ private fun ProjectsList(
                 onMenuOpen = onMenuOpen,
                 onMenuDismiss = onMenuDismiss,
                 onRunMenuClick = onRunMenuClick,
+                onExportMenuClick = onExportMenuClick,
                 onBuildHistoryMenuClick = onBuildHistoryMenuClick,
                 onDeleteMenuClick = onDeleteMenuClick,
             )
@@ -179,6 +213,7 @@ private fun ProjectListItem(
     onMenuOpen: (Project) -> Unit,
     onMenuDismiss: () -> Unit,
     onRunMenuClick: (Project) -> Unit,
+    onExportMenuClick: (Project) -> Unit,
     onBuildHistoryMenuClick: (Project) -> Unit,
     onDeleteMenuClick: (Project) -> Unit,
 ) {
@@ -196,6 +231,7 @@ private fun ProjectListItem(
             ProjectOverflowMenu(
                 onOpen = { onOpenClick(project) },
                 onRun = { onRunMenuClick(project) },
+                onExport = { onExportMenuClick(project) },
                 onBuildHistory = { onBuildHistoryMenuClick(project) },
                 onDelete = { onDeleteMenuClick(project) },
                 onDismiss = onMenuDismiss,
@@ -208,10 +244,15 @@ private fun ProjectListItem(
 private val ProjectOverflowMenuTopOffset = 62.dp
 private val ProjectOverflowMenuEndOffset = 8.dp
 
+/** Below the projects top-bar + control. */
+private val HubMenuTopOffset = 48.dp
+private val HubMenuEndOffset = 12.dp
+
 @Composable
 private fun ProjectOverflowMenu(
     onOpen: () -> Unit,
     onRun: () -> Unit,
+    onExport: () -> Unit,
     onBuildHistory: () -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
@@ -228,8 +269,32 @@ private fun ProjectOverflowMenu(
         ProjectMenu(
             onOpen = onOpen,
             onRun = onRun,
+            onExport = onExport,
             onBuildHistory = onBuildHistory,
             onDelete = onDelete,
+        )
+    }
+}
+
+@Composable
+private fun ProjectsHubOverflowMenu(
+    onNewProject: () -> Unit,
+    onImportProject: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Popup(
+        alignment = Alignment.TopEnd,
+        offset = topEndPopupOffset(
+            top = HubMenuTopOffset,
+            end = HubMenuEndOffset,
+            includeStatusBars = true,
+        ),
+        onDismissRequest = onDismiss,
+        properties = PopupProperties(focusable = true),
+    ) {
+        ProjectsHubMenu(
+            onNewProject = onNewProject,
+            onImportProject = onImportProject,
         )
     }
 }

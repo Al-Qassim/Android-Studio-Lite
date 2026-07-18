@@ -3,4 +3,7 @@
     <cache-path
         name="buildapk_cache"
         path="buildapk/" />
+    <cache-path
+        name="project_export"
+        path="project-export/" />
 </paths>

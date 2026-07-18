@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Colors
+import com.robotopia.androidstudiolite.designsystem.icon.IconAdd
 import com.robotopia.androidstudiolite.designsystem.icon.IconCloud
 import com.robotopia.androidstudiolite.designsystem.icon.IconCopy
 import com.robotopia.androidstudiolite.designsystem.icon.IconFile
@@ -71,6 +72,7 @@ fun ContextMenu(
 fun ProjectMenu(
     onOpen: () -> Unit = {},
     onRun: () -> Unit = {},
+    onExport: () -> Unit = {},
     onBuildHistory: () -> Unit = {},
     onDelete: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -87,12 +89,38 @@ fun ProjectMenu(
             icon = { tint, size -> IconRun(tint = tint, size = size) },
         )
         MenuItem(
+            label = "Export…",
+            onClick = onExport,
+            icon = { tint, size -> IconSave(tint = tint, size = size) },
+        )
+        MenuItem(
             label = "Build history",
             onClick = onBuildHistory,
             icon = { tint, size -> IconCloud(tint = tint, size = size) },
         )
         MenuDivider()
         MenuItem(label = "Delete", onClick = onDelete, danger = true)
+    }
+}
+
+/** Top-bar + menu on the Projects list: create new or import a zip. */
+@Composable
+fun ProjectsHubMenu(
+    onNewProject: () -> Unit = {},
+    onImportProject: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    DropdownMenu(modifier = modifier.width(200.dp)) {
+        MenuItem(
+            label = "New project",
+            onClick = onNewProject,
+            icon = { tint, size -> IconAdd(tint = tint, size = size) },
+        )
+        MenuItem(
+            label = "Import project",
+            onClick = onImportProject,
+            icon = { tint, size -> IconFolder(tint = tint, size = size) },
+        )
     }
 }
 
@@ -271,6 +299,12 @@ private fun MenuDivider() {
 @Composable
 private fun ProjectMenuPreview() {
     ProjectMenu(modifier = Modifier.padding(16.dp))
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "ProjectsHubMenu")
+@Composable
+private fun ProjectsHubMenuPreview() {
+    ProjectsHubMenu(modifier = Modifier.padding(16.dp))
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "BuildHistoryMenu")

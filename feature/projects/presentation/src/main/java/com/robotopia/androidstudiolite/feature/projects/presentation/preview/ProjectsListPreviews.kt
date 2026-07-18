@@ -62,11 +62,35 @@ internal class ProjectsListPreviewProvider : PreviewParameterProvider<ProjectsLi
             ),
         ),
         ProjectsListPreviewCase(
+            "hub menu",
+            ProjectsListUiState(
+                isLoading = false,
+                projects = previewProjects,
+                hubMenuOpen = true,
+            ),
+        ),
+        ProjectsListPreviewCase(
             "delete confirm",
             ProjectsListUiState(
                 isLoading = false,
                 projects = previewProjects,
                 pendingDelete = previewProjects.first(),
+            ),
+        ),
+        ProjectsListPreviewCase(
+            "busy export",
+            ProjectsListUiState(
+                isLoading = false,
+                projects = previewProjects,
+                isBusy = true,
+            ),
+        ),
+        ProjectsListPreviewCase(
+            "toast",
+            ProjectsListUiState(
+                isLoading = false,
+                projects = previewProjects,
+                toastMessage = "Imported HelloCompose",
             ),
         ),
         ProjectsListPreviewCase(
@@ -87,12 +111,16 @@ private fun ProjectsListPreview(
 ) {
     ProjectsListContent(
         state = preview.state,
-        onCreateProject = {},
         onOpenSettings = {},
+        onHubMenuOpen = {},
+        onHubMenuDismiss = {},
+        onNewProject = {},
+        onImportProject = {},
         onOpenClick = {},
         onMenuOpen = {},
         onMenuDismiss = {},
         onRunMenuClick = {},
+        onExportMenuClick = {},
         onBuildHistoryMenuClick = {},
         onDeleteMenuClick = {},
         onDeleteCancel = {},
