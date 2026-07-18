@@ -19,7 +19,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.robotopia.androidstudiolite.designsystem.color.Colors
-import com.robotopia.androidstudiolite.designsystem.component.BuildHistoryMenu
+import com.robotopia.androidstudiolite.designsystem.component.Menu
+import com.robotopia.androidstudiolite.designsystem.component.MenuItem
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.DialogMessageAction
@@ -233,7 +234,11 @@ private fun BuildHistoryItemOverflowMenu(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
-        BuildHistoryMenu(onDelete = onDelete)
+        Menu(
+            items = listOf(
+                MenuItem.Button(label = "Delete", onClick = onDelete, danger = true),
+            ),
+        )
     }
 }
 

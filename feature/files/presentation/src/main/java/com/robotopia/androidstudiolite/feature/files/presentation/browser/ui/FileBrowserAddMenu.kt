@@ -5,7 +5,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.robotopia.androidstudiolite.designsystem.component.CreateMenu
+import com.robotopia.androidstudiolite.designsystem.component.Menu
+import com.robotopia.androidstudiolite.designsystem.component.MenuItem
+import com.robotopia.androidstudiolite.designsystem.icon.IconFile
+import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
 import com.robotopia.androidstudiolite.designsystem.popup.topEndPopupOffset
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreenContext
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserUiState
@@ -30,9 +33,19 @@ internal fun FileBrowserScreenContext.FileBrowserAddMenu(state: FileBrowserUiSta
         onDismissRequest = { dismissAddMenu() },
         properties = PopupProperties(focusable = true),
     ) {
-        CreateMenu(
-            onNewFile = { openCreateFileDialog() },
-            onNewFolder = { openCreateFolderDialog() },
+        Menu(
+            items = listOf(
+                MenuItem.Button(
+                    label = "New file",
+                    onClick = { openCreateFileDialog() },
+                    icon = { tint, size -> IconFile(tint = tint, size = size) },
+                ),
+                MenuItem.Button(
+                    label = "New folder",
+                    onClick = { openCreateFolderDialog() },
+                    icon = { tint, size -> IconFolder(tint = tint, size = size) },
+                ),
+            ),
         )
     }
 }

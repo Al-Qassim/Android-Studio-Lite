@@ -21,11 +21,16 @@ import com.robotopia.androidstudiolite.designsystem.component.DialogMessageActio
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
 import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
-import com.robotopia.androidstudiolite.designsystem.component.ProjectMenu
+import com.robotopia.androidstudiolite.designsystem.component.Menu
+import com.robotopia.androidstudiolite.designsystem.component.MenuItem
 import com.robotopia.androidstudiolite.designsystem.component.ProjectRow
-import com.robotopia.androidstudiolite.designsystem.component.ProjectsHubMenu
 import com.robotopia.androidstudiolite.designsystem.component.ToastBottom
 import com.robotopia.androidstudiolite.designsystem.component.TopBarTitleAction
+import com.robotopia.androidstudiolite.designsystem.icon.IconAdd
+import com.robotopia.androidstudiolite.designsystem.icon.IconCloud
+import com.robotopia.androidstudiolite.designsystem.icon.IconFolder
+import com.robotopia.androidstudiolite.designsystem.icon.IconRun
+import com.robotopia.androidstudiolite.designsystem.icon.IconSave
 import com.robotopia.androidstudiolite.designsystem.popup.topEndPopupOffset
 import com.robotopia.androidstudiolite.feature.projects.model.Project
 import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
@@ -280,12 +285,32 @@ private fun ProjectOverflowMenu(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
-        ProjectMenu(
-            onOpen = onOpen,
-            onRun = onRun,
-            onExport = onExport,
-            onBuildHistory = onBuildHistory,
-            onDelete = onDelete,
+        Menu(
+            items = listOf(
+                MenuItem.Button(
+                    label = "Open",
+                    onClick = onOpen,
+                    icon = { tint, size -> IconFolder(tint = tint, size = size) },
+                ),
+                MenuItem.Divider,
+                MenuItem.Button(
+                    label = "Run",
+                    onClick = onRun,
+                    icon = { tint, size -> IconRun(tint = tint, size = size) },
+                ),
+                MenuItem.Button(
+                    label = "Build history",
+                    onClick = onBuildHistory,
+                    icon = { tint, size -> IconCloud(tint = tint, size = size) },
+                ),
+                MenuItem.Divider,
+                MenuItem.Button(
+                    label = "Export…",
+                    onClick = onExport,
+                    icon = { tint, size -> IconSave(tint = tint, size = size) },
+                ),
+                MenuItem.Button(label = "Delete", onClick = onDelete, danger = true),
+            ),
         )
     }
 }
@@ -306,9 +331,19 @@ private fun ProjectsHubOverflowMenu(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
-        ProjectsHubMenu(
-            onNewProject = onNewProject,
-            onImportProject = onImportProject,
+        Menu(
+            items = listOf(
+                MenuItem.Button(
+                    label = "New project",
+                    onClick = onNewProject,
+                    icon = { tint, size -> IconAdd(tint = tint, size = size) },
+                ),
+                MenuItem.Button(
+                    label = "Import project",
+                    onClick = onImportProject,
+                    icon = { tint, size -> IconFolder(tint = tint, size = size) },
+                ),
+            ),
         )
     }
 }

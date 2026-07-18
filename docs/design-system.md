@@ -11,6 +11,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Tokens / components | `designsystem/` — tokens + reusable Compose components only (no product screens). UI type: Inter; code/gutter: JetBrains Mono (`Typography.Code` / `CodeGutter`). |
 | Composable UI | `designsystem/.../component/` — bars, rows, dialogs, scaffold, etc. |
 | Modifier helpers | `designsystem/.../modifier/` — e.g. `insetClickable`, `overlayEnter` (not under `component/`) |
+| Menus | One `Menu(items)` composable; items are `MenuItem.Button` or `MenuItem.Divider`. Screens build the list; DS keeps example previews only |
 | Overlay motion | Menus / dialogs use `overlayEnter` (short fade + scale) on their surfaces — feature Popup/Dialog hosts stay thin |
 | Popup position | Position menus with `Popup(offset = topEndPopupOffset(…))` — do **not** pad/statusBarsPadding the menu content. Top-bar menus (`includeStatusBars = true`) must be composed **outside** `IslandScaffold`’s body (sibling of the scaffold, like `FileBrowserAddMenu`) so the popup is window-scoped; row overflow menus stay inside their row `Box` without status-bar inset |
 | Nav motion | Custom route hosts use `AnimatedContent` + `aslNavFade()` — enter/exit cross-fade; exit starts after a short delay |

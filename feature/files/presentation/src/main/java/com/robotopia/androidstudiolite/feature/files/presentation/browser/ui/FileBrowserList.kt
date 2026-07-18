@@ -10,11 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.robotopia.androidstudiolite.designsystem.component.ContextMenu
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.component.FileRow
 import com.robotopia.androidstudiolite.designsystem.component.FolderRow
 import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
+import com.robotopia.androidstudiolite.designsystem.component.Menu
+import com.robotopia.androidstudiolite.designsystem.component.MenuItem
+import com.robotopia.androidstudiolite.designsystem.icon.IconCopy
 import com.robotopia.androidstudiolite.designsystem.popup.topEndPopupOffset
 import com.robotopia.androidstudiolite.feature.files.model.FsNode
 import com.robotopia.androidstudiolite.feature.files.presentation.browser.FileBrowserScreenContext
@@ -134,11 +136,18 @@ private fun FileItemOverflowMenu(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
-        ContextMenu(
-            onRename = onRename,
-            onMove = onMove,
-            onCopy = onCopy,
-            onDelete = onDelete,
+        Menu(
+            items = listOf(
+                MenuItem.Button(label = "Rename", onClick = onRename),
+                MenuItem.Button(label = "Move", onClick = onMove),
+                MenuItem.Button(
+                    label = "Copy",
+                    onClick = onCopy,
+                    icon = { tint, size -> IconCopy(tint = tint, size = size) },
+                ),
+                MenuItem.Divider,
+                MenuItem.Button(label = "Delete", onClick = onDelete, danger = true),
+            ),
         )
     }
 }
