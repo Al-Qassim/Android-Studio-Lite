@@ -104,6 +104,48 @@ class JGitGitServiceAdapterTest {
     }
 
     @Test
+    fun stage_then_unstage_keeps_file_unstaged() = runBlocking {
+        git.init(root)
+        File(root, "tracked.txt").writeText("base\n")
+        git.stageAll(root)
+        git.commit(root, "base", "ASL", "asl@local")
+
+        File(root, "tracked.txt").writeText("edited\n")
+        File(root, "new.txt").writeText("fresh\n")
+
+        val before = git.status(root)
+        assertTrue(before.modified.contains("tracked.txt") || before.untracked.contains("tracked.txt"))
+        assertTrue(before.untracked.contains("new.txt"))
+
+        git.stagePaths(root, listOf("tracked.txt", "new.txt"))
+        val staged = git.status(root)
+        assertTrue(staged.changed.contains("tracked.txt") || staged.added.contains("tracked.txt"))
+        assertTrue(staged.added.contains("new.txt"))
+        assertFalse(staged.modified.contains("tracked.txt"))
+        assertFalse(staged.untracked.contains("new.txt"))
+
+        git.unstagePaths(root, listOf("tracked.txt", "new.txt"))
+        val unstaged = git.status(root)
+        assertFalse(unstaged.changed.contains("tracked.txt"))
+        assertFalse(unstaged.added.contains("new.txt"))
+        assertTrue(unstaged.modified.contains("tracked.txt"))
+        assertTrue(unstaged.untracked.contains("new.txt"))
+    }
+
+
+    @Test
+    fun diff_working_tree_shows_edits() = runBlocking {
+        git.init(root)
+        File(root, "AGENTS.md").writeText("old\n")
+        git.stageAll(root)
+        git.commit(root, "base", "ASL", "asl@local")
+        File(root, "AGENTS.md").writeText("new\n")
+        val lines = git.diffWorkingTree(root, "AGENTS.md")
+        assertTrue(lines.any { it.type.name == "Add" || it.type.name == "Remove" })
+        assertTrue(lines.any { it.text.contains("new") || it.text.contains("old") })
+    }
+
+    @Test
     fun merge_conflict_and_abort() = runBlocking {
         git.init(root)
         File(root, "conflict.txt").writeText("base\n")

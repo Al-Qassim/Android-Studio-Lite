@@ -41,6 +41,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.transport.URIish
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
+import org.eclipse.jgit.treewalk.AbstractTreeIterator
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.treewalk.EmptyTreeIterator
 import org.eclipse.jgit.treewalk.FileTreeIterator
@@ -129,11 +130,18 @@ class JGitGitServiceAdapter : GitService {
         withRepoLock(projectRoot) {
             if (paths.isEmpty()) return@withRepoLock Unit
             open(projectRoot).use { git ->
-                val reset = git.reset().setMode(ResetCommand.ResetType.MIXED)
-                for (path in paths.map { requireRelativePath(it) }) {
-                    reset.addPath(path)
+                try {
+                    // Path reset must not set MIXED/SOFT/HARD — JGit rejects that combination.
+                    val reset = git.reset()
+                    for (path in paths.map { requireRelativePath(it) }) {
+                        reset.addPath(path)
+                    }
+                    reset.call()
+                } catch (e: GitAPIException) {
+                    throw AppException("Couldn't unstage those files.", e)
+                } catch (e: Exception) {
+                    throw AppException("Couldn't unstage those files.", e)
                 }
-                reset.call()
             }
             Unit
         }
@@ -557,24 +565,20 @@ class JGitGitServiceAdapter : GitService {
     ): List<GitDiffLineInfo> = withRepoLock(projectRoot) {
         val path = requireRelativePath(relativePath)
         open(projectRoot).use { git ->
-            val repo = git.repository
-            val headId = repo.resolve(Constants.HEAD)
-            DiffFormatter(ByteArrayOutputStream()).use { formatter ->
-                formatter.setRepository(repo)
-                formatter.setPathFilter(PathFilter.create(path))
-                val oldTree = if (headId != null) {
-                    RevWalk(repo).use { walk ->
-                        val commit = walk.parseCommit(headId)
-                        CanonicalTreeParser().also {
-                            it.reset(repo.newObjectReader(), commit.tree)
-                        }
+            try {
+                val repo = git.repository
+                repo.newObjectReader().use { reader ->
+                    val oldTree = when (val treeId = repo.resolve("HEAD^{tree}")) {
+                        null -> EmptyTreeIterator()
+                        else -> CanonicalTreeParser().also { it.reset(reader, treeId) }
                     }
-                } else {
-                    EmptyTreeIterator()
+                    // Scan + format must share one DiffFormatter so working-tree blobs resolve.
+                    formatTreeDiff(repo, oldTree, FileTreeIterator(repo), path)
                 }
-                val newTree = FileTreeIterator(repo)
-                val entries = formatter.scan(oldTree, newTree)
-                entries.flatMap { entry -> formatDiffEntry(repo, entry) }
+            } catch (e: AppException) {
+                throw e
+            } catch (e: Exception) {
+                throw AppException("Couldn't open that diff.", e)
             }
         }
     }
@@ -586,31 +590,30 @@ class JGitGitServiceAdapter : GitService {
     ): List<GitDiffLineInfo> = withRepoLock(projectRoot) {
         val path = requireRelativePath(relativePath)
         open(projectRoot).use { git ->
-            val repo = git.repository
-            RevWalk(repo).use { walk ->
-                val commit = walk.parseCommit(repo.resolve(commitId)
-                    ?: throw AppException("Couldn't find that commit."))
-                val parentTree = if (commit.parentCount > 0) {
-                    walk.parseCommit(commit.getParent(0)).tree
-                } else {
-                    null
-                }
-                DiffFormatter(ByteArrayOutputStream()).use { formatter ->
-                    formatter.setRepository(repo)
-                    formatter.setPathFilter(PathFilter.create(path))
-                    val oldTree = if (parentTree != null) {
-                        CanonicalTreeParser().also {
-                            it.reset(repo.newObjectReader(), parentTree)
+            try {
+                val repo = git.repository
+                repo.newObjectReader().use { reader ->
+                    RevWalk(repo).use { walk ->
+                        val commit = walk.parseCommit(
+                            repo.resolve(commitId)
+                                ?: throw AppException("Couldn't find that commit."),
+                        )
+                        val oldTree = if (commit.parentCount > 0) {
+                            val parent = walk.parseCommit(commit.getParent(0))
+                            CanonicalTreeParser().also { it.reset(reader, parent.tree) }
+                        } else {
+                            EmptyTreeIterator()
                         }
-                    } else {
-                        EmptyTreeIterator()
+                        val newTree = CanonicalTreeParser().also {
+                            it.reset(reader, commit.tree)
+                        }
+                        formatTreeDiff(repo, oldTree, newTree, path)
                     }
-                    val newTree = CanonicalTreeParser().also {
-                        it.reset(repo.newObjectReader(), commit.tree)
-                    }
-                    val entries = formatter.scan(oldTree, newTree)
-                    entries.flatMap { entry -> formatDiffEntry(repo, entry) }
                 }
+            } catch (e: AppException) {
+                throw e
+            } catch (e: Exception) {
+                throw AppException("Couldn't open that diff.", e)
             }
         }
     }
@@ -711,14 +714,24 @@ class JGitGitServiceAdapter : GitService {
         }.getOrDefault(false)
     }
 
-    private fun formatDiffEntry(
+    /**
+     * Formats a path-filtered tree diff. Caller must keep [oldTree]/[newTree] readers alive
+     * for working-tree iterators (one shared [DiffFormatter] for scan + format).
+     */
+    private fun formatTreeDiff(
         repo: Repository,
-        entry: DiffEntry,
+        oldTree: AbstractTreeIterator,
+        newTree: AbstractTreeIterator,
+        path: String,
     ): List<GitDiffLineInfo> {
         val out = ByteArrayOutputStream()
         DiffFormatter(out).use { formatter ->
             formatter.setRepository(repo)
-            formatter.format(entry)
+            formatter.setPathFilter(PathFilter.create(path))
+            val entries = formatter.scan(oldTree, newTree)
+            for (entry in entries) {
+                formatter.format(entry)
+            }
         }
         return parseUnifiedDiff(out.toString(Charsets.UTF_8.name()))
     }
