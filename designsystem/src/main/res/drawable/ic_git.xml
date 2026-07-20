@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#F2F5F7">
+    <!-- Lucide-style git-branch -->
+    <path
+        android:pathData="M6,3v12"
+        android:fillColor="#00000000"
+        android:strokeWidth="2"
+        android:strokeColor="#F2F5F7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+    <path
+        android:pathData="M18,9a3,3 0,1 0,0 -6a3,3 0,0 0,0 6z"
+        android:fillColor="#00000000"
+        android:strokeWidth="2"
+        android:strokeColor="#F2F5F7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+    <path
+        android:pathData="M6,21a3,3 0,1 0,0 -6a3,3 0,0 0,0 6z"
+        android:fillColor="#00000000"
+        android:strokeWidth="2"
+        android:strokeColor="#F2F5F7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+    <path
+        android:pathData="M18,9a9,9 0,0 1,-9 9"
+        android:fillColor="#00000000"
+        android:strokeWidth="2"
+        android:strokeColor="#F2F5F7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+</vector>

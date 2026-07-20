@@ -108,6 +108,58 @@ fun DialogMessageAction(
     }
 }
 
+/**
+ * Message dialog with stacked full-width actions (phone-friendly multi-choice).
+ * Primary first, optional danger, then cancel.
+ */
+@Composable
+fun DialogMessageStackedActions(
+    title: String,
+    message: String,
+    primaryLabel: String,
+    onPrimary: () -> Unit,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+    dangerLabel: String? = null,
+    onDanger: (() -> Unit)? = null,
+    cancelLabel: String = "Cancel",
+) {
+    DialogSurface(modifier = modifier) {
+        DialogTitle(title)
+        Spacer(modifier = Modifier.height(12.dp))
+        BasicText(
+            text = message,
+            style = Typography.Body.copy(color = Theme.colors.Muted),
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Button(
+                label = primaryLabel,
+                onClick = onPrimary,
+                variant = ButtonVariant.Primary,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            if (dangerLabel != null && onDanger != null) {
+                Button(
+                    label = dangerLabel,
+                    onClick = onDanger,
+                    variant = ButtonVariant.Danger,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Button(
+                label = cancelLabel,
+                onClick = onCancel,
+                variant = ButtonVariant.Secondary,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
 @Composable
 private fun DialogSurface(
     modifier: Modifier = Modifier,
@@ -244,6 +296,21 @@ private fun DialogMessageActionPreview() {
         message = "MainActivity.kt will be permanently deleted. This cannot be undone.",
         actionLabel = "Delete",
         dangerAction = true,
+        modifier = Modifier.padding(16.dp),
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, name = "DialogMessageStacked · overwrite")
+@Composable
+private fun DialogMessageStackedActionsPreview() {
+    DialogMessageStackedActions(
+        title = "Local changes would be overwritten",
+        message = "Checking out “feature/login” would overwrite:\n• MainActivity.kt\n• LoginScreen.kt\n\nCommit your changes first, or discard them to switch.",
+        primaryLabel = "Commit first",
+        onPrimary = {},
+        dangerLabel = "Discard & switch",
+        onDanger = {},
+        onCancel = {},
         modifier = Modifier.padding(16.dp),
     )
 }

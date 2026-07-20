@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.icon.IconAdd
 import com.robotopia.androidstudiolite.designsystem.icon.IconBack
+import com.robotopia.androidstudiolite.designsystem.icon.IconGit
 import com.robotopia.androidstudiolite.designsystem.icon.IconMore
 import com.robotopia.androidstudiolite.designsystem.icon.IconRun
 import com.robotopia.androidstudiolite.designsystem.icon.IconSettings
@@ -146,10 +147,11 @@ fun TopBarBackTitleAdd(
             )
         }
         if (onGitClick != null) {
-            Button(
-                label = "Git",
+            IconButton(
                 onClick = onGitClick,
-                variant = ButtonVariant.TextAction,
+                variant = IconButtonVariant.Ghost,
+                modifier = Modifier.semantics { contentDescription = "Git" },
+                icon = { tint, size -> IconGit(tint = tint, size = size) },
             )
         }
         IconButton(
@@ -206,7 +208,7 @@ fun TopBarEditorMore(
     isDirty: Boolean = false,
     onBackClick: () -> Unit = {},
     onRunClick: (() -> Unit)? = null,
-    onMoreClick: () -> Unit = {},
+    onMoreClick: (() -> Unit)? = {},
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -237,11 +239,13 @@ fun TopBarEditorMore(
                 icon = { _, size -> IconRun(tint = Theme.colors.Run, size = size) },
             )
         }
-        IconButton(
-            onClick = onMoreClick,
-            variant = IconButtonVariant.Ghost,
-            icon = { tint, size -> IconMore(tint = tint, size = size) },
-        )
+        if (onMoreClick != null) {
+            IconButton(
+                onClick = onMoreClick,
+                variant = IconButtonVariant.Ghost,
+                icon = { tint, size -> IconMore(tint = tint, size = size) },
+            )
+        }
     }
 }
 
@@ -280,6 +284,16 @@ private fun TopBarBackTitleAddPreview() {
     TopBarBackTitleAdd(
         title = "MyApp",
         onRunClick = {},
+    )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF1E1F22, widthDp = 360, name = "BackTitleAdd · with Git")
+@Composable
+private fun TopBarBackTitleAddWithGitPreview() {
+    TopBarBackTitleAdd(
+        title = "MyApp",
+        onRunClick = {},
+        onGitClick = {},
     )
 }
 
