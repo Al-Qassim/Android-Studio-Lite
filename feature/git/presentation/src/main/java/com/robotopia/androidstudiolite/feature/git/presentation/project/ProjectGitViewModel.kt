@@ -6,8 +6,25 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 enum class ProjectGitTab {
     Changes,
+    History,
     Branches,
 }
+
+/** One row in the current-branch commit history list. */
+data class GitCommitSummary(
+    val id: String,
+    val shortId: String,
+    val subject: String,
+    val authorName: String,
+    /** Short relative time for the list (UI shell). */
+    val authoredRelative: String,
+)
+
+/** A file touched by a selected commit. */
+data class GitCommitFileChange(
+    val path: String,
+    val kind: GitChangeKind,
+)
 
 enum class GitChangeKind {
     Modified,
@@ -59,6 +76,10 @@ data class ProjectGitUiState(
     val localBranches: List<GitBranch> = emptyList(),
     val remoteBranches: List<GitBranch> = emptyList(),
     val changeFiles: List<GitChangeFile> = emptyList(),
+    /** Commits on [currentBranch] only (no full DAG). Newest first. */
+    val historyCommits: List<GitCommitSummary> = emptyList(),
+    val selectedCommit: GitCommitSummary? = null,
+    val selectedCommitFiles: List<GitCommitFileChange> = emptyList(),
     val commitMessage: String = "",
     val commitError: String? = null,
     val selectedDiffPath: String? = null,

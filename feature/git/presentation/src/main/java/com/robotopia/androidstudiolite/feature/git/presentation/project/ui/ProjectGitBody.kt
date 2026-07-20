@@ -61,6 +61,10 @@ internal fun ProjectGitScreenContext.ProjectGitBody(state: ProjectGitUiState) {
             ProjectGitDiffBody(state)
         }
 
+        state.selectedCommit != null -> {
+            ProjectGitCommitDetailBody(state)
+        }
+
         state.loadError != null -> {
             Box(
                 modifier = Modifier
@@ -93,6 +97,7 @@ internal fun ProjectGitScreenContext.ProjectGitBody(state: ProjectGitUiState) {
                 )
                 when (state.tab) {
                     ProjectGitTab.Changes -> ProjectGitChangesBody(state)
+                    ProjectGitTab.History -> ProjectGitHistoryBody(state)
                     ProjectGitTab.Branches -> ProjectGitBranchesBody(state)
                 }
             }

@@ -36,6 +36,12 @@ internal fun ProjectGitTabBar(
             modifier = Modifier.weight(1f),
         )
         ProjectGitTabItem(
+            label = "History",
+            selected = selected == ProjectGitTab.History,
+            onClick = { onSelect(ProjectGitTab.History) },
+            modifier = Modifier.weight(1f),
+        )
+        ProjectGitTabItem(
             label = "Branches",
             selected = selected == ProjectGitTab.Branches,
             onClick = { onSelect(ProjectGitTab.Branches) },

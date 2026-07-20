@@ -23,6 +23,7 @@ import com.robotopia.androidstudiolite.feature.auth.api.AuthSession
 import com.robotopia.androidstudiolite.feature.git.api.GitService
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.clearToast
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.closeChangeDiff
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.closeCommitDetail
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.refreshBranches
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ui.ProjectGitBody
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ui.ProjectGitDialogs
@@ -79,35 +80,47 @@ internal fun ProjectGitScreenContext.ProjectGitScreen(
     }
 
     val showingDiff = state.selectedDiffPath != null
+    val showingCommit = state.selectedCommit != null
     BackHandler {
-        if (showingDiff) {
-            closeChangeDiff()
-        } else {
-            onBack()
+        when {
+            showingDiff -> closeChangeDiff()
+            showingCommit -> closeCommitDetail()
+            else -> onBack()
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         IslandScaffold(
             topBar = {
-                if (showingDiff) {
-                    TopBarEditorMore(
-                        fileName = state.selectedDiffPath
-                            ?: state.diffTitle.ifBlank { "Changes" },
-                        onBackClick = { closeChangeDiff() },
-                        onMoreClick = null,
-                    )
-                } else {
-                    TopBarBackTitle(
-                        title = when {
-                            state.needsInit -> "Git · $projectName"
-                            state.mergeSourceBranch != null && state.tab == ProjectGitTab.Changes ->
-                                "Merge · $projectName"
-                            state.tab == ProjectGitTab.Changes -> "Changes · $projectName"
-                            else -> "Branches · $projectName"
-                        },
-                        onBackClick = onBack,
-                    )
+                when {
+                    showingDiff -> {
+                        TopBarEditorMore(
+                            fileName = state.selectedDiffPath
+                                ?: state.diffTitle.ifBlank { "Changes" },
+                            onBackClick = { closeChangeDiff() },
+                            onMoreClick = null,
+                        )
+                    }
+                    showingCommit -> {
+                        TopBarBackTitle(
+                            title = state.selectedCommit?.shortId ?: "Commit",
+                            onBackClick = { closeCommitDetail() },
+                        )
+                    }
+                    else -> {
+                        TopBarBackTitle(
+                            title = when {
+                                state.needsInit -> "Git · $projectName"
+                                state.mergeSourceBranch != null &&
+                                    state.tab == ProjectGitTab.Changes ->
+                                    "Merge · $projectName"
+                                state.tab == ProjectGitTab.Changes -> "Changes · $projectName"
+                                state.tab == ProjectGitTab.History -> "History · $projectName"
+                                else -> "Branches · $projectName"
+                            },
+                            onBackClick = onBack,
+                        )
+                    }
                 }
             },
         ) {
