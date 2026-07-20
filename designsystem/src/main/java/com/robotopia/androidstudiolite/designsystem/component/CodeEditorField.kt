@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,6 +27,7 @@ import com.robotopia.androidstudiolite.designsystem.typography.Typography
  *
  * @param wrapText when true, lines soft-wrap to the viewport width; when false, the editor
  * scrolls horizontally for long lines.
+ * @param visualTransformation defaults to Kotlin syntax highlighting; override for conflict paints.
  */
 @Composable
 fun CodeEditorField(
@@ -33,11 +35,13 @@ fun CodeEditorField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     wrapText: Boolean = false,
+    visualTransformation: VisualTransformation? = null,
 ) {
     val verticalScroll = rememberScrollState()
     val horizontalScroll = rememberScrollState()
     val colors = LocalColorScheme.current
-    val highlight = remember(colors) { codeHighlightTransformation(colors) }
+    val highlight = visualTransformation
+        ?: remember(colors) { codeHighlightTransformation(colors) }
     val lineCount = remember(value) { value.count { it == '\n' } + 1 }
     val gutterText = remember(lineCount) {
         buildString(lineCount * 3) {

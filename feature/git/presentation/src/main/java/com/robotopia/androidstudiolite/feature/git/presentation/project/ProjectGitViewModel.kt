@@ -65,6 +65,14 @@ data class CheckoutOverwritePrompt(
     val conflictingPaths: List<String>,
 )
 
+/** Visual paint for a conflict-buffer line (cleared after the user edits that line). */
+enum class ConflictLinePaint {
+    None,
+    Marker,
+    Ours,
+    Theirs,
+}
+
 data class ProjectGitUiState(
     val isLoading: Boolean = true,
     val loadError: String? = null,
@@ -88,6 +96,13 @@ data class ProjectGitUiState(
     val isDiffLoading: Boolean = false,
     /** True when the open file editor is a conflict resolve view. */
     val isConflictEditor: Boolean = false,
+    /** Editable conflict buffer (markers included) while [isConflictEditor] is true. */
+    val conflictText: String = "",
+    /**
+     * Per-line conflict paint for [conflictText]. Cleared for a line when the user edits it.
+     * Same size as `conflictText` line count.
+     */
+    val conflictLinePaint: List<ConflictLinePaint> = emptyList(),
     /**
      * Non-null while a merge is in progress (conflicts or merge commit pending).
      * Holds the branch being merged into [currentBranch].
@@ -115,18 +130,53 @@ data class ProjectGitUiState(
     val createBranchValue: String = "",
     val createBranchError: String? = null,
     val deleteConfirmBranch: String? = null,
+    /** True when `origin` (or any remote) is configured. */
+    val hasRemote: Boolean = false,
+    /** Full-screen Publish to GitHub form (local repo with no remote). */
+    val showPublish: Boolean = false,
+    /** Preview/runtime flag: build account connected for GitHub HTTPS. */
+    val publishAccountConnected: Boolean = false,
+    val publishProviderName: String = "GitHub",
+    val publishRepoName: String = "",
+    val publishPrivate: Boolean = true,
+    val publishNameError: String? = null,
+    val publishError: String? = null,
+    /** True when publish should be blocked until the user commits at least once. */
+    val publishNeedsCommit: Boolean = false,
+    /** Commits ahead of upstream (0 when unknown / no tracking). */
+    val aheadCount: Int = 0,
+    /** Commits behind upstream. */
+    val behindCount: Int = 0,
+    /** File-row overflow menu on Changes (`path`). */
+    val changeFileMenuPath: String? = null,
+    /**
+     * Discard confirm: `null` path = discard all local changes;
+     * non-null = discard that file only.
+     */
+    val discardConfirmPath: String? = null,
+    val showDiscardAllConfirm: Boolean = false,
+    val showUndoCommitConfirm: Boolean = false,
+    /**
+     * HTTPS GitHub repo page when published (`https://github.com/owner/repo`).
+     * Used for Open on GitHub actions.
+     */
+    val remoteHtmlUrl: String? = null,
 ) {
     val unresolvedConflictCount: Int
         get() = changeFiles.count { it.kind == GitChangeKind.Conflict && !it.staged }
 
-    /** True while the open conflict buffer still has markers or side hunks. */
+    /** True while the conflict buffer still contains Git conflict markers. */
     val hasOpenConflictHunks: Boolean
-        get() = diffLines.any {
-            it.kind == GitDiffLineKind.ConflictMarker ||
-                it.kind == GitDiffLineKind.ConflictOurs ||
-                it.kind == GitDiffLineKind.ConflictTheirs
-        }
+        get() = isConflictEditor && conflictTextHasMarkers(conflictText)
 }
+
+/** Standard Git conflict marker lines (`<<<<<<<`, `=======`, `>>>>>>>`). */
+fun conflictTextHasMarkers(text: String): Boolean =
+    text.lineSequence().any { line ->
+        line.startsWith("<<<<<<<") ||
+            line.startsWith("=======") ||
+            line.startsWith(">>>>>>>")
+    }
 
 class ProjectGitViewModel : ViewModel() {
     val uiState = MutableStateFlow(ProjectGitUiState())

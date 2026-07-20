@@ -55,6 +55,8 @@ fun ProjectGitScreenContext.closeChangeDiff() {
             diffLines = emptyList(),
             isDiffLoading = false,
             isConflictEditor = false,
+            conflictText = "",
+            conflictLinePaint = emptyList(),
         )
     }
 }

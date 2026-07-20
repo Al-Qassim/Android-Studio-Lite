@@ -14,14 +14,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.robotopia.androidstudiolite.designsystem.color.LocalColorScheme
 import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
+import com.robotopia.androidstudiolite.designsystem.component.CodeEditorField
 import com.robotopia.androidstudiolite.designsystem.component.LoadingIndicator
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitDiffLine
@@ -30,11 +33,13 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectG
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.acceptConflictOurs
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.acceptConflictTheirs
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.conflictHighlightTransformation
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.markConflictResolvedManually
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.setConflictText
 
 /**
- * Read-only diff / conflict viewer that mirrors CodeEditorField
- * (dual old/new gutters + code column, editor typography).
+ * Working-tree / commit diffs stay read-only. Conflict resolve uses an editable
+ * [CodeEditorField] so the user can manually finish the merge buffer.
  */
 @Composable
 internal fun ProjectGitScreenContext.ProjectGitDiffBody(state: ProjectGitUiState) {
@@ -52,22 +57,19 @@ internal fun ProjectGitScreenContext.ProjectGitDiffBody(state: ProjectGitUiState
             Column(modifier = Modifier.fillMaxSize()) {
                 if (state.isConflictEditor) {
                     ConflictResolveHeader(state)
-                }
-                val verticalScroll = rememberScrollState()
-                val horizontalScroll = rememberScrollState()
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .verticalScroll(verticalScroll)
-                        .horizontalScroll(horizontalScroll)
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                ) {
-                    state.diffLines.forEach { line ->
-                        DiffEditorLine(line = line)
+                    val colors = LocalColorScheme.current
+                    val conflictHighlight = remember(state.conflictLinePaint, colors) {
+                        conflictHighlightTransformation(state.conflictLinePaint, colors)
                     }
-                }
-                if (state.isConflictEditor) {
+                    CodeEditorField(
+                        value = state.conflictText,
+                        onValueChange = { setConflictText(it) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        wrapText = true,
+                        visualTransformation = conflictHighlight,
+                    )
                     ConflictResolveActions(
                         acceptEnabled = !state.isBusy && state.hasOpenConflictHunks,
                         markResolvedEnabled = !state.isBusy && !state.hasOpenConflictHunks,
@@ -75,6 +77,21 @@ internal fun ProjectGitScreenContext.ProjectGitDiffBody(state: ProjectGitUiState
                         onAcceptTheirs = { acceptConflictTheirs(state) },
                         onMarkResolved = { markConflictResolvedManually(state) },
                     )
+                } else {
+                    val verticalScroll = rememberScrollState()
+                    val horizontalScroll = rememberScrollState()
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .verticalScroll(verticalScroll)
+                            .horizontalScroll(horizontalScroll)
+                            .padding(horizontal = 12.dp, vertical = 12.dp),
+                    ) {
+                        state.diffLines.forEach { line ->
+                            DiffEditorLine(line = line)
+                        }
+                    }
                 }
             }
         }

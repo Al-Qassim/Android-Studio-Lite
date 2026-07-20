@@ -14,6 +14,8 @@ fun ProjectGitScreenContext.openCommit(commit: GitCommitSummary) {
             diffTitle = "",
             diffLines = emptyList(),
             isConflictEditor = false,
+            conflictText = "",
+            conflictLinePaint = emptyList(),
         )
     }
 }
@@ -27,6 +29,8 @@ fun ProjectGitScreenContext.closeCommitDetail() {
             diffTitle = "",
             diffLines = emptyList(),
             isConflictEditor = false,
+            conflictText = "",
+            conflictLinePaint = emptyList(),
         )
     }
 }
@@ -38,6 +42,8 @@ fun ProjectGitScreenContext.openCommitFileDiff(file: GitCommitFileChange) {
             diffTitle = file.path.substringAfterLast('/'),
             isDiffLoading = false,
             isConflictEditor = false,
+            conflictText = "",
+            conflictLinePaint = emptyList(),
             diffLines = previewDiffLinesFor(file.path),
         )
     }

@@ -25,6 +25,8 @@ fun ProjectGitScreenContext.requestAbortMerge() {
             changeFiles = changeFiles.filterNot { it.kind == GitChangeKind.Conflict },
             selectedDiffPath = null,
             isConflictEditor = false,
+            conflictText = "",
+            conflictLinePaint = emptyList(),
             diffLines = emptyList(),
             commitMessage = "",
             toastMessage = "Merge aborted.",
@@ -32,16 +34,27 @@ fun ProjectGitScreenContext.requestAbortMerge() {
     }
 }
 
+fun ProjectGitScreenContext.setConflictText(value: String) {
+    updateState {
+        copy(
+            conflictText = value,
+            conflictLinePaint = updateConflictLinePaintAfterEdit(
+                previousText = conflictText,
+                previousPaint = conflictLinePaint,
+                newText = value,
+            ),
+        )
+    }
+}
+
 /** UI shell — keep current (ours) side in the buffer; user still marks resolved. */
 fun ProjectGitScreenContext.acceptConflictOurs(state: ProjectGitUiState) {
     if (!state.hasOpenConflictHunks) return
+    val resolved = resolveConflictTextKeeping(state.conflictText, keepOurs = true)
     updateState {
         copy(
-            diffLines = state.diffLines
-                .filter {
-                    it.kind == GitDiffLineKind.Context || it.kind == GitDiffLineKind.ConflictOurs
-                }
-                .map { it.copy(kind = GitDiffLineKind.Context) },
+            conflictText = resolved,
+            conflictLinePaint = classifyConflictLinePaint(resolved),
             toastMessage = "Kept current changes.",
         )
     }
@@ -50,25 +63,27 @@ fun ProjectGitScreenContext.acceptConflictOurs(state: ProjectGitUiState) {
 /** UI shell — keep incoming (theirs) side in the buffer; user still marks resolved. */
 fun ProjectGitScreenContext.acceptConflictTheirs(state: ProjectGitUiState) {
     if (!state.hasOpenConflictHunks) return
+    val resolved = resolveConflictTextKeeping(state.conflictText, keepOurs = false)
     updateState {
         copy(
-            diffLines = state.diffLines
-                .filter {
-                    it.kind == GitDiffLineKind.Context || it.kind == GitDiffLineKind.ConflictTheirs
-                }
-                .map { it.copy(kind = GitDiffLineKind.Context) },
+            conflictText = resolved,
+            conflictLinePaint = classifyConflictLinePaint(resolved),
             toastMessage = "Kept incoming changes.",
         )
     }
 }
 
 /**
- * UI shell — stage the open conflict file after hunks are cleared
- * (Accept current/incoming, or a future manual edit).
+ * UI shell — stage the open conflict file after markers are cleared
+ * (Accept current/incoming, or manual edit in the conflict editor).
  */
 fun ProjectGitScreenContext.markConflictResolvedManually(state: ProjectGitUiState) {
     val path = state.selectedDiffPath ?: return
     if (state.hasOpenConflictHunks) return
+    val resolvedLines = state.conflictText.split('\n').mapIndexed { index, text ->
+        val n = index + 1
+        GitDiffLine(GitDiffLineKind.Context, text, oldLine = n, newLine = n)
+    }
     updateState {
         copy(
             changeFiles = changeFiles.map { file ->
@@ -79,25 +94,65 @@ fun ProjectGitScreenContext.markConflictResolvedManually(state: ProjectGitUiStat
                 }
             },
             isConflictEditor = false,
+            conflictText = "",
+            conflictLinePaint = emptyList(),
+            diffLines = resolvedLines,
             toastMessage = "Marked as resolved.",
         )
     }
 }
 
 fun ProjectGitScreenContext.openConflictFile(file: GitChangeFile, currentBranch: String, mergeSource: String) {
+    val lines = previewConflictLinesFor(
+        path = file.path,
+        currentBranch = currentBranch,
+        mergeSource = mergeSource,
+    )
+    val text = conflictTextFromDiffLines(lines)
     updateState {
         copy(
             selectedDiffPath = file.path,
             diffTitle = file.path.substringAfterLast('/'),
             isDiffLoading = false,
             isConflictEditor = true,
-            diffLines = previewConflictLinesFor(
-                path = file.path,
-                currentBranch = currentBranch,
-                mergeSource = mergeSource,
-            ),
+            diffLines = lines,
+            conflictText = text,
+            conflictLinePaint = classifyConflictLinePaint(text),
         )
     }
+}
+
+fun conflictTextFromDiffLines(lines: List<GitDiffLine>): String =
+    lines.joinToString("\n") { it.text }
+
+/**
+ * Drops conflict markers and keeps either the current (ours) or incoming (theirs) side
+ * for every `<<<<<<<` / `=======` / `>>>>>>>` hunk in [text].
+ */
+fun resolveConflictTextKeeping(text: String, keepOurs: Boolean): String {
+    val out = ArrayList<String>()
+    var inOurs = false
+    var inTheirs = false
+    for (line in text.split('\n')) {
+        when {
+            line.startsWith("<<<<<<<") -> {
+                inOurs = true
+                inTheirs = false
+            }
+            line.startsWith("=======") && (inOurs || inTheirs) -> {
+                inOurs = false
+                inTheirs = true
+            }
+            line.startsWith(">>>>>>>") -> {
+                inOurs = false
+                inTheirs = false
+            }
+            inOurs -> if (keepOurs) out.add(line)
+            inTheirs -> if (!keepOurs) out.add(line)
+            else -> out.add(line)
+        }
+    }
+    return out.joinToString("\n")
 }
 
 fun previewConflictLinesFor(
