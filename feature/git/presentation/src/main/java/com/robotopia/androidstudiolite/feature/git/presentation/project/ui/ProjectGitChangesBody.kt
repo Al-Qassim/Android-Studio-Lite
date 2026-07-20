@@ -25,18 +25,31 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.robotopia.androidstudiolite.designsystem.color.Theme
 import com.robotopia.androidstudiolite.designsystem.component.Button
 import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
+import com.robotopia.androidstudiolite.designsystem.component.IconButton
+import com.robotopia.androidstudiolite.designsystem.component.IconButtonVariant
+import com.robotopia.androidstudiolite.designsystem.component.Menu
+import com.robotopia.androidstudiolite.designsystem.component.MenuItem
+import com.robotopia.androidstudiolite.designsystem.icon.IconMore
+import com.robotopia.androidstudiolite.designsystem.popup.rememberEndAlignedMenuPopupPositionProvider
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeFile
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeKind
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissChangeFileMenu
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openAbortMergeConfirm
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openChangeDiff
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openChangeFileMenu
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openDiscardAllConfirm
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openDiscardFileConfirm
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestCommit
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestIgnorePath
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.setCommitMessage
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.toggleChangeStaged
 
@@ -53,10 +66,27 @@ internal fun ProjectGitScreenContext.ProjectGitChangesBody(state: ProjectGitUiSt
                 .padding(top = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            BasicText(
-                text = "On branch ${state.currentBranch.ifBlank { "—" }}",
-                style = Typography.Caption.copy(color = Theme.colors.Muted),
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                BasicText(
+                    text = "On branch ${state.currentBranch.ifBlank { "—" }}",
+                    style = Typography.Caption.copy(color = Theme.colors.Muted),
+                )
+                if (state.changeFiles.isNotEmpty() && state.mergeSourceBranch == null) {
+                    Button(
+                        label = "Discard all",
+                        onClick = { openDiscardAllConfirm() },
+                        variant = if (state.isBusy) {
+                            ButtonVariant.Disabled
+                        } else {
+                            ButtonVariant.DangerText
+                        },
+                    )
+                }
+            }
             if (state.mergeSourceBranch != null) {
                 MergeInProgressBanner(
                     currentBranch = state.currentBranch,
@@ -98,9 +128,11 @@ internal fun ProjectGitScreenContext.ProjectGitChangesBody(state: ProjectGitUiSt
                         items(conflicts, key = { "conflict-${it.path}" }) { file ->
                             ChangeFileRow(
                                 file = file,
+                                menuOpen = state.changeFileMenuPath == file.path,
                                 enabled = !state.isBusy,
                                 onToggleStaged = { toggleChangeStaged(file.path) },
                                 onOpen = { openChangeDiff(file, state) },
+                                onMore = { openChangeFileMenu(file.path) },
                             )
                         }
                     }
@@ -117,9 +149,11 @@ internal fun ProjectGitScreenContext.ProjectGitChangesBody(state: ProjectGitUiSt
                         items(otherChanges, key = { it.path }) { file ->
                             ChangeFileRow(
                                 file = file,
+                                menuOpen = state.changeFileMenuPath == file.path,
                                 enabled = !state.isBusy,
                                 onToggleStaged = { toggleChangeStaged(file.path) },
                                 onOpen = { openChangeDiff(file, state) },
+                                onMore = { openChangeFileMenu(file.path) },
                             )
                         }
                     }
@@ -167,49 +201,97 @@ private fun MergeInProgressBanner(
 }
 
 @Composable
-private fun ChangeFileRow(
+private fun ProjectGitScreenContext.ChangeFileRow(
     file: GitChangeFile,
+    menuOpen: Boolean,
     enabled: Boolean,
     onToggleStaged: () -> Unit,
     onOpen: () -> Unit,
+    onMore: () -> Unit,
 ) {
     val shape = RoundedCornerShape(8.dp)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Theme.colors.Surface, shape)
-            .border(1.dp, Theme.colors.Border, shape)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        StageToggle(
-            staged = file.staged,
-            enabled = enabled,
-            onClick = onToggleStaged,
-        )
-        Column(
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .clickable(enabled = enabled, onClick = onOpen),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+                .fillMaxWidth()
+                .background(Theme.colors.Surface, shape)
+                .border(1.dp, Theme.colors.Border, shape)
+                .padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            BasicText(
-                text = file.path,
-                style = Typography.BodyStrong.copy(color = Theme.colors.Text),
+            StageToggle(
+                staged = file.staged,
+                enabled = enabled && file.kind != GitChangeKind.Conflict,
+                onClick = onToggleStaged,
             )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(enabled = enabled, onClick = onOpen),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                BasicText(
+                    text = file.path,
+                    style = Typography.BodyStrong.copy(color = Theme.colors.Text),
+                )
+                BasicText(
+                    text = when {
+                        file.kind == GitChangeKind.Conflict && file.staged -> "Resolved"
+                        else -> kindLabel(file.kind)
+                    },
+                    style = Typography.Caption.copy(color = Theme.colors.Muted2),
+                )
+            }
             BasicText(
-                text = when {
-                    file.kind == GitChangeKind.Conflict && file.staged -> "Resolved"
-                    else -> kindLabel(file.kind)
-                },
-                style = Typography.Caption.copy(color = Theme.colors.Muted2),
+                text = kindBadge(file.kind),
+                style = Typography.Caption.copy(color = kindColor(file.kind)),
+                modifier = Modifier.clickable(enabled = enabled, onClick = onOpen),
             )
+            if (file.kind != GitChangeKind.Conflict) {
+                IconButton(
+                    onClick = { if (enabled) onMore() },
+                    variant = IconButtonVariant.Ghost,
+                    size = 32.dp,
+                    iconSize = 18.dp,
+                    icon = { tint, size -> IconMore(tint = tint, size = size) },
+                )
+            }
         }
-        BasicText(
-            text = kindBadge(file.kind),
-            style = Typography.Caption.copy(color = kindColor(file.kind)),
-            modifier = Modifier.clickable(enabled = enabled, onClick = onOpen),
+        if (menuOpen) {
+            ChangeFileOverflowMenu(file)
+        }
+    }
+}
+
+@Composable
+private fun ProjectGitScreenContext.ChangeFileOverflowMenu(file: GitChangeFile) {
+    val positionProvider = rememberEndAlignedMenuPopupPositionProvider()
+    Popup(
+        popupPositionProvider = positionProvider,
+        onDismissRequest = { dismissChangeFileMenu() },
+        properties = PopupProperties(focusable = true),
+    ) {
+        val canIgnore = file.kind == GitChangeKind.Untracked ||
+            file.kind == GitChangeKind.Modified
+        Menu(
+            items = buildList {
+                add(
+                    MenuItem.Button(
+                        label = "Discard",
+                        onClick = { openDiscardFileConfirm(file.path) },
+                        danger = true,
+                    ),
+                )
+                if (canIgnore) {
+                    add(
+                        MenuItem.Button(
+                            label = "Ignore",
+                            onClick = { requestIgnorePath(file.path) },
+                        ),
+                    )
+                }
+            },
         )
     }
 }

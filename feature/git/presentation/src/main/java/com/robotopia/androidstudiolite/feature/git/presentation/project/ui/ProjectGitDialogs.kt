@@ -13,14 +13,19 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.di
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissCheckoutOverwrite
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissCreateBranch
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissDeleteConfirm
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissDiscardConfirm
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissMergeConfirm
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissRename
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissUndoCommitConfirm
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestAbortMerge
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestCreateBranch
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestDeleteBranch
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestDiscardAll
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestDiscardAndCheckout
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestDiscardFile
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestMerge
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestRename
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestUndoCommit
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.setCreateBranchValue
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.setRenameValue
 
@@ -112,6 +117,57 @@ internal fun ProjectGitScreenContext.ProjectGitDialogs(state: ProjectGitUiState)
                 dangerLabel = "Discard & switch",
                 onDanger = { requestDiscardAndCheckout(checkoutOverwrite.targetBranch) },
                 onCancel = { dismissCheckoutOverwrite() },
+            )
+        }
+    }
+
+    val discardPath = state.discardConfirmPath
+    if (discardPath != null) {
+        Dialog(onDismissRequest = { dismissDiscardConfirm() }) {
+            DialogMessageAction(
+                title = "Discard changes?",
+                message = "Discard local changes in “$discardPath”. This can’t be undone.",
+                actionLabel = "Discard",
+                onCancel = { dismissDiscardConfirm() },
+                onAction = { requestDiscardFile(discardPath) },
+                dangerAction = true,
+            )
+        }
+    }
+
+    if (state.showDiscardAllConfirm) {
+        Dialog(onDismissRequest = { dismissDiscardConfirm() }) {
+            DialogMessageAction(
+                title = "Discard all changes?",
+                message = "Discard all local changes in this project. This can’t be undone.",
+                actionLabel = "Discard all",
+                onCancel = { dismissDiscardConfirm() },
+                onAction = { requestDiscardAll() },
+                dangerAction = true,
+            )
+        }
+    }
+
+    if (state.showUndoCommitConfirm) {
+        val tip = state.historyCommits.firstOrNull()
+        val base = if (tip != null) {
+            "Remove “${tip.subject}” (${tip.shortId}) from the branch. File contents stay as local changes."
+        } else {
+            "Remove the latest commit from the branch. File contents stay as local changes."
+        }
+        val message = if (state.hasRemote && state.aheadCount == 0) {
+            "$base\n\nThis commit may already be on the remote. Undoing it only changes your local branch."
+        } else {
+            base
+        }
+        Dialog(onDismissRequest = { dismissUndoCommitConfirm() }) {
+            DialogMessageAction(
+                title = "Undo last commit?",
+                message = message,
+                actionLabel = "Undo commit",
+                onCancel = { dismissUndoCommitConfirm() },
+                onAction = { requestUndoCommit(state) },
+                dangerAction = true,
             )
         }
     }

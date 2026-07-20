@@ -19,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.robotopia.androidstudiolite.designsystem.color.Theme
+import com.robotopia.androidstudiolite.designsystem.component.Button
+import com.robotopia.androidstudiolite.designsystem.component.ButtonVariant
 import com.robotopia.androidstudiolite.designsystem.component.EmptyState
 import com.robotopia.androidstudiolite.designsystem.typography.Typography
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeKind
@@ -26,8 +28,12 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.GitCommi
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitCommitSummary
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.githubCommitUrl
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.githubTreeUrl
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openCommit
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openCommitFileDiff
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openUndoCommitConfirm
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestOpenOnGitHub
 
 @Composable
 internal fun ProjectGitScreenContext.ProjectGitHistoryBody(state: ProjectGitUiState) {
@@ -53,10 +59,44 @@ internal fun ProjectGitScreenContext.ProjectGitHistoryBody(state: ProjectGitUiSt
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(key = "history-branch") {
-            BasicText(
-                text = "On ${state.currentBranch.ifBlank { "—" }}",
-                style = Typography.Caption.copy(color = Theme.colors.Muted),
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                BasicText(
+                    text = "On ${state.currentBranch.ifBlank { "—" }}",
+                    style = Typography.Caption.copy(color = Theme.colors.Muted),
+                )
+                Button(
+                    label = "Undo last commit",
+                    onClick = { openUndoCommitConfirm(state) },
+                    variant = if (state.isBusy) {
+                        ButtonVariant.Disabled
+                    } else {
+                        ButtonVariant.DangerText
+                    },
+                )
+            }
+        }
+        val remoteHtml = state.remoteHtmlUrl
+        if (remoteHtml != null && state.hasRemote) {
+            item(key = "open-branch-github") {
+                Button(
+                    label = "Open branch on GitHub",
+                    onClick = {
+                        requestOpenOnGitHub(
+                            githubTreeUrl(remoteHtml, state.currentBranch.ifBlank { "main" }),
+                        )
+                    },
+                    variant = if (state.isBusy) {
+                        ButtonVariant.Disabled
+                    } else {
+                        ButtonVariant.Secondary
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
         items(state.historyCommits, key = { it.id }) { commit ->
             HistoryCommitRow(
@@ -95,6 +135,23 @@ internal fun ProjectGitScreenContext.ProjectGitCommitDetailBody(state: ProjectGi
                     text = commit.shortId,
                     style = Typography.Code.copy(color = Theme.colors.Muted2),
                 )
+                val remoteHtml = state.remoteHtmlUrl
+                if (remoteHtml != null && state.hasRemote) {
+                    Button(
+                        label = "Open on GitHub",
+                        onClick = {
+                            requestOpenOnGitHub(githubCommitUrl(remoteHtml, commit.id))
+                        },
+                        variant = if (state.isBusy) {
+                            ButtonVariant.Disabled
+                        } else {
+                            ButtonVariant.Secondary
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
+                    )
+                }
             }
         }
         item(key = "files-header") {
