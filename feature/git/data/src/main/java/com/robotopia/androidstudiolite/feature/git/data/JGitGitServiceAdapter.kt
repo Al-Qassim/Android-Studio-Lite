@@ -6,9 +6,17 @@ import com.robotopia.androidstudiolite.feature.git.api.GitBranch
 import com.robotopia.androidstudiolite.feature.git.api.GitBranchKind
 import com.robotopia.androidstudiolite.feature.git.api.GitBranchesSnapshot
 import com.robotopia.androidstudiolite.feature.git.api.GitCheckoutConflictException
+import com.robotopia.androidstudiolite.feature.git.api.GitCommitFileInfo
+import com.robotopia.androidstudiolite.feature.git.api.GitCommitInfo
 import com.robotopia.androidstudiolite.feature.git.api.GitCredentials
+import com.robotopia.androidstudiolite.feature.git.api.GitDiffLineInfo
+import com.robotopia.androidstudiolite.feature.git.api.GitDiffLineType
+import com.robotopia.androidstudiolite.feature.git.api.GitFileChangeKind
+import com.robotopia.androidstudiolite.feature.git.api.GitMergeResult
+import com.robotopia.androidstudiolite.feature.git.api.GitRepositoryInfo
 import com.robotopia.androidstudiolite.feature.git.api.GitService
 import com.robotopia.androidstudiolite.feature.git.api.GitStatusSnapshot
+import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -18,20 +26,36 @@ import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
 import org.eclipse.jgit.api.MergeResult
+import org.eclipse.jgit.api.ResetCommand
 import org.eclipse.jgit.api.errors.CheckoutConflictException
 import org.eclipse.jgit.api.errors.GitAPIException
+import org.eclipse.jgit.diff.DiffEntry
+import org.eclipse.jgit.diff.DiffFormatter
+import org.eclipse.jgit.lib.BranchTrackingStatus
+import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.PersonIdent
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.lib.RepositoryState
+import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.transport.RefSpec
+import org.eclipse.jgit.transport.URIish
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
+import org.eclipse.jgit.treewalk.CanonicalTreeParser
+import org.eclipse.jgit.treewalk.EmptyTreeIterator
+import org.eclipse.jgit.treewalk.FileTreeIterator
+import org.eclipse.jgit.treewalk.filter.PathFilter
 
 /**
- * JGit-backed [GitService] proof of concept.
- * Serializes ops per project root; uses HTTPS credentials in-process only.
+ * JGit-backed [GitService]. Serializes ops per project root; HTTPS credentials stay in-process.
  */
 class JGitGitServiceAdapter : GitService {
     private val locks = mutableMapOf<String, Mutex>()
     private val locksGuard = Mutex()
+
+    override suspend fun isRepository(projectRoot: File): Boolean = withContext(Dispatchers.IO) {
+        File(projectRoot, ".git").exists()
+    }
 
     override suspend fun init(projectRoot: File) = withRepoLock(projectRoot) {
         projectRoot.mkdirs()
@@ -46,6 +70,7 @@ class JGitGitServiceAdapter : GitService {
                 isClean = status.isClean,
                 added = status.added,
                 changed = status.changed,
+                removed = status.removed,
                 modified = status.modified,
                 untracked = status.untracked,
                 conflicting = status.conflicting,
@@ -54,11 +79,123 @@ class JGitGitServiceAdapter : GitService {
         }
     }
 
+    override suspend fun repositoryInfo(projectRoot: File): GitRepositoryInfo =
+        withRepoLock(projectRoot) {
+            open(projectRoot).use { git ->
+                val repo = git.repository
+                val remotes = git.remoteList().call()
+                val hasRemote = remotes.isNotEmpty()
+                val originUrl = remotes.firstOrNull { it.name == "origin" }?.urIs?.firstOrNull()
+                    ?.toPrivateASCIIString()
+                    ?: remotes.firstOrNull()?.urIs?.firstOrNull()?.toPrivateASCIIString()
+                val tracking = runCatching {
+                    BranchTrackingStatus.of(repo, repo.branch)
+                }.getOrNull()
+                GitRepositoryInfo(
+                    hasRemote = hasRemote,
+                    remoteHtmlUrl = originUrl?.let { githubHtmlUrl(it) },
+                    aheadCount = tracking?.aheadCount ?: 0,
+                    behindCount = tracking?.behindCount ?: 0,
+                    isMerging = repo.repositoryState.isMergeInProgress(),
+                )
+            }
+        }
+
     override suspend fun stageAll(projectRoot: File) = withRepoLock(projectRoot) {
         open(projectRoot).use { git ->
             git.add().addFilepattern(".").call()
-            // Include deletions in the index for a complete "stage all".
             git.add().setUpdate(true).addFilepattern(".").call()
+        }
+        Unit
+    }
+
+    override suspend fun stagePaths(projectRoot: File, paths: List<String>) =
+        withRepoLock(projectRoot) {
+            if (paths.isEmpty()) return@withRepoLock Unit
+            open(projectRoot).use { git ->
+                val add = git.add()
+                val update = git.add().setUpdate(true)
+                for (path in paths.map { requireRelativePath(it) }) {
+                    add.addFilepattern(path)
+                    update.addFilepattern(path)
+                }
+                add.call()
+                update.call()
+            }
+            Unit
+        }
+
+    override suspend fun unstagePaths(projectRoot: File, paths: List<String>) =
+        withRepoLock(projectRoot) {
+            if (paths.isEmpty()) return@withRepoLock Unit
+            open(projectRoot).use { git ->
+                val reset = git.reset().setMode(ResetCommand.ResetType.MIXED)
+                for (path in paths.map { requireRelativePath(it) }) {
+                    reset.addPath(path)
+                }
+                reset.call()
+            }
+            Unit
+        }
+
+    override suspend fun discardPaths(projectRoot: File, paths: List<String>) =
+        withRepoLock(projectRoot) {
+            if (paths.isEmpty()) return@withRepoLock
+            open(projectRoot).use { git ->
+                val status = git.status().call()
+                val untracked = status.untracked
+                val trackedPaths = mutableListOf<String>()
+                for (raw in paths) {
+                    val path = requireRelativePath(raw)
+                    val file = File(projectRoot, path)
+                    if (path in untracked || (!fileExistsInIndex(git.repository, path) && file.exists())) {
+                        if (file.isDirectory) file.deleteRecursively() else file.delete()
+                    } else {
+                        trackedPaths.add(path)
+                    }
+                }
+                if (trackedPaths.isNotEmpty()) {
+                    try {
+                        val checkout = git.checkout().setStartPoint(Constants.HEAD)
+                        for (path in trackedPaths) checkout.addPath(path)
+                        checkout.call()
+                    } catch (e: GitAPIException) {
+                        throw AppException("Couldn't discard those changes.", e)
+                    }
+                }
+            }
+        }
+
+    override suspend fun discardAll(projectRoot: File) = withRepoLock(projectRoot) {
+        open(projectRoot).use { git ->
+            try {
+                git.reset().setMode(ResetCommand.ResetType.HARD).call()
+                git.clean().setCleanDirectories(true).setForce(true).call()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't discard local changes.", e)
+            }
+        }
+        Unit
+    }
+
+    override suspend fun undoLastCommit(projectRoot: File) = withRepoLock(projectRoot) {
+        open(projectRoot).use { git ->
+            val head = git.repository.resolve(Constants.HEAD)
+                ?: throw AppException("Nothing to undo.")
+            RevWalk(git.repository).use { walk ->
+                val commit = walk.parseCommit(head)
+                if (commit.parentCount == 0) {
+                    throw AppException("Can't undo the only commit.")
+                }
+            }
+            try {
+                git.reset()
+                    .setMode(ResetCommand.ResetType.SOFT)
+                    .setRef("HEAD~1")
+                    .call()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't undo the last commit.", e)
+            }
         }
         Unit
     }
@@ -221,8 +358,7 @@ class JGitGitServiceAdapter : GitService {
     ) = withRepoLock(projectRoot) {
         open(projectRoot).use { git ->
             try {
-                val command = git.fetch()
-                    .setCheckFetchedObjects(true)
+                val command = git.fetch().setCheckFetchedObjects(true)
                 credentials?.let { command.setCredentialsProvider(it.toProvider()) }
                 command.call()
             } catch (e: GitAPIException) {
@@ -239,9 +375,13 @@ class JGitGitServiceAdapter : GitService {
         credentials: GitCredentials?,
     ) = withRepoLock(projectRoot) {
         open(projectRoot).use { git ->
-            val command = git.pull()
-            credentials?.let { command.setCredentialsProvider(it.toProvider()) }
-            command.call()
+            try {
+                val command = git.pull()
+                credentials?.let { command.setCredentialsProvider(it.toProvider()) }
+                command.call()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't pull from the remote.", e)
+            }
         }
         Unit
     }
@@ -251,30 +391,98 @@ class JGitGitServiceAdapter : GitService {
         credentials: GitCredentials?,
     ) = withRepoLock(projectRoot) {
         open(projectRoot).use { git ->
-            val command = git.push()
-            credentials?.let { command.setCredentialsProvider(it.toProvider()) }
-            command.call()
+            try {
+                val command = git.push()
+                credentials?.let { command.setCredentialsProvider(it.toProvider()) }
+                command.call()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't push to the remote.", e)
+            }
         }
         Unit
     }
 
-    override suspend fun merge(projectRoot: File, branchName: String) = withRepoLock(projectRoot) {
+    override suspend fun pushSetUpstream(
+        projectRoot: File,
+        remote: String,
+        branch: String,
+        credentials: GitCredentials?,
+    ) = withRepoLock(projectRoot) {
         open(projectRoot).use { git ->
-            val ref = git.repository.findRef(branchName)
-                ?: git.repository.findRef("refs/heads/$branchName")
-                ?: git.repository.findRef("refs/remotes/$branchName")
-                ?: throw AppException("Couldn't find that branch.")
-            val result = git.merge().include(ref).call()
-            when (result.mergeStatus) {
-                MergeResult.MergeStatus.CONFLICTING ->
-                    throw AppException("Merge has conflicts. Resolve them in the files, then commit.")
-                MergeResult.MergeStatus.FAILED,
-                MergeResult.MergeStatus.ABORTED,
-                MergeResult.MergeStatus.NOT_SUPPORTED,
-                -> throw AppException("Couldn't merge that branch.")
-                else -> Unit
+            try {
+                val command = git.push()
+                    .setRemote(remote)
+                    .setRefSpecs(RefSpec("refs/heads/$branch:refs/heads/$branch"))
+                credentials?.let { command.setCredentialsProvider(it.toProvider()) }
+                command.call()
+                val config = git.repository.config
+                config.setString("branch", branch, "remote", remote)
+                config.setString("branch", branch, "merge", "refs/heads/$branch")
+                config.save()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't publish that branch.", e)
             }
         }
+        Unit
+    }
+
+    override suspend fun addRemote(
+        projectRoot: File,
+        name: String,
+        httpsUrl: String,
+    ) = withRepoLock(projectRoot) {
+        open(projectRoot).use { git ->
+            try {
+                git.remoteAdd()
+                    .setName(name)
+                    .setUri(URIish(httpsUrl))
+                    .call()
+            } catch (e: Exception) {
+                throw AppException("Couldn't add that remote.", e)
+            }
+        }
+        Unit
+    }
+
+    override suspend fun merge(projectRoot: File, branchName: String): GitMergeResult =
+        withRepoLock(projectRoot) {
+            open(projectRoot).use { git ->
+                val ref = git.repository.findRef(branchName)
+                    ?: git.repository.findRef("refs/heads/$branchName")
+                    ?: git.repository.findRef("refs/remotes/$branchName")
+                    ?: throw AppException("Couldn't find that branch.")
+                val result = try {
+                    git.merge().include(ref).call()
+                } catch (e: GitAPIException) {
+                    throw AppException("Couldn't merge that branch.", e)
+                }
+                when (result.mergeStatus) {
+                    MergeResult.MergeStatus.CONFLICTING -> GitMergeResult(
+                        conflicts = true,
+                        conflictingPaths = result.conflicts?.keys.orEmpty(),
+                    )
+                    MergeResult.MergeStatus.FAILED,
+                    MergeResult.MergeStatus.ABORTED,
+                    MergeResult.MergeStatus.NOT_SUPPORTED,
+                    -> throw AppException("Couldn't merge that branch.")
+                    else -> GitMergeResult(conflicts = false)
+                }
+            }
+        }
+
+    override suspend fun abortMerge(projectRoot: File) = withRepoLock(projectRoot) {
+        open(projectRoot).use { git ->
+            if (!git.repository.repositoryState.isMergeInProgress()) {
+                throw AppException("No merge in progress.")
+            }
+            try {
+                // JGit's MERGE reset mode is unsupported on some builds; HARD clears MERGE_HEAD.
+                git.reset().setMode(ResetCommand.ResetType.HARD).call()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't abort the merge.", e)
+            }
+        }
+        Unit
     }
 
     override suspend fun renameBranch(
@@ -286,7 +494,6 @@ class JGitGitServiceAdapter : GitService {
         open(projectRoot).use { git ->
             val remoteTracking = git.repository.findRef("refs/remotes/$oldName")
             if (remoteTracking != null) {
-                // Remote UI may pass `origin/foo` or bare `foo`; remote heads are short names.
                 val remoteShort = requireBranchName(newName.substringAfterLast('/'))
                 renameRemoteBranch(git, oldName, remoteShort, credentials)
             } else {
@@ -304,6 +511,173 @@ class JGitGitServiceAdapter : GitService {
         Unit
     }
 
+    override suspend fun readWorkingFile(projectRoot: File, relativePath: String): String =
+        withRepoLock(projectRoot) {
+            val path = requireRelativePath(relativePath)
+            val file = File(projectRoot, path)
+            if (!file.isFile) {
+                throw AppException("Couldn't open that file.")
+            }
+            file.readText()
+        }
+
+    override suspend fun writeWorkingFile(
+        projectRoot: File,
+        relativePath: String,
+        content: String,
+    ) = withRepoLock(projectRoot) {
+        val path = requireRelativePath(relativePath)
+        val file = File(projectRoot, path)
+        file.parentFile?.mkdirs()
+        file.writeText(content)
+    }
+
+    override suspend fun appendGitignore(projectRoot: File, pattern: String) =
+        withRepoLock(projectRoot) {
+            val trimmed = pattern.trim()
+            if (trimmed.isEmpty()) {
+                throw AppException("Enter a path to ignore.")
+            }
+            val file = File(projectRoot, ".gitignore")
+            val existing = if (file.isFile) file.readText() else ""
+            if (existing.lineSequence().any { it.trim() == trimmed }) {
+                return@withRepoLock
+            }
+            val prefix = when {
+                existing.isEmpty() -> ""
+                existing.endsWith("\n") -> ""
+                else -> "\n"
+            }
+            file.appendText("$prefix$trimmed\n")
+        }
+
+    override suspend fun diffWorkingTree(
+        projectRoot: File,
+        relativePath: String,
+    ): List<GitDiffLineInfo> = withRepoLock(projectRoot) {
+        val path = requireRelativePath(relativePath)
+        open(projectRoot).use { git ->
+            val repo = git.repository
+            val headId = repo.resolve(Constants.HEAD)
+            DiffFormatter(ByteArrayOutputStream()).use { formatter ->
+                formatter.setRepository(repo)
+                formatter.setPathFilter(PathFilter.create(path))
+                val oldTree = if (headId != null) {
+                    RevWalk(repo).use { walk ->
+                        val commit = walk.parseCommit(headId)
+                        CanonicalTreeParser().also {
+                            it.reset(repo.newObjectReader(), commit.tree)
+                        }
+                    }
+                } else {
+                    EmptyTreeIterator()
+                }
+                val newTree = FileTreeIterator(repo)
+                val entries = formatter.scan(oldTree, newTree)
+                entries.flatMap { entry -> formatDiffEntry(repo, entry) }
+            }
+        }
+    }
+
+    override suspend fun diffCommit(
+        projectRoot: File,
+        commitId: String,
+        relativePath: String,
+    ): List<GitDiffLineInfo> = withRepoLock(projectRoot) {
+        val path = requireRelativePath(relativePath)
+        open(projectRoot).use { git ->
+            val repo = git.repository
+            RevWalk(repo).use { walk ->
+                val commit = walk.parseCommit(repo.resolve(commitId)
+                    ?: throw AppException("Couldn't find that commit."))
+                val parentTree = if (commit.parentCount > 0) {
+                    walk.parseCommit(commit.getParent(0)).tree
+                } else {
+                    null
+                }
+                DiffFormatter(ByteArrayOutputStream()).use { formatter ->
+                    formatter.setRepository(repo)
+                    formatter.setPathFilter(PathFilter.create(path))
+                    val oldTree = if (parentTree != null) {
+                        CanonicalTreeParser().also {
+                            it.reset(repo.newObjectReader(), parentTree)
+                        }
+                    } else {
+                        EmptyTreeIterator()
+                    }
+                    val newTree = CanonicalTreeParser().also {
+                        it.reset(repo.newObjectReader(), commit.tree)
+                    }
+                    val entries = formatter.scan(oldTree, newTree)
+                    entries.flatMap { entry -> formatDiffEntry(repo, entry) }
+                }
+            }
+        }
+    }
+
+    override suspend fun log(projectRoot: File, maxCount: Int): List<GitCommitInfo> =
+        withRepoLock(projectRoot) {
+            open(projectRoot).use { git ->
+                val head = git.repository.resolve(Constants.HEAD) ?: return@use emptyList()
+                git.log().add(head).setMaxCount(maxCount.coerceAtLeast(1)).call().map { rev ->
+                    GitCommitInfo(
+                        id = rev.name,
+                        shortId = rev.abbreviate(7).name(),
+                        subject = rev.shortMessage,
+                        authorName = rev.authorIdent.name,
+                        authoredAtEpochMs = rev.authorIdent.`when`.time,
+                    )
+                }
+            }
+        }
+
+    override suspend fun commitFiles(
+        projectRoot: File,
+        commitId: String,
+    ): List<GitCommitFileInfo> = withRepoLock(projectRoot) {
+        open(projectRoot).use { git ->
+            val repo = git.repository
+            RevWalk(repo).use { walk ->
+                val commit = walk.parseCommit(repo.resolve(commitId)
+                    ?: throw AppException("Couldn't find that commit."))
+                val parentTree = if (commit.parentCount > 0) {
+                    walk.parseCommit(commit.getParent(0)).tree
+                } else {
+                    null
+                }
+                DiffFormatter(ByteArrayOutputStream()).use { formatter ->
+                    formatter.setRepository(repo)
+                    val oldTree = if (parentTree != null) {
+                        CanonicalTreeParser().also {
+                            it.reset(repo.newObjectReader(), parentTree)
+                        }
+                    } else {
+                        EmptyTreeIterator()
+                    }
+                    val newTree = CanonicalTreeParser().also {
+                        it.reset(repo.newObjectReader(), commit.tree)
+                    }
+                    formatter.scan(oldTree, newTree).mapNotNull { entry ->
+                        val path = when (entry.changeType) {
+                            DiffEntry.ChangeType.DELETE -> entry.oldPath
+                            else -> entry.newPath
+                        }
+                        if (path == null || path == DiffEntry.DEV_NULL) return@mapNotNull null
+                        val kind = when (entry.changeType) {
+                            DiffEntry.ChangeType.ADD -> GitFileChangeKind.Added
+                            DiffEntry.ChangeType.DELETE -> GitFileChangeKind.Deleted
+                            else -> GitFileChangeKind.Modified
+                        }
+                        GitCommitFileInfo(path = path, kind = kind)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun validateCloneUrl(input: String): CloneUrlValidation =
+        CloneUrlParser.validate(input)
+
     private fun requireBranchName(name: String): String {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) {
@@ -315,13 +689,98 @@ class JGitGitServiceAdapter : GitService {
         return trimmed
     }
 
-    override fun validateCloneUrl(input: String): CloneUrlValidation =
-        CloneUrlParser.validate(input)
+    private fun requireRelativePath(path: String): String {
+        val trimmed = path.trim().replace('\\', '/')
+        if (trimmed.isEmpty() || trimmed.startsWith("/") || trimmed.contains("..")) {
+            throw AppException("Invalid file path.")
+        }
+        return trimmed
+    }
 
-    /**
-     * Renames [oldRemoteName] (`origin/feature`) to [newShortName] on the remote via push,
-     * then fetches with prune so local remote-tracking refs match.
-     */
+    private fun fileExistsInIndex(repo: Repository, path: String): Boolean {
+        val head = repo.resolve(Constants.HEAD) ?: return false
+        return runCatching {
+            RevWalk(repo).use { walk ->
+                val tree = walk.parseCommit(head).tree
+                repo.newObjectReader().use { reader ->
+                    CanonicalTreeParser().also { it.reset(reader, tree) }
+                    // Presence check via resolve of blob id
+                    repo.resolve("$head:$path") != null
+                }
+            }
+        }.getOrDefault(false)
+    }
+
+    private fun formatDiffEntry(
+        repo: Repository,
+        entry: DiffEntry,
+    ): List<GitDiffLineInfo> {
+        val out = ByteArrayOutputStream()
+        DiffFormatter(out).use { formatter ->
+            formatter.setRepository(repo)
+            formatter.format(entry)
+        }
+        return parseUnifiedDiff(out.toString(Charsets.UTF_8.name()))
+    }
+
+    private fun RepositoryState.isMergeInProgress(): Boolean =
+        this == RepositoryState.MERGING || this == RepositoryState.MERGING_RESOLVED
+
+    private fun parseUnifiedDiff(raw: String): List<GitDiffLineInfo> {
+        val lines = mutableListOf<GitDiffLineInfo>()
+        var oldLine = 0
+        var newLine = 0
+        for (line in raw.lineSequence()) {
+            when {
+                line.startsWith("@@") -> {
+                    val match = HUNK_HEADER.find(line) ?: continue
+                    oldLine = match.groupValues[1].toInt()
+                    newLine = match.groupValues[2].toInt()
+                }
+                line.startsWith("+++") || line.startsWith("---") ||
+                    line.startsWith("diff ") || line.startsWith("index ") ||
+                    line.startsWith("new file") || line.startsWith("deleted file") -> Unit
+                line.startsWith("+") -> {
+                    lines.add(
+                        GitDiffLineInfo(
+                            type = GitDiffLineType.Add,
+                            text = line.removePrefix("+"),
+                            oldLine = null,
+                            newLine = newLine,
+                        ),
+                    )
+                    newLine++
+                }
+                line.startsWith("-") -> {
+                    lines.add(
+                        GitDiffLineInfo(
+                            type = GitDiffLineType.Remove,
+                            text = line.removePrefix("-"),
+                            oldLine = oldLine,
+                            newLine = null,
+                        ),
+                    )
+                    oldLine++
+                }
+                line.startsWith("\\") -> Unit
+                line.startsWith(" ") || line.isEmpty() -> {
+                    val text = if (line.startsWith(" ")) line.drop(1) else line
+                    lines.add(
+                        GitDiffLineInfo(
+                            type = GitDiffLineType.Context,
+                            text = text,
+                            oldLine = oldLine,
+                            newLine = newLine,
+                        ),
+                    )
+                    oldLine++
+                    newLine++
+                }
+            }
+        }
+        return lines
+    }
+
     private fun renameRemoteBranch(
         git: Git,
         oldRemoteName: String,
@@ -361,9 +820,6 @@ class JGitGitServiceAdapter : GitService {
         }
     }
 
-    /**
-     * @return local branch name that is now checked out
-     */
     private fun checkoutRemoteTracking(git: Git, remoteName: String, force: Boolean): String {
         val localName = remoteName.substringAfter('/')
         if (localName.isEmpty() || localName == remoteName) {
@@ -425,10 +881,6 @@ class JGitGitServiceAdapter : GitService {
         return Git(repository)
     }
 
-    private companion object {
-        const val RECENT_MAX = 3
-    }
-
     private suspend fun <T> withRepoLock(projectRoot: File, block: () -> T): T {
         val key = projectRoot.canonicalFile.absolutePath
         val mutex = locksGuard.withLock {
@@ -441,4 +893,24 @@ class JGitGitServiceAdapter : GitService {
 
     private fun GitCredentials.toProvider() =
         UsernamePasswordCredentialsProvider(username, passwordOrToken)
+
+    private companion object {
+        const val RECENT_MAX = 3
+        val HUNK_HEADER = Regex("""@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@""")
+
+        fun githubHtmlUrl(remoteUrl: String): String? {
+            val trimmed = remoteUrl.trim().removeSuffix(".git")
+            val https = Regex("""https?://github\.com/([^/]+)/([^/]+)""")
+                .matchEntire(trimmed)
+            if (https != null) {
+                return "https://github.com/${https.groupValues[1]}/${https.groupValues[2]}"
+            }
+            val ssh = Regex("""git@github\.com:([^/]+)/([^/]+)""")
+                .matchEntire(trimmed)
+            if (ssh != null) {
+                return "https://github.com/${ssh.groupValues[1]}/${ssh.groupValues[2]}"
+            }
+            return null
+        }
+    }
 }

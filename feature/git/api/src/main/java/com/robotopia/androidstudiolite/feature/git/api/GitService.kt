@@ -12,17 +12,35 @@ class GitCheckoutConflictException(
 ) : Exception("Local changes would be overwritten.", cause)
 
 /**
- * POC local Git surface (JGit). Not a full IDE SCM product yet.
- * Remotes use HTTPS; pass [GitCredentials] per network op — never embed tokens in remote URLs.
+ * Local Git surface (JGit). Remotes use HTTPS; pass [GitCredentials] per network op —
+ * never embed tokens in remote URLs.
  */
 interface GitService {
+    /** True when [projectRoot] contains a `.git` directory. */
+    suspend fun isRepository(projectRoot: File): Boolean
+
     suspend fun init(projectRoot: File)
 
     suspend fun status(projectRoot: File): GitStatusSnapshot
 
+    suspend fun repositoryInfo(projectRoot: File): GitRepositoryInfo
+
     suspend fun stageAll(projectRoot: File)
 
-    /** Returns the new commit SHA (abbreviated or full). */
+    suspend fun stagePaths(projectRoot: File, paths: List<String>)
+
+    suspend fun unstagePaths(projectRoot: File, paths: List<String>)
+
+    /** Discard working-tree changes for [paths] (tracked restore + delete untracked). */
+    suspend fun discardPaths(projectRoot: File, paths: List<String>)
+
+    /** Hard-reset to HEAD and remove untracked files. */
+    suspend fun discardAll(projectRoot: File)
+
+    /** Soft-reset tip commit (`HEAD~1`); keeps file contents as local changes. */
+    suspend fun undoLastCommit(projectRoot: File)
+
+    /** Returns the new commit SHA. */
     suspend fun commit(
         projectRoot: File,
         message: String,
@@ -87,8 +105,29 @@ interface GitService {
         credentials: GitCredentials? = null,
     )
 
-    /** Merge [branchName] into the current branch. */
-    suspend fun merge(projectRoot: File, branchName: String)
+    /**
+     * Push [branch] to [remote] and set upstream tracking.
+     */
+    suspend fun pushSetUpstream(
+        projectRoot: File,
+        remote: String,
+        branch: String,
+        credentials: GitCredentials? = null,
+    )
+
+    suspend fun addRemote(
+        projectRoot: File,
+        name: String,
+        httpsUrl: String,
+    )
+
+    /**
+     * Merge [branchName] into the current branch.
+     * On conflicts, leaves the merge in progress and returns [GitMergeResult.conflicts] true.
+     */
+    suspend fun merge(projectRoot: File, branchName: String): GitMergeResult
+
+    suspend fun abortMerge(projectRoot: File)
 
     /**
      * Renames a branch. Local names are bare (`main`); remotes use `origin/branch`
@@ -100,6 +139,27 @@ interface GitService {
         newName: String,
         credentials: GitCredentials? = null,
     )
+
+    suspend fun readWorkingFile(projectRoot: File, relativePath: String): String
+
+    suspend fun writeWorkingFile(projectRoot: File, relativePath: String, content: String)
+
+    /** Append [pattern] to `.gitignore` (creates the file when missing). */
+    suspend fun appendGitignore(projectRoot: File, pattern: String)
+
+    /** Working-tree vs HEAD (or index) unified diff for one path. */
+    suspend fun diffWorkingTree(projectRoot: File, relativePath: String): List<GitDiffLineInfo>
+
+    /** Diff of [commitId] against its first parent (or empty tree). */
+    suspend fun diffCommit(
+        projectRoot: File,
+        commitId: String,
+        relativePath: String,
+    ): List<GitDiffLineInfo>
+
+    suspend fun log(projectRoot: File, maxCount: Int = 50): List<GitCommitInfo>
+
+    suspend fun commitFiles(projectRoot: File, commitId: String): List<GitCommitFileInfo>
 
     /** Normalizes a clone URL or `owner/repo` slug to an HTTPS GitHub URL. */
     fun validateCloneUrl(input: String): CloneUrlValidation
@@ -142,6 +202,7 @@ data class GitStatusSnapshot(
     val isClean: Boolean,
     val added: Set<String>,
     val changed: Set<String>,
+    val removed: Set<String>,
     val modified: Set<String>,
     val untracked: Set<String>,
     val conflicting: Set<String>,
