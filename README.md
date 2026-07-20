@@ -2,8 +2,6 @@
 
 Open-source, phone-first IDE for Android — create and manage projects, edit files, run cloud builds, and install APKs, all on device.
 
-**Repository:** [github.com/Al-Qassim/Android-Studio-Lite](https://github.com/Al-Qassim/Android-Studio-Lite)
-
 ## Features
 
 - **Projects** — create, list, open, delete; import/export ZIP
