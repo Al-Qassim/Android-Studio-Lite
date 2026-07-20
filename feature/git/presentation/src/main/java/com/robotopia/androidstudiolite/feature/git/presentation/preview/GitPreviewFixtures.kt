@@ -3,7 +3,6 @@ package com.robotopia.androidstudiolite.feature.git.presentation.preview
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.tooling.preview.Preview
 import com.robotopia.androidstudiolite.feature.auth.api.AuthSession
 import com.robotopia.androidstudiolite.feature.auth.model.AuthAccount
 import com.robotopia.androidstudiolite.feature.git.api.CloneUrlValidation
@@ -13,75 +12,20 @@ import com.robotopia.androidstudiolite.feature.git.api.GitBranchesSnapshot
 import com.robotopia.androidstudiolite.feature.git.api.GitCredentials
 import com.robotopia.androidstudiolite.feature.git.api.GitService
 import com.robotopia.androidstudiolite.feature.git.api.GitStatusSnapshot
-import com.robotopia.androidstudiolite.feature.git.presentation.clone.CloneProjectUiState
-import com.robotopia.androidstudiolite.feature.git.presentation.clone.ui.CloneProjectBody
+import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeFile
+import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeKind
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreen
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
+import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitTab
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
 import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun CloneIdlePreview() {
-    CloneProjectBody(
-        state = CloneProjectUiState(url = "owner/repo"),
-        onCancel = {},
-        onUrlChange = {},
-        onCloneClick = {},
-    )
-}
+internal const val GIT_PREVIEW_BG = 0xFF2B2D30
 
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
 @Composable
-private fun CloneErrorPreview() {
-    CloneProjectBody(
-        state = CloneProjectUiState(
-            url = "bad",
-            urlError = "Use https://github.com/owner/repo or owner/repo.",
-        ),
-        onCancel = {},
-        onUrlChange = {},
-        onCloneClick = {},
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun ProjectGitBranchesPreview() {
-    val scope = rememberCoroutineScope()
-    val context = remember {
-        ProjectGitScreenContext(
-            updateState = {},
-            gitService = PreviewGitService,
-            authSession = PreviewAuthSession,
-            projectRoot = File("/tmp/preview"),
-            onBack = {},
-            scope = scope,
-        )
-    }
-    val main = GitBranch("main", GitBranchKind.Local, isCurrent = true)
-    val feature = GitBranch("feature/login", GitBranchKind.Local)
-    val fix = GitBranch("fix/crash", GitBranchKind.Local)
-    context.ProjectGitScreen(
-        state = ProjectGitUiState(
-            isLoading = false,
-            currentBranch = "main",
-            recentBranches = listOf(main, feature),
-            localBranches = listOf(main, feature, fix),
-            remoteBranches = listOf(
-                GitBranch("origin/main", GitBranchKind.Remote),
-                GitBranch("origin/develop", GitBranchKind.Remote),
-            ),
-        ),
-        projectName = "MyApp",
-    )
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF2B2D30, widthDp = 360, heightDp = 640)
-@Composable
-private fun ProjectGitLoadErrorPreview() {
+internal fun PreviewProjectGit(state: ProjectGitUiState) {
     val scope = rememberCoroutineScope()
     val context = remember {
         ProjectGitScreenContext(
@@ -94,13 +38,30 @@ private fun ProjectGitLoadErrorPreview() {
         )
     }
     context.ProjectGitScreen(
-        state = ProjectGitUiState(
-            isLoading = false,
-            loadError = "Not a git repository.",
-        ),
+        state = state,
         projectName = "MyApp",
     )
 }
+
+internal fun sampleChangeFiles(): List<GitChangeFile> = listOf(
+    GitChangeFile("app/src/main/java/MainActivity.kt", GitChangeKind.Modified),
+    GitChangeFile("app/src/main/java/LoginScreen.kt", GitChangeKind.Added),
+    GitChangeFile("README.md", GitChangeKind.Modified),
+    GitChangeFile("scratch.tmp", GitChangeKind.Untracked, staged = false),
+    GitChangeFile("old/LegacyScreen.kt", GitChangeKind.Deleted),
+)
+
+internal fun mergeConflictsState(): ProjectGitUiState = ProjectGitUiState(
+    isLoading = false,
+    tab = ProjectGitTab.Changes,
+    currentBranch = "main",
+    mergeSourceBranch = "feature/login",
+    changeFiles = listOf(
+        GitChangeFile("app/src/main/java/Nav.kt", GitChangeKind.Conflict, staged = false),
+        GitChangeFile("app/src/main/java/Theme.kt", GitChangeKind.Conflict, staged = false),
+        GitChangeFile("README.md", GitChangeKind.Modified, staged = true),
+    ),
+)
 
 private object PreviewAuthSession : AuthSession {
     override fun observeAccount(): Flow<AuthAccount?> = flowOf(null)
@@ -130,9 +91,9 @@ private object PreviewGitService : GitService {
         authorEmail: String,
     ) = "abc"
     override suspend fun currentBranch(projectRoot: File) = "main"
-    override suspend fun createBranch(projectRoot: File, name: String) = Unit
+    override suspend fun createBranch(projectRoot: File, name: String, startPoint: String?) = Unit
     override suspend fun deleteBranch(projectRoot: File, name: String) = Unit
-    override suspend fun checkout(projectRoot: File, name: String) = Unit
+    override suspend fun checkout(projectRoot: File, name: String, force: Boolean) = Unit
     override suspend fun listBranches(projectRoot: File) = GitBranchesSnapshot(
         currentBranch = "main",
         recent = listOf(GitBranch("main", GitBranchKind.Local, isCurrent = true)),
@@ -144,6 +105,11 @@ private object PreviewGitService : GitService {
     override suspend fun pull(projectRoot: File, credentials: GitCredentials?) = Unit
     override suspend fun push(projectRoot: File, credentials: GitCredentials?) = Unit
     override suspend fun merge(projectRoot: File, branchName: String) = Unit
-    override suspend fun renameBranch(projectRoot: File, oldName: String, newName: String) = Unit
+    override suspend fun renameBranch(
+        projectRoot: File,
+        oldName: String,
+        newName: String,
+        credentials: GitCredentials?,
+    ) = Unit
     override fun validateCloneUrl(input: String) = CloneUrlValidation(errorMessage = "preview")
 }
