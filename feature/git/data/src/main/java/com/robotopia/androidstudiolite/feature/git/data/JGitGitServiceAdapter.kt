@@ -5,6 +5,7 @@ import com.robotopia.androidstudiolite.feature.git.api.CloneUrlValidation
 import com.robotopia.androidstudiolite.feature.git.api.GitBranch
 import com.robotopia.androidstudiolite.feature.git.api.GitBranchKind
 import com.robotopia.androidstudiolite.feature.git.api.GitBranchesSnapshot
+import com.robotopia.androidstudiolite.feature.git.api.GitCheckoutConflictException
 import com.robotopia.androidstudiolite.feature.git.api.GitCredentials
 import com.robotopia.androidstudiolite.feature.git.api.GitService
 import com.robotopia.androidstudiolite.feature.git.api.GitStatusSnapshot
@@ -17,9 +18,11 @@ import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
 import org.eclipse.jgit.api.MergeResult
+import org.eclipse.jgit.api.errors.CheckoutConflictException
 import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 
 /**
@@ -81,11 +84,20 @@ class JGitGitServiceAdapter : GitService {
         open(projectRoot).use { it.repository.branch }
     }
 
-    override suspend fun createBranch(projectRoot: File, name: String) = withRepoLock(projectRoot) {
+    override suspend fun createBranch(
+        projectRoot: File,
+        name: String,
+        startPoint: String?,
+    ) = withRepoLock(projectRoot) {
         val trimmed = requireBranchName(name)
         open(projectRoot).use { git ->
             try {
-                git.branchCreate().setName(trimmed).call()
+                val command = git.branchCreate().setName(trimmed)
+                val start = startPoint?.trim().orEmpty()
+                if (start.isNotEmpty()) {
+                    command.setStartPoint(start)
+                }
+                command.call()
             } catch (e: GitAPIException) {
                 throw AppException("Couldn't create that branch.", e)
             }
@@ -111,15 +123,24 @@ class JGitGitServiceAdapter : GitService {
         Unit
     }
 
-    override suspend fun checkout(projectRoot: File, name: String) = withRepoLock(projectRoot) {
+    override suspend fun checkout(
+        projectRoot: File,
+        name: String,
+        force: Boolean,
+    ) = withRepoLock(projectRoot) {
         open(projectRoot).use { git ->
             val repo = git.repository
             val remoteTracking = repo.findRef("refs/remotes/$name")
             val localCheckedOut = if (remoteTracking != null) {
-                checkoutRemoteTracking(git, name)
+                checkoutRemoteTracking(git, name, force)
             } else {
                 try {
-                    git.checkout().setName(name).call()
+                    git.checkout().setName(name).setForce(force).call()
+                } catch (e: CheckoutConflictException) {
+                    throw GitCheckoutConflictException(
+                        conflictingPaths = e.conflictingPaths.orEmpty().sorted(),
+                        cause = e,
+                    )
                 } catch (e: GitAPIException) {
                     throw AppException("Couldn't check out that branch.", e)
                 }
@@ -260,16 +281,24 @@ class JGitGitServiceAdapter : GitService {
         projectRoot: File,
         oldName: String,
         newName: String,
+        credentials: GitCredentials?,
     ) = withRepoLock(projectRoot) {
-        val trimmed = requireBranchName(newName)
         open(projectRoot).use { git ->
-            try {
-                git.branchRename()
-                    .setOldName(oldName)
-                    .setNewName(trimmed)
-                    .call()
-            } catch (e: GitAPIException) {
-                throw AppException("Couldn't rename that branch.", e)
+            val remoteTracking = git.repository.findRef("refs/remotes/$oldName")
+            if (remoteTracking != null) {
+                // Remote UI may pass `origin/foo` or bare `foo`; remote heads are short names.
+                val remoteShort = requireBranchName(newName.substringAfterLast('/'))
+                renameRemoteBranch(git, oldName, remoteShort, credentials)
+            } else {
+                val trimmedNew = requireBranchName(newName)
+                try {
+                    git.branchRename()
+                        .setOldName(oldName)
+                        .setNewName(trimmedNew)
+                        .call()
+                } catch (e: GitAPIException) {
+                    throw AppException("Couldn't rename that branch.", e)
+                }
             }
         }
         Unit
@@ -290,9 +319,52 @@ class JGitGitServiceAdapter : GitService {
         CloneUrlParser.validate(input)
 
     /**
+     * Renames [oldRemoteName] (`origin/feature`) to [newShortName] on the remote via push,
+     * then fetches with prune so local remote-tracking refs match.
+     */
+    private fun renameRemoteBranch(
+        git: Git,
+        oldRemoteName: String,
+        newShortName: String,
+        credentials: GitCredentials?,
+    ) {
+        val slash = oldRemoteName.indexOf('/')
+        if (slash <= 0 || slash == oldRemoteName.lastIndex) {
+            throw AppException("Couldn't rename that remote branch.")
+        }
+        val remote = oldRemoteName.substring(0, slash)
+        val oldShort = oldRemoteName.substring(slash + 1)
+        if (oldShort == newShortName) return
+        val tracking = git.repository.findRef("refs/remotes/$oldRemoteName")
+            ?: throw AppException("Couldn't find that remote branch.")
+        val objectId = tracking.objectId.name
+        try {
+            val create = git.push()
+                .setRemote(remote)
+                .setRefSpecs(RefSpec("$objectId:refs/heads/$newShortName"))
+            credentials?.let { create.setCredentialsProvider(it.toProvider()) }
+            create.call()
+
+            val delete = git.push()
+                .setRemote(remote)
+                .setRefSpecs(RefSpec(":refs/heads/$oldShort"))
+            credentials?.let { delete.setCredentialsProvider(it.toProvider()) }
+            delete.call()
+
+            val fetch = git.fetch()
+                .setRemote(remote)
+                .setRemoveDeletedRefs(true)
+            credentials?.let { fetch.setCredentialsProvider(it.toProvider()) }
+            fetch.call()
+        } catch (e: GitAPIException) {
+            throw AppException("Couldn't rename that remote branch.", e)
+        }
+    }
+
+    /**
      * @return local branch name that is now checked out
      */
-    private fun checkoutRemoteTracking(git: Git, remoteName: String): String {
+    private fun checkoutRemoteTracking(git: Git, remoteName: String, force: Boolean): String {
         val localName = remoteName.substringAfter('/')
         if (localName.isEmpty() || localName == remoteName) {
             throw AppException("Couldn't check out that remote branch.")
@@ -303,11 +375,17 @@ class JGitGitServiceAdapter : GitService {
             val command = git.checkout()
                 .setName(localName)
                 .setStartPoint(remoteName)
+                .setForce(force)
             if (!localExists) {
                 command.setCreateBranch(true)
                     .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
             }
             command.call()
+        } catch (e: CheckoutConflictException) {
+            throw GitCheckoutConflictException(
+                conflictingPaths = e.conflictingPaths.orEmpty().sorted(),
+                cause = e,
+            )
         } catch (e: GitAPIException) {
             throw AppException("Couldn't check out that remote branch.", e)
         }

@@ -25,4 +25,15 @@ class CloneUrlParserTest {
         val result = CloneUrlParser.validate("https://gitlab.com/foo/bar")
         assertFalse(result.isValid)
     }
+
+    @Test
+    fun prependsHttpsWhenSchemeMissing() {
+        val result = CloneUrlParser.validate("github.com/foo/bar")
+        assertTrue(result.isValid)
+        assertEquals("https://github.com/foo/bar.git", result.normalizedHttpsUrl)
+
+        val www = CloneUrlParser.validate("www.github.com/foo/bar.git")
+        assertTrue(www.isValid)
+        assertEquals("https://github.com/foo/bar.git", www.normalizedHttpsUrl)
+    }
 }

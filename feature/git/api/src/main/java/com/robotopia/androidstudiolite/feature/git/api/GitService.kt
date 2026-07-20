@@ -3,6 +3,15 @@ package com.robotopia.androidstudiolite.feature.git.api
 import java.io.File
 
 /**
+ * Checkout refused because local changes would be overwritten.
+ * Paths are relative to the project root. No stash — caller offers commit or discard.
+ */
+class GitCheckoutConflictException(
+    val conflictingPaths: List<String>,
+    cause: Throwable? = null,
+) : Exception("Local changes would be overwritten.", cause)
+
+/**
  * POC local Git surface (JGit). Not a full IDE SCM product yet.
  * Remotes use HTTPS; pass [GitCredentials] per network op — never embed tokens in remote URLs.
  */
@@ -23,7 +32,15 @@ interface GitService {
 
     suspend fun currentBranch(projectRoot: File): String
 
-    suspend fun createBranch(projectRoot: File, name: String)
+    /**
+     * Creates a local branch named [name].
+     * When [startPoint] is set (local or `origin/branch`), the new branch starts there.
+     */
+    suspend fun createBranch(
+        projectRoot: File,
+        name: String,
+        startPoint: String? = null,
+    )
 
     /** Deletes a local branch. Fails if [name] is the current branch. */
     suspend fun deleteBranch(projectRoot: File, name: String)
@@ -31,8 +48,16 @@ interface GitService {
     /**
      * Checks out [name]. Local names are bare (`main`); remotes use `origin/branch`.
      * Checking out a remote creates/updates a matching local branch when needed.
+     *
+     * Uncommitted changes that don't conflict are carried over. When checkout would
+     * overwrite local work, throws [GitCheckoutConflictException] unless [force] is true
+     * (discards conflicting local changes — no stash).
      */
-    suspend fun checkout(projectRoot: File, name: String)
+    suspend fun checkout(
+        projectRoot: File,
+        name: String,
+        force: Boolean = false,
+    )
 
     /** Local, remote-tracking, and recent (max 3, current first) branches. */
     suspend fun listBranches(projectRoot: File): GitBranchesSnapshot
@@ -65,10 +90,15 @@ interface GitService {
     /** Merge [branchName] into the current branch. */
     suspend fun merge(projectRoot: File, branchName: String)
 
+    /**
+     * Renames a branch. Local names are bare (`main`); remotes use `origin/branch`
+     * and are renamed on the remote (push new + delete old). [credentials] required for remotes.
+     */
     suspend fun renameBranch(
         projectRoot: File,
         oldName: String,
         newName: String,
+        credentials: GitCredentials? = null,
     )
 
     /** Normalizes a clone URL or `owner/repo` slug to an HTTPS GitHub URL. */

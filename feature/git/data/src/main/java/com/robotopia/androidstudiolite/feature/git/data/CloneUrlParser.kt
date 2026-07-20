@@ -11,14 +11,25 @@ internal object CloneUrlParser {
             return CloneUrlValidation(errorMessage = "Enter a GitHub URL or owner/repo.")
         }
 
+        val normalizedInput = ensureHttpsScheme(trimmed)
         val slug = when {
-            trimmed.matches(ownerRepo) -> trimmed.removeSuffix(".git")
-            else -> parseGithubHttps(trimmed)
+            normalizedInput.matches(ownerRepo) -> normalizedInput.removeSuffix(".git")
+            else -> parseGithubHttps(normalizedInput)
         } ?: return CloneUrlValidation(
             errorMessage = "Use https://github.com/owner/repo or owner/repo.",
         )
 
         return CloneUrlValidation(normalizedHttpsUrl = "https://github.com/$slug.git")
+    }
+
+    /** If the user omitted only the scheme for a github.com URL, prepend https://. */
+    private fun ensureHttpsScheme(raw: String): String {
+        if (raw.contains("://")) return raw
+        val lower = raw.lowercase()
+        if (lower.startsWith("github.com/") || lower.startsWith("www.github.com/")) {
+            return "https://$raw"
+        }
+        return raw
     }
 
     private fun parseGithubHttps(raw: String): String? {
