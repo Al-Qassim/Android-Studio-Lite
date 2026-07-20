@@ -1,6 +1,10 @@
 package com.robotopia.androidstudiolite.feature.git.data
 
 import com.robotopia.androidstudiolite.core.error.AppException
+import com.robotopia.androidstudiolite.feature.git.api.CloneUrlValidation
+import com.robotopia.androidstudiolite.feature.git.api.GitBranch
+import com.robotopia.androidstudiolite.feature.git.api.GitBranchKind
+import com.robotopia.androidstudiolite.feature.git.api.GitBranchesSnapshot
 import com.robotopia.androidstudiolite.feature.git.api.GitCredentials
 import com.robotopia.androidstudiolite.feature.git.api.GitService
 import com.robotopia.androidstudiolite.feature.git.api.GitStatusSnapshot
@@ -9,8 +13,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
+import org.eclipse.jgit.api.MergeResult
 import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
@@ -76,29 +82,91 @@ class JGitGitServiceAdapter : GitService {
     }
 
     override suspend fun createBranch(projectRoot: File, name: String) = withRepoLock(projectRoot) {
+        val trimmed = requireBranchName(name)
         open(projectRoot).use { git ->
-            git.branchCreate().setName(name).call()
+            try {
+                git.branchCreate().setName(trimmed).call()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't create that branch.", e)
+            }
+        }
+        Unit
+    }
+
+    override suspend fun deleteBranch(projectRoot: File, name: String) = withRepoLock(projectRoot) {
+        val trimmed = requireBranchName(name)
+        open(projectRoot).use { git ->
+            if (git.repository.branch == trimmed) {
+                throw AppException("Switch to another branch before deleting this one.")
+            }
+            try {
+                git.branchDelete()
+                    .setBranchNames(trimmed)
+                    .setForce(true)
+                    .call()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't delete that branch.", e)
+            }
         }
         Unit
     }
 
     override suspend fun checkout(projectRoot: File, name: String) = withRepoLock(projectRoot) {
         open(projectRoot).use { git ->
-            git.checkout().setName(name).call()
+            val repo = git.repository
+            val remoteTracking = repo.findRef("refs/remotes/$name")
+            val localCheckedOut = if (remoteTracking != null) {
+                checkoutRemoteTracking(git, name)
+            } else {
+                try {
+                    git.checkout().setName(name).call()
+                } catch (e: GitAPIException) {
+                    throw AppException("Couldn't check out that branch.", e)
+                }
+                name
+            }
+            RecentBranchesStore.record(repo.directory, localCheckedOut)
         }
         Unit
     }
 
-    override suspend fun listBranches(projectRoot: File): List<String> = withRepoLock(projectRoot) {
-        open(projectRoot).use { git ->
-            git.branchList()
-                .setListMode(ListBranchCommand.ListMode.ALL)
-                .call()
-                .map { it.name.removePrefix("refs/heads/").removePrefix("refs/remotes/") }
-                .distinct()
-                .sorted()
+    override suspend fun listBranches(projectRoot: File): GitBranchesSnapshot =
+        withRepoLock(projectRoot) {
+            open(projectRoot).use { git ->
+                val repo = git.repository
+                val current = repo.branch
+                val localNames = git.branchList()
+                    .call()
+                    .map { it.name.removePrefix("refs/heads/") }
+                    .distinct()
+                    .sorted()
+                val remoteNames = git.branchList()
+                    .setListMode(ListBranchCommand.ListMode.REMOTE)
+                    .call()
+                    .map { it.name.removePrefix("refs/remotes/") }
+                    .filter { !it.endsWith("/HEAD") && !it.endsWith("HEAD") }
+                    .distinct()
+                    .sorted()
+
+                val local = localNames.map { name ->
+                    GitBranch(
+                        name = name,
+                        kind = GitBranchKind.Local,
+                        isCurrent = name == current,
+                    )
+                }
+                val remote = remoteNames.map { name ->
+                    GitBranch(name = name, kind = GitBranchKind.Remote)
+                }
+                val recent = buildRecent(repo.directory, current, localNames.toSet())
+                GitBranchesSnapshot(
+                    currentBranch = current,
+                    recent = recent,
+                    local = local,
+                    remote = remote,
+                )
+            }
         }
-    }
 
     override suspend fun clone(
         httpsUrl: String,
@@ -131,9 +199,16 @@ class JGitGitServiceAdapter : GitService {
         credentials: GitCredentials?,
     ) = withRepoLock(projectRoot) {
         open(projectRoot).use { git ->
-            val command = git.fetch()
-            credentials?.let { command.setCredentialsProvider(it.toProvider()) }
-            command.call()
+            try {
+                val command = git.fetch()
+                    .setCheckFetchedObjects(true)
+                credentials?.let { command.setCredentialsProvider(it.toProvider()) }
+                command.call()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't fetch from the remote.", e)
+            } catch (e: Exception) {
+                throw AppException("Couldn't fetch from the remote.", e)
+            }
         }
         Unit
     }
@@ -162,6 +237,103 @@ class JGitGitServiceAdapter : GitService {
         Unit
     }
 
+    override suspend fun merge(projectRoot: File, branchName: String) = withRepoLock(projectRoot) {
+        open(projectRoot).use { git ->
+            val ref = git.repository.findRef(branchName)
+                ?: git.repository.findRef("refs/heads/$branchName")
+                ?: git.repository.findRef("refs/remotes/$branchName")
+                ?: throw AppException("Couldn't find that branch.")
+            val result = git.merge().include(ref).call()
+            when (result.mergeStatus) {
+                MergeResult.MergeStatus.CONFLICTING ->
+                    throw AppException("Merge has conflicts. Resolve them in the files, then commit.")
+                MergeResult.MergeStatus.FAILED,
+                MergeResult.MergeStatus.ABORTED,
+                MergeResult.MergeStatus.NOT_SUPPORTED,
+                -> throw AppException("Couldn't merge that branch.")
+                else -> Unit
+            }
+        }
+    }
+
+    override suspend fun renameBranch(
+        projectRoot: File,
+        oldName: String,
+        newName: String,
+    ) = withRepoLock(projectRoot) {
+        val trimmed = requireBranchName(newName)
+        open(projectRoot).use { git ->
+            try {
+                git.branchRename()
+                    .setOldName(oldName)
+                    .setNewName(trimmed)
+                    .call()
+            } catch (e: GitAPIException) {
+                throw AppException("Couldn't rename that branch.", e)
+            }
+        }
+        Unit
+    }
+
+    private fun requireBranchName(name: String): String {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) {
+            throw AppException("Enter a branch name.")
+        }
+        if (trimmed.contains(' ') || trimmed.contains('\\')) {
+            throw AppException("Branch names can't contain spaces or backslashes.")
+        }
+        return trimmed
+    }
+
+    override fun validateCloneUrl(input: String): CloneUrlValidation =
+        CloneUrlParser.validate(input)
+
+    /**
+     * @return local branch name that is now checked out
+     */
+    private fun checkoutRemoteTracking(git: Git, remoteName: String): String {
+        val localName = remoteName.substringAfter('/')
+        if (localName.isEmpty() || localName == remoteName) {
+            throw AppException("Couldn't check out that remote branch.")
+        }
+        val repo = git.repository
+        val localExists = repo.findRef("refs/heads/$localName") != null
+        try {
+            val command = git.checkout()
+                .setName(localName)
+                .setStartPoint(remoteName)
+            if (!localExists) {
+                command.setCreateBranch(true)
+                    .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+            }
+            command.call()
+        } catch (e: GitAPIException) {
+            throw AppException("Couldn't check out that remote branch.", e)
+        }
+        return localName
+    }
+
+    private fun buildRecent(
+        gitDir: File,
+        current: String,
+        localNames: Set<String>,
+    ): List<GitBranch> {
+        val ordered = buildList {
+            if (current in localNames) add(current)
+            for (name in RecentBranchesStore.read(gitDir)) {
+                if (name != current && name in localNames) add(name)
+            }
+        }.take(RECENT_MAX)
+        return ordered.map { name ->
+            GitBranch(
+                name = name,
+                kind = GitBranchKind.Local,
+                isCurrent = name == current,
+            )
+        }
+    }
+
     private fun open(projectRoot: File): Git {
         val gitDir = File(projectRoot, ".git")
         if (!gitDir.exists()) {
@@ -173,6 +345,10 @@ class JGitGitServiceAdapter : GitService {
             .findGitDir(projectRoot)
             .build()
         return Git(repository)
+    }
+
+    private companion object {
+        const val RECENT_MAX = 3
     }
 
     private suspend fun <T> withRepoLock(projectRoot: File, block: () -> T): T {

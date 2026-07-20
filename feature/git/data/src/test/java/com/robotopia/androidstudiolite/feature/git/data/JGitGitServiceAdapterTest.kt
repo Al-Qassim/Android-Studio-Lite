@@ -59,8 +59,27 @@ class JGitGitServiceAdapterTest {
             authorEmail = "poc@androidstudiolite.local",
         )
 
-        val branches = git.listBranches(root)
-        assertTrue(branches.any { it.contains("feature/poc") })
-        assertTrue(branches.any { it == "master" || it == "main" })
+        val afterCheckout = git.listBranches(root)
+        assertTrue(afterCheckout.local.any { it.name == "feature/poc" })
+        assertTrue(afterCheckout.local.any { it.name == "master" || it.name == "main" })
+        assertEquals("feature/poc", afterCheckout.recent.first().name)
+        assertTrue(afterCheckout.recent.first().isCurrent)
+        assertTrue(afterCheckout.recent.size <= 3)
+
+        git.renameBranch(root, "feature/poc", "feature/renamed")
+        assertEquals("feature/renamed", git.currentBranch(root))
+
+        git.checkout(root, "master")
+        git.merge(root, "feature/renamed")
+        assertTrue(File(root, "note.txt").isFile)
+
+        val recent = git.listBranches(root).recent
+        assertEquals("master", recent.first().name)
+        assertTrue(recent.any { it.name == "feature/renamed" } || recent.size == 1)
+
+        git.createBranch(root, "to-delete")
+        assertTrue(git.listBranches(root).local.any { it.name == "to-delete" })
+        git.deleteBranch(root, "to-delete")
+        assertFalse(git.listBranches(root).local.any { it.name == "to-delete" })
     }
 }
