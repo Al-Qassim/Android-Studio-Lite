@@ -2,8 +2,12 @@ package com.robotopia.androidstudiolite.feature.git.presentation.project.logic
 
 import com.robotopia.androidstudiolite.core.error.userMessageOrNull
 import com.robotopia.androidstudiolite.feature.git.api.GitBranch
+import com.robotopia.androidstudiolite.feature.git.api.GitBranchKind
+import com.robotopia.androidstudiolite.feature.git.api.GitCheckoutConflictException
 import com.robotopia.androidstudiolite.feature.git.presentation.logic.credentialsOrNull
+import com.robotopia.androidstudiolite.feature.git.presentation.project.CheckoutOverwritePrompt
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
+import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitTab
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -20,7 +24,27 @@ fun ProjectGitScreenContext.requestFetch() {
 }
 
 fun ProjectGitScreenContext.requestCheckout(branch: GitBranch) {
-    scope.launch { checkout(branch.name) }
+    scope.launch { checkout(branch.name, force = false) }
+}
+
+fun ProjectGitScreenContext.dismissCheckoutOverwrite() {
+    updateState { copy(checkoutOverwrite = null) }
+}
+
+/** Send the user to Changes to commit; they can retry checkout afterward. */
+fun ProjectGitScreenContext.commitBeforeCheckout() {
+    updateState {
+        copy(
+            checkoutOverwrite = null,
+            tab = ProjectGitTab.Changes,
+            menuBranch = null,
+            menuBranchKey = null,
+        )
+    }
+}
+
+fun ProjectGitScreenContext.requestDiscardAndCheckout(targetBranch: String) {
+    scope.launch { checkout(targetBranch, force = true) }
 }
 
 fun ProjectGitScreenContext.requestMerge(branchName: String) {
@@ -31,28 +55,33 @@ fun ProjectGitScreenContext.requestRename(oldName: String, newName: String) {
     scope.launch { renameBranch(oldName, newName) }
 }
 
-fun ProjectGitScreenContext.requestCreateBranch(name: String) {
-    scope.launch { createBranch(name) }
+fun ProjectGitScreenContext.requestCreateBranch(name: String, startPoint: String?) {
+    scope.launch { createBranch(name, startPoint) }
 }
 
 fun ProjectGitScreenContext.requestDeleteBranch(branch: String) {
     scope.launch { deleteBranch(branch) }
 }
 
-fun ProjectGitScreenContext.openBranchMenu(branch: GitBranch) {
-    updateState { copy(menuBranch = branch, actionError = null) }
+fun ProjectGitScreenContext.openBranchMenu(branch: GitBranch, rowKey: String) {
+    updateState { copy(menuBranch = branch, menuBranchKey = rowKey, actionError = null) }
 }
 
 fun ProjectGitScreenContext.dismissBranchMenu() {
-    updateState { copy(menuBranch = null) }
+    updateState { copy(menuBranch = null, menuBranchKey = null) }
 }
 
 fun ProjectGitScreenContext.openRename(branch: GitBranch) {
+    val shortName = when (branch.kind) {
+        GitBranchKind.Remote -> branch.name.substringAfter('/')
+        GitBranchKind.Local -> branch.name
+    }
     updateState {
         copy(
             menuBranch = null,
+            menuBranchKey = null,
             renameBranch = branch.name,
-            renameValue = branch.name,
+            renameValue = shortName,
             renameError = null,
         )
     }
@@ -70,7 +99,12 @@ fun ProjectGitScreenContext.setRenameValue(value: String) {
 
 fun ProjectGitScreenContext.openMergeConfirm(branch: GitBranch) {
     updateState {
-        copy(menuBranch = null, mergeConfirmBranch = branch.name, actionError = null)
+        copy(
+            menuBranch = null,
+            menuBranchKey = null,
+            mergeConfirmBranch = branch.name,
+            actionError = null,
+        )
     }
 }
 
@@ -78,10 +112,13 @@ fun ProjectGitScreenContext.dismissMergeConfirm() {
     updateState { copy(mergeConfirmBranch = null) }
 }
 
-fun ProjectGitScreenContext.openCreateBranch() {
+fun ProjectGitScreenContext.openCreateBranch(from: GitBranch) {
     updateState {
         copy(
+            menuBranch = null,
+            menuBranchKey = null,
             showCreateBranch = true,
+            createBranchFrom = from.name,
             createBranchValue = "",
             createBranchError = null,
             actionError = null,
@@ -91,7 +128,12 @@ fun ProjectGitScreenContext.openCreateBranch() {
 
 fun ProjectGitScreenContext.dismissCreateBranch() {
     updateState {
-        copy(showCreateBranch = false, createBranchValue = "", createBranchError = null)
+        copy(
+            showCreateBranch = false,
+            createBranchFrom = null,
+            createBranchValue = "",
+            createBranchError = null,
+        )
     }
 }
 
@@ -101,7 +143,12 @@ fun ProjectGitScreenContext.setCreateBranchValue(value: String) {
 
 fun ProjectGitScreenContext.openDeleteConfirm(branch: GitBranch) {
     updateState {
-        copy(menuBranch = null, deleteConfirmBranch = branch.name, actionError = null)
+        copy(
+            menuBranch = null,
+            menuBranchKey = null,
+            deleteConfirmBranch = branch.name,
+            actionError = null,
+        )
     }
 }
 
@@ -131,10 +178,47 @@ suspend fun ProjectGitScreenContext.fetch() {
     }
 }
 
-suspend fun ProjectGitScreenContext.checkout(branchName: String) {
-    updateState { copy(menuBranch = null) }
-    runBusy("Checked out $branchName.") {
-        gitService.checkout(projectRoot, branchName)
+suspend fun ProjectGitScreenContext.checkout(branchName: String, force: Boolean) {
+    updateState {
+        copy(
+            menuBranch = null,
+            menuBranchKey = null,
+            checkoutOverwrite = null,
+        )
+    }
+    updateState { copy(isBusy = true, actionError = null) }
+    try {
+        gitService.checkout(projectRoot, branchName, force)
+        refreshBranches(showLoading = false)
+        updateState {
+            copy(
+                isBusy = false,
+                toastMessage = if (force) {
+                    "Discarded local changes and checked out $branchName."
+                } else {
+                    "Checked out $branchName."
+                },
+            )
+        }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: GitCheckoutConflictException) {
+        updateState {
+            copy(
+                isBusy = false,
+                checkoutOverwrite = CheckoutOverwritePrompt(
+                    targetBranch = branchName,
+                    conflictingPaths = e.conflictingPaths,
+                ),
+            )
+        }
+    } catch (e: Exception) {
+        updateState {
+            copy(
+                isBusy = false,
+                actionError = e.userMessageOrNull(TAG) ?: GENERIC_ERROR,
+            )
+        }
     }
 }
 
@@ -152,21 +236,31 @@ suspend fun ProjectGitScreenContext.renameBranch(oldName: String, newName: Strin
         return
     }
     runBusy("Renamed branch.") {
-        gitService.renameBranch(projectRoot, oldName, trimmed)
+        gitService.renameBranch(
+            projectRoot,
+            oldName,
+            trimmed,
+            credentialsOrNull(authSession),
+        )
         updateState { copy(renameBranch = null, renameValue = "", renameError = null) }
     }
 }
 
-suspend fun ProjectGitScreenContext.createBranch(name: String) {
+suspend fun ProjectGitScreenContext.createBranch(name: String, startPoint: String?) {
     val trimmed = name.trim()
     if (trimmed.isEmpty()) {
         updateState { copy(createBranchError = "Enter a branch name.") }
         return
     }
     runBusy("Created $trimmed.") {
-        gitService.createBranch(projectRoot, trimmed)
+        gitService.createBranch(projectRoot, trimmed, startPoint)
         updateState {
-            copy(showCreateBranch = false, createBranchValue = "", createBranchError = null)
+            copy(
+                showCreateBranch = false,
+                createBranchFrom = null,
+                createBranchValue = "",
+                createBranchError = null,
+            )
         }
     }
 }

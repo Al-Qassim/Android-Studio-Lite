@@ -3,6 +3,11 @@ package com.robotopia.androidstudiolite.feature.git.presentation.project.logic
 import com.robotopia.androidstudiolite.core.error.userMessageOrNull
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
+
+fun ProjectGitScreenContext.requestRetryLoad() {
+    scope.launch { refreshBranches() }
+}
 
 suspend fun ProjectGitScreenContext.refreshBranches(showLoading: Boolean = true) {
     if (showLoading) {
