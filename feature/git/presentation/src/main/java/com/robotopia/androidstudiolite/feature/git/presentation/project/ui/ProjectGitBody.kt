@@ -35,6 +35,7 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectG
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitTab
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openBranchMenu
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openPublish
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestFetch
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestPull
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestPush
@@ -63,6 +64,10 @@ internal fun ProjectGitScreenContext.ProjectGitBody(state: ProjectGitUiState) {
 
         state.selectedCommit != null -> {
             ProjectGitCommitDetailBody(state)
+        }
+
+        state.showPublish -> {
+            ProjectGitPublishBody(state)
         }
 
         state.loadError != null -> {
@@ -125,39 +130,58 @@ internal fun ProjectGitScreenContext.ProjectGitBranchesBody(state: ProjectGitUiS
                     text = "Current branch: ${state.currentBranch}",
                     style = Typography.BodyStrong.copy(color = Theme.colors.Text),
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Button(
-                        label = "Fetch",
-                        onClick = { requestFetch() },
-                        variant = if (state.isBusy) {
-                            ButtonVariant.Disabled
-                        } else {
-                            ButtonVariant.Secondary
-                        },
-                        modifier = Modifier.weight(1f),
+                if (state.hasRemote && (state.aheadCount > 0 || state.behindCount > 0)) {
+                    BasicText(
+                        text = syncStatusLabel(state.aheadCount, state.behindCount),
+                        style = Typography.Caption.copy(color = Theme.colors.Muted),
                     )
+                }
+                if (state.hasRemote) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Button(
+                            label = "Fetch",
+                            onClick = { requestFetch() },
+                            variant = if (state.isBusy) {
+                                ButtonVariant.Disabled
+                            } else {
+                                ButtonVariant.Secondary
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        Button(
+                            label = "Pull",
+                            onClick = { requestPull() },
+                            variant = if (state.isBusy) {
+                                ButtonVariant.Disabled
+                            } else {
+                                ButtonVariant.Secondary
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        Button(
+                            label = "Push",
+                            onClick = { requestPush() },
+                            variant = if (state.isBusy) {
+                                ButtonVariant.Disabled
+                            } else {
+                                ButtonVariant.Secondary
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                } else {
                     Button(
-                        label = "Pull",
-                        onClick = { requestPull() },
+                        label = "Publish on GitHub",
+                        onClick = { openPublish() },
                         variant = if (state.isBusy) {
                             ButtonVariant.Disabled
                         } else {
                             ButtonVariant.Secondary
                         },
-                        modifier = Modifier.weight(1f),
-                    )
-                    Button(
-                        label = "Push",
-                        onClick = { requestPush() },
-                        variant = if (state.isBusy) {
-                            ButtonVariant.Disabled
-                        } else {
-                            ButtonVariant.Secondary
-                        },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 if (state.actionError != null) {
@@ -237,6 +261,13 @@ private fun EmptyHint(text: String) {
         style = Typography.Caption.copy(color = Theme.colors.Muted2),
         modifier = Modifier.padding(vertical = 4.dp),
     )
+}
+
+private fun syncStatusLabel(ahead: Int, behind: Int): String = when {
+    ahead > 0 && behind > 0 -> "$ahead ahead · $behind behind"
+    ahead > 0 -> "$ahead ahead"
+    behind > 0 -> "$behind behind"
+    else -> "Up to date with origin"
 }
 
 @Composable

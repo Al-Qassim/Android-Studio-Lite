@@ -24,6 +24,7 @@ import com.robotopia.androidstudiolite.feature.git.api.GitService
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.clearToast
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.closeChangeDiff
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.closeCommitDetail
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissPublish
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.refreshBranches
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ui.ProjectGitBody
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ui.ProjectGitDialogs
@@ -81,10 +82,12 @@ internal fun ProjectGitScreenContext.ProjectGitScreen(
 
     val showingDiff = state.selectedDiffPath != null
     val showingCommit = state.selectedCommit != null
+    val showingPublish = state.showPublish
     BackHandler {
         when {
             showingDiff -> closeChangeDiff()
             showingCommit -> closeCommitDetail()
+            showingPublish -> dismissPublish()
             else -> onBack()
         }
     }
@@ -105,6 +108,12 @@ internal fun ProjectGitScreenContext.ProjectGitScreen(
                         TopBarBackTitle(
                             title = state.selectedCommit?.shortId ?: "Commit",
                             onBackClick = { closeCommitDetail() },
+                        )
+                    }
+                    showingPublish -> {
+                        TopBarBackTitle(
+                            title = "Publish to ${state.publishProviderName}",
+                            onBackClick = { dismissPublish() },
                         )
                     }
                     else -> {
@@ -136,8 +145,8 @@ internal fun ProjectGitScreenContext.ProjectGitScreen(
             }
         }
 
-        // Init already shows busy on its primary button — no full-screen overlay there.
-        if (state.isBusy && !state.needsInit) {
+        // Init / Publish show busy on their primary button — no full-screen overlay there.
+        if (state.isBusy && !state.needsInit && !state.showPublish) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

@@ -24,6 +24,7 @@ private fun BranchesPopulatedPreview() {
                 GitBranch("origin/main", GitBranchKind.Remote),
                 GitBranch("origin/develop", GitBranchKind.Remote),
             ),
+            hasRemote = true,
             changeFiles = sampleChangeFiles(),
         ),
     )
@@ -41,6 +42,7 @@ private fun BranchesEmptyRemotePreview() {
             recentBranches = listOf(main),
             localBranches = listOf(main),
             remoteBranches = emptyList(),
+            hasRemote = true,
         ),
     )
 }
@@ -56,6 +58,7 @@ private fun BranchesSyncBusyPreview() {
             currentBranch = "main",
             recentBranches = listOf(main),
             localBranches = listOf(main),
+            hasRemote = true,
             isBusy = true,
         ),
     )
@@ -72,6 +75,7 @@ private fun BranchesPushFailedPreview() {
             currentBranch = "main",
             recentBranches = listOf(main),
             localBranches = listOf(main),
+            hasRemote = true,
             actionError = "Push rejected. Pull and retry.",
         ),
     )
@@ -107,6 +111,7 @@ private fun FlowRenameRemotePreview() {
             recentBranches = listOf(main),
             localBranches = listOf(main),
             remoteBranches = listOf(GitBranch("origin/develop", GitBranchKind.Remote)),
+            hasRemote = true,
             renameBranch = "origin/develop",
             renameValue = "develop",
         ),
