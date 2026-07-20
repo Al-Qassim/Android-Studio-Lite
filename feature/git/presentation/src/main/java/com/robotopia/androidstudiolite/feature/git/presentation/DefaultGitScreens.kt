@@ -43,6 +43,7 @@ class DefaultGitScreens(
         projectRoot: File,
         projectName: String,
         onBack: () -> Unit,
+        onOpenFile: (relativePath: String) -> Unit,
     ) {
         var showConnect by remember { mutableStateOf(false) }
         if (showConnect) {
@@ -59,6 +60,7 @@ class DefaultGitScreens(
                 projectName = projectName,
                 onBack = onBack,
                 onConnectAccount = { showConnect = true },
+                onOpenFile = onOpenFile,
             )
         }
     }

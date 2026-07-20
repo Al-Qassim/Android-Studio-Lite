@@ -42,8 +42,9 @@ fun ProjectGitScreenContext.toggleChangeStaged(path: String) {
             throw e
         } catch (e: Exception) {
             refreshProjectGit(showLoading = false)
+            val message = e.userMessageOrNull(TAG) ?: "Couldn't update staging."
             updateState {
-                copy(actionError = e.userMessageOrNull(TAG) ?: "Couldn't update staging.")
+                copy(actionError = message, toastMessage = message)
             }
         }
     }
@@ -68,6 +69,7 @@ fun ProjectGitScreenContext.openChangeDiff(file: GitChangeFile, state: ProjectGi
                 conflictText = "",
                 conflictLinePaint = emptyList(),
                 diffLines = emptyList(),
+                actionError = null,
             )
         }
         try {
@@ -88,10 +90,12 @@ fun ProjectGitScreenContext.openChangeDiff(file: GitChangeFile, state: ProjectGi
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            val message = e.userMessageOrNull(TAG) ?: "Couldn't open that diff."
             updateState {
                 copy(
                     isDiffLoading = false,
-                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't open that diff.",
+                    actionError = message,
+                    toastMessage = message,
                     selectedDiffPath = null,
                 )
             }
@@ -111,6 +115,12 @@ fun ProjectGitScreenContext.closeChangeDiff() {
             conflictLinePaint = emptyList(),
         )
     }
+}
+
+/** Leave Project Git and open [path] in the editor. */
+fun ProjectGitScreenContext.requestOpenWorkingFile(path: String) {
+    updateState { copy(changeFileMenuPath = null) }
+    onOpenFile(path)
 }
 
 fun ProjectGitScreenContext.requestInitRepository() {

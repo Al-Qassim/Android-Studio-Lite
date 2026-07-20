@@ -69,6 +69,7 @@ class DefaultFilesScreens(
                         projectRoot = File(root.absolutePath),
                         projectName = projectName,
                         onBack = { route = FilesRoute.Browser },
+                        onOpenFile = onOpenFile,
                     )
                 }
             }

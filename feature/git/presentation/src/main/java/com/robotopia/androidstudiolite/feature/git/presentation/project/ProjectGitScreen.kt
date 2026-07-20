@@ -46,6 +46,7 @@ internal fun ProjectGitScreen(
     projectName: String,
     onBack: () -> Unit,
     onConnectAccount: () -> Unit,
+    onOpenFile: (relativePath: String) -> Unit,
 ) {
     val viewModel: ProjectGitViewModel = koinViewModel(key = projectRoot.absolutePath)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -59,6 +60,7 @@ internal fun ProjectGitScreen(
         projectRoot,
         onBack,
         onConnectAccount,
+        onOpenFile,
         context,
     ) {
         ProjectGitScreenContext(
@@ -69,6 +71,7 @@ internal fun ProjectGitScreen(
             projectRoot = projectRoot,
             onBack = onBack,
             onConnectAccount = onConnectAccount,
+            onOpenFile = onOpenFile,
             openUrl = { url ->
                 runCatching {
                     context.startActivity(

@@ -35,6 +35,7 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.ac
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.acceptConflictTheirs
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.conflictHighlightTransformation
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.markConflictResolvedManually
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestOpenWorkingFile
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.setConflictText
 
 /**
@@ -91,6 +92,21 @@ internal fun ProjectGitScreenContext.ProjectGitDiffBody(state: ProjectGitUiState
                         state.diffLines.forEach { line ->
                             DiffEditorLine(line = line)
                         }
+                    }
+                    val openPath = state.selectedDiffPath
+                    if (openPath != null) {
+                        Button(
+                            label = "Open file",
+                            onClick = { requestOpenWorkingFile(openPath) },
+                            variant = if (state.isBusy) {
+                                ButtonVariant.Disabled
+                            } else {
+                                ButtonVariant.Secondary
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                        )
                     }
                 }
             }

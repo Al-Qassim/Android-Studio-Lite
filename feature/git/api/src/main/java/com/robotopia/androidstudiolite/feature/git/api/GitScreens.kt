@@ -16,5 +16,7 @@ interface GitScreens {
         projectRoot: File,
         projectName: String,
         onBack: () -> Unit,
+        /** Open a project-relative path in the editor (exits Project Git). */
+        onOpenFile: (relativePath: String) -> Unit,
     )
 }

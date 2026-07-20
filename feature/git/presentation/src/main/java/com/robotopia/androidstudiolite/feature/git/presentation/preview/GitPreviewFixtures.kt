@@ -48,6 +48,7 @@ internal fun PreviewProjectGit(state: ProjectGitUiState) {
             projectRoot = File("/tmp/preview"),
             onBack = {},
             onConnectAccount = {},
+            onOpenFile = {},
             openUrl = {},
             scope = scope,
         )

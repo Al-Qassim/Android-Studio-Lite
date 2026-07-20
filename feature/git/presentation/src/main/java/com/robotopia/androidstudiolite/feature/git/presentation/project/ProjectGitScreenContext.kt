@@ -14,6 +14,7 @@ class ProjectGitScreenContext(
     val projectRoot: File,
     val onBack: () -> Unit,
     val onConnectAccount: () -> Unit,
+    val onOpenFile: (relativePath: String) -> Unit,
     val openUrl: (String) -> Unit,
     val scope: CoroutineScope,
 )

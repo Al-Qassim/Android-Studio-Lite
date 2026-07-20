@@ -50,6 +50,7 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.op
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.openDiscardFileConfirm
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestCommit
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestIgnorePath
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestOpenWorkingFile
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.setCommitMessage
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.toggleChangeStaged
 
@@ -92,6 +93,12 @@ internal fun ProjectGitScreenContext.ProjectGitChangesBody(state: ProjectGitUiSt
                     currentBranch = state.currentBranch,
                     sourceBranch = state.mergeSourceBranch,
                     unresolvedCount = state.unresolvedConflictCount,
+                )
+            }
+            if (state.actionError != null) {
+                BasicText(
+                    text = state.actionError,
+                    style = Typography.Caption.copy(color = Theme.colors.Danger),
                 )
             }
             if (state.changeFiles.isEmpty()) {
@@ -276,6 +283,14 @@ private fun ProjectGitScreenContext.ChangeFileOverflowMenu(file: GitChangeFile) 
             file.kind == GitChangeKind.Modified
         Menu(
             items = buildList {
+                if (file.kind != GitChangeKind.Deleted) {
+                    add(
+                        MenuItem.Button(
+                            label = "Open file",
+                            onClick = { requestOpenWorkingFile(file.path) },
+                        ),
+                    )
+                }
                 add(
                     MenuItem.Button(
                         label = "Discard",
