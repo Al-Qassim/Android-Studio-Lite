@@ -10,6 +10,11 @@ import org.koin.dsl.module
 
 val filesDiModule = module {
     single<FileExplorerService> { DefaultFileExplorerService() }
-    single<FilesScreens> { DefaultFilesScreens(fileExplorerService = get()) }
+    single<FilesScreens> {
+        DefaultFilesScreens(
+            fileExplorerService = get(),
+            gitScreens = get(),
+        )
+    }
     viewModelOf(::FileBrowserViewModel)
 }

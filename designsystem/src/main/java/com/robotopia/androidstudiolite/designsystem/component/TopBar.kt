@@ -107,12 +107,13 @@ fun TopBarBackTitle(
     }
 }
 
-/** Back + title + run + add — file browser chrome (path lives in [PathBar] below). */
+/** Back + title + run + optional Git + add — file browser chrome (path lives in [PathBar] below). */
 @Composable
 fun TopBarBackTitleAdd(
     title: String,
     onBackClick: () -> Unit = {},
     onRunClick: (() -> Unit)? = null,
+    onGitClick: (() -> Unit)? = null,
     onAddClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -142,6 +143,13 @@ fun TopBarBackTitleAdd(
                 onClick = onRunClick,
                 variant = IconButtonVariant.Ghost,
                 icon = { _, size -> IconRun(tint = Theme.colors.Run, size = size) },
+            )
+        }
+        if (onGitClick != null) {
+            Button(
+                label = "Git",
+                onClick = onGitClick,
+                variant = ButtonVariant.TextAction,
             )
         }
         IconButton(

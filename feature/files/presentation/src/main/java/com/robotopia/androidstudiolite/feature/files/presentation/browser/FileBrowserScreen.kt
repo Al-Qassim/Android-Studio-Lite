@@ -38,6 +38,7 @@ internal fun FileBrowserScreenContext.FileBrowserScreen(state: FileBrowserUiStat
                 title = state.projectName,
                 onBackClick = { navigateUp(state) },
                 onRunClick = onRun,
+                onGitClick = onOpenGit,
                 onAddClick = { openAddMenu() },
             )
         },

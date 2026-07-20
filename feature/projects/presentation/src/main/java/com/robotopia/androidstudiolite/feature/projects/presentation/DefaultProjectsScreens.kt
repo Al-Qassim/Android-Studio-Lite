@@ -10,16 +10,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.robotopia.androidstudiolite.designsystem.animation.navFade
 import com.robotopia.androidstudiolite.feature.buildapk.api.BuildScreens
+import com.robotopia.androidstudiolite.feature.git.api.GitScreens
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectService
 import com.robotopia.androidstudiolite.feature.projects.api.ProjectsScreens
 import com.robotopia.androidstudiolite.feature.projects.model.Project
-import com.robotopia.androidstudiolite.feature.projects.model.ProjectId
 import com.robotopia.androidstudiolite.feature.projects.presentation.create.CreateProjectScreen
 import com.robotopia.androidstudiolite.feature.projects.presentation.list.ProjectsListScreen
 
 class DefaultProjectsScreens(
     private val projectService: ProjectService,
     private val buildScreens: BuildScreens,
+    private val gitScreens: GitScreens,
 ) : ProjectsScreens {
 
     @Composable
@@ -31,6 +32,7 @@ class DefaultProjectsScreens(
         ProjectsNavHost(
             projectService = projectService,
             buildScreens = buildScreens,
+            gitScreens = gitScreens,
             onOpenProject = onOpenProject,
             onRunProject = onRunProject,
             onOpenSettings = onOpenSettings,
@@ -41,6 +43,7 @@ class DefaultProjectsScreens(
 private enum class ProjectsRoute {
     List,
     Create,
+    Clone,
     BuildHistory,
 }
 
@@ -48,6 +51,7 @@ private enum class ProjectsRoute {
 private fun ProjectsNavHost(
     projectService: ProjectService,
     buildScreens: BuildScreens,
+    gitScreens: GitScreens,
     onOpenProject: (Project) -> Unit,
     onRunProject: (Project) -> Unit,
     onOpenSettings: () -> Unit,
@@ -68,6 +72,7 @@ private fun ProjectsNavHost(
                     onOpenProject = onOpenProject,
                     onRunProject = onRunProject,
                     onCreateProject = { route = ProjectsRoute.Create },
+                    onCloneProject = { route = ProjectsRoute.Clone },
                     onOpenSettings = onOpenSettings,
                     onBuildHistory = { project ->
                         historyProjectId = project.id.value
@@ -80,6 +85,16 @@ private fun ProjectsNavHost(
                 CreateProjectScreen(
                     projectService = projectService,
                     onCreated = { route = ProjectsRoute.List },
+                    onCancel = { route = ProjectsRoute.List },
+                )
+            }
+
+            ProjectsRoute.Clone -> {
+                gitScreens.CloneProject(
+                    onCreated = { project ->
+                        route = ProjectsRoute.List
+                        onOpenProject(project)
+                    },
                     onCancel = { route = ProjectsRoute.List },
                 )
             }

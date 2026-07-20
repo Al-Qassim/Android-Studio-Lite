@@ -9,5 +9,6 @@ class FileBrowserScreenContext(
     val onOpenFile: (relativePath: String) -> Unit,
     val onNavigateBack: () -> Unit,
     val onRun: (() -> Unit)?,
+    val onOpenGit: (() -> Unit)?,
     val scope: CoroutineScope,
 )

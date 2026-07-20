@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":feature:projects:data"))
     implementation(project(":feature:projects:presentation"))
     implementation(project(":feature:buildapk:api"))
+    implementation(project(":feature:git:api"))
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
 }
