@@ -17,9 +17,9 @@ val integrationDiModule = module {
     includes(
         databaseDiModule,
         gitHubDiModule,
-        gitDiModule,
         authDiModule,
         projectsDiModule,
+        gitDiModule,
         buildApkDiModule,
         filesDiModule,
         editorDiModule,

@@ -72,6 +72,7 @@ include(":feature:github:di")
 
 include(":feature:git:api")
 include(":feature:git:data")
+include(":feature:git:presentation")
 include(":feature:git:di")
 
 include(":feature:onboarding:api")
