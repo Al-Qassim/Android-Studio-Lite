@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.feature.git.presentation.project.logic
 
+import com.robotopia.androidstudiolite.core.error.userMessageOrNull
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeFile
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeKind
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitDiffLine
@@ -7,6 +8,8 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.GitDiffL
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitTab
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 fun ProjectGitScreenContext.openAbortMergeConfirm() {
     updateState { copy(showAbortMergeConfirm = true, actionError = null) }
@@ -16,21 +19,34 @@ fun ProjectGitScreenContext.dismissAbortMergeConfirm() {
     updateState { copy(showAbortMergeConfirm = false) }
 }
 
-/** UI shell — clears merge conflict state. */
 fun ProjectGitScreenContext.requestAbortMerge() {
-    updateState {
-        copy(
-            showAbortMergeConfirm = false,
-            mergeSourceBranch = null,
-            changeFiles = changeFiles.filterNot { it.kind == GitChangeKind.Conflict },
-            selectedDiffPath = null,
-            isConflictEditor = false,
-            conflictText = "",
-            conflictLinePaint = emptyList(),
-            diffLines = emptyList(),
-            commitMessage = "",
-            toastMessage = "Merge aborted.",
-        )
+    scope.launch {
+        updateState { copy(isBusy = true, showAbortMergeConfirm = false, actionError = null) }
+        try {
+            gitService.abortMerge(projectRoot)
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(
+                    isBusy = false,
+                    selectedDiffPath = null,
+                    isConflictEditor = false,
+                    conflictText = "",
+                    conflictLinePaint = emptyList(),
+                    diffLines = emptyList(),
+                    commitMessage = "",
+                    toastMessage = "Merge aborted.",
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't abort the merge.",
+                )
+            }
+        }
     }
 }
 
@@ -47,7 +63,6 @@ fun ProjectGitScreenContext.setConflictText(value: String) {
     }
 }
 
-/** UI shell — keep current (ours) side in the buffer; user still marks resolved. */
 fun ProjectGitScreenContext.acceptConflictOurs(state: ProjectGitUiState) {
     if (!state.hasOpenConflictHunks) return
     val resolved = resolveConflictTextKeeping(state.conflictText, keepOurs = true)
@@ -60,7 +75,6 @@ fun ProjectGitScreenContext.acceptConflictOurs(state: ProjectGitUiState) {
     }
 }
 
-/** UI shell — keep incoming (theirs) side in the buffer; user still marks resolved. */
 fun ProjectGitScreenContext.acceptConflictTheirs(state: ProjectGitUiState) {
     if (!state.hasOpenConflictHunks) return
     val resolved = resolveConflictTextKeeping(state.conflictText, keepOurs = false)
@@ -73,52 +87,82 @@ fun ProjectGitScreenContext.acceptConflictTheirs(state: ProjectGitUiState) {
     }
 }
 
-/**
- * UI shell — stage the open conflict file after markers are cleared
- * (Accept current/incoming, or manual edit in the conflict editor).
- */
 fun ProjectGitScreenContext.markConflictResolvedManually(state: ProjectGitUiState) {
     val path = state.selectedDiffPath ?: return
     if (state.hasOpenConflictHunks) return
-    val resolvedLines = state.conflictText.split('\n').mapIndexed { index, text ->
-        val n = index + 1
-        GitDiffLine(GitDiffLineKind.Context, text, oldLine = n, newLine = n)
-    }
-    updateState {
-        copy(
-            changeFiles = changeFiles.map { file ->
-                if (file.path == path && file.kind == GitChangeKind.Conflict) {
-                    file.copy(staged = true, kind = GitChangeKind.Modified)
-                } else {
-                    file
-                }
-            },
-            isConflictEditor = false,
-            conflictText = "",
-            conflictLinePaint = emptyList(),
-            diffLines = resolvedLines,
-            toastMessage = "Marked as resolved.",
-        )
+    scope.launch {
+        updateState { copy(isBusy = true, actionError = null) }
+        try {
+            gitService.writeWorkingFile(projectRoot, path, state.conflictText)
+            gitService.stagePaths(projectRoot, listOf(path))
+            val resolvedLines = state.conflictText.split('\n').mapIndexed { index, text ->
+                val n = index + 1
+                GitDiffLine(GitDiffLineKind.Context, text, oldLine = n, newLine = n)
+            }
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(
+                    isBusy = false,
+                    isConflictEditor = false,
+                    conflictText = "",
+                    conflictLinePaint = emptyList(),
+                    diffLines = resolvedLines,
+                    toastMessage = "Marked as resolved.",
+                )
+            }
+            prepareMergeCommitMessageAfterRefresh()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't mark that file resolved.",
+                )
+            }
+        }
     }
 }
 
-fun ProjectGitScreenContext.openConflictFile(file: GitChangeFile, currentBranch: String, mergeSource: String) {
-    val lines = previewConflictLinesFor(
-        path = file.path,
-        currentBranch = currentBranch,
-        mergeSource = mergeSource,
-    )
-    val text = conflictTextFromDiffLines(lines)
-    updateState {
-        copy(
-            selectedDiffPath = file.path,
-            diffTitle = file.path.substringAfterLast('/'),
-            isDiffLoading = false,
-            isConflictEditor = true,
-            diffLines = lines,
-            conflictText = text,
-            conflictLinePaint = classifyConflictLinePaint(text),
-        )
+fun ProjectGitScreenContext.openConflictFile(
+    file: GitChangeFile,
+    currentBranch: String,
+    mergeSource: String,
+) {
+    scope.launch {
+        updateState {
+            copy(
+                selectedDiffPath = file.path,
+                diffTitle = file.path.substringAfterLast('/'),
+                isDiffLoading = true,
+                isConflictEditor = true,
+                diffLines = emptyList(),
+                conflictText = "",
+                conflictLinePaint = emptyList(),
+            )
+        }
+        try {
+            val text = gitService.readWorkingFile(projectRoot, file.path)
+            updateState {
+                copy(
+                    isDiffLoading = false,
+                    conflictText = text,
+                    conflictLinePaint = classifyConflictLinePaint(text),
+                    // Keep branch labels available for header via existing state fields.
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isDiffLoading = false,
+                    selectedDiffPath = null,
+                    isConflictEditor = false,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't open that conflict file.",
+                )
+            }
+        }
     }
 }
 
@@ -177,7 +221,6 @@ fun previewConflictLinesFor(
     )
 }
 
-/** After all conflicts are resolved, seed a merge commit message (UI shell). */
 fun ProjectGitScreenContext.prepareMergeCommitMessage(state: ProjectGitUiState) {
     if (state.mergeSourceBranch == null) return
     if (state.unresolvedConflictCount > 0) return
@@ -189,3 +232,21 @@ fun ProjectGitScreenContext.prepareMergeCommitMessage(state: ProjectGitUiState) 
         )
     }
 }
+
+private fun ProjectGitScreenContext.prepareMergeCommitMessageAfterRefresh() {
+    updateState {
+        if (mergeSourceBranch == null || unresolvedConflictCount > 0) {
+            this
+        } else {
+            copy(
+                tab = ProjectGitTab.Changes,
+                commitMessage = commitMessage.ifBlank {
+                    "Merge branch '$mergeSourceBranch' into $currentBranch"
+                },
+                commitError = null,
+            )
+        }
+    }
+}
+
+private const val TAG = "ProjectGit"

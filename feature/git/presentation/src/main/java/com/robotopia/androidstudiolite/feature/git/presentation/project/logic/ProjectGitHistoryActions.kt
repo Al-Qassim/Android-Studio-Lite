@@ -1,22 +1,50 @@
 package com.robotopia.androidstudiolite.feature.git.presentation.project.logic
 
+import com.robotopia.androidstudiolite.core.error.userMessageOrNull
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeKind
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitCommitFileChange
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitCommitSummary
+import com.robotopia.androidstudiolite.feature.git.presentation.project.GitDiffLine
+import com.robotopia.androidstudiolite.feature.git.presentation.project.GitDiffLineKind
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 fun ProjectGitScreenContext.openCommit(commit: GitCommitSummary) {
-    updateState {
-        copy(
-            selectedCommit = commit,
-            selectedCommitFiles = previewCommitFilesFor(commit.id),
-            selectedDiffPath = null,
-            diffTitle = "",
-            diffLines = emptyList(),
-            isConflictEditor = false,
-            conflictText = "",
-            conflictLinePaint = emptyList(),
-        )
+    scope.launch {
+        updateState {
+            copy(
+                selectedCommit = commit,
+                selectedCommitFiles = emptyList(),
+                selectedDiffPath = null,
+                diffTitle = "",
+                diffLines = emptyList(),
+                isConflictEditor = false,
+                conflictText = "",
+                conflictLinePaint = emptyList(),
+                isBusy = true,
+                actionError = null,
+            )
+        }
+        try {
+            val files = gitService.commitFiles(projectRoot, commit.id).map { it.toUiFile() }
+            updateState {
+                copy(
+                    isBusy = false,
+                    selectedCommitFiles = files,
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    selectedCommit = null,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't open that commit.",
+                )
+            }
+        }
     }
 }
 
@@ -36,20 +64,53 @@ fun ProjectGitScreenContext.closeCommitDetail() {
 }
 
 fun ProjectGitScreenContext.openCommitFileDiff(file: GitCommitFileChange) {
-    updateState {
-        copy(
-            selectedDiffPath = file.path,
-            diffTitle = file.path.substringAfterLast('/'),
-            isDiffLoading = false,
-            isConflictEditor = false,
-            conflictText = "",
-            conflictLinePaint = emptyList(),
-            diffLines = previewDiffLinesFor(file.path),
-        )
+    scope.launch {
+        val commitId = run {
+            var id: String? = null
+            updateState {
+                id = selectedCommit?.id
+                copy(
+                    selectedDiffPath = file.path,
+                    diffTitle = file.path.substringAfterLast('/'),
+                    isDiffLoading = true,
+                    isConflictEditor = false,
+                    conflictText = "",
+                    conflictLinePaint = emptyList(),
+                    diffLines = emptyList(),
+                )
+            }
+            id
+        } ?: return@launch
+        try {
+            val lines = gitService.diffCommit(projectRoot, commitId, file.path).map { it.toUiLine() }
+            updateState {
+                copy(
+                    isDiffLoading = false,
+                    diffLines = lines.ifEmpty {
+                        listOf(
+                            GitDiffLine(
+                                GitDiffLineKind.Context,
+                                "(No textual diff for this file.)",
+                            ),
+                        )
+                    },
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isDiffLoading = false,
+                    selectedDiffPath = null,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't open that diff.",
+                )
+            }
+        }
     }
 }
 
-/** Placeholder history for UI shell / previews until a real log API exists. */
+/** Placeholder history for Compose previews. */
 fun previewHistoryCommits(): List<GitCommitSummary> = listOf(
     GitCommitSummary(
         id = "a1b2c3d4e5f6789012345678abcdef0123456789",
@@ -101,3 +162,5 @@ fun previewCommitFilesFor(commitId: String): List<GitCommitFileChange> = when {
         GitCommitFileChange("settings.gradle.kts", GitChangeKind.Added),
     )
 }
+
+private const val TAG = "ProjectGit"

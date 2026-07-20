@@ -189,7 +189,7 @@ suspend fun ProjectGitScreenContext.checkout(branchName: String, force: Boolean)
     updateState { copy(isBusy = true, actionError = null) }
     try {
         gitService.checkout(projectRoot, branchName, force)
-        refreshBranches(showLoading = false)
+        refreshProjectGit(showLoading = false)
         updateState {
             copy(
                 isBusy = false,
@@ -223,9 +223,33 @@ suspend fun ProjectGitScreenContext.checkout(branchName: String, force: Boolean)
 }
 
 suspend fun ProjectGitScreenContext.merge(branchName: String) {
-    updateState { copy(mergeConfirmBranch = null) }
-    runBusy("Merged $branchName.") {
-        gitService.merge(projectRoot, branchName)
+    updateState { copy(mergeConfirmBranch = null, isBusy = true, actionError = null) }
+    try {
+        val result = gitService.merge(projectRoot, branchName)
+        updateState {
+            copy(mergeSourceBranch = if (result.conflicts) branchName else mergeSourceBranch)
+        }
+        refreshProjectGit(showLoading = false)
+        updateState {
+            copy(
+                isBusy = false,
+                tab = if (result.conflicts) ProjectGitTab.Changes else tab,
+                toastMessage = if (result.conflicts) {
+                    "Merge has conflicts. Resolve them, then commit."
+                } else {
+                    "Merged $branchName."
+                },
+            )
+        }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        updateState {
+            copy(
+                isBusy = false,
+                actionError = e.userMessageOrNull(TAG) ?: GENERIC_ERROR,
+            )
+        }
     }
 }
 
@@ -279,7 +303,7 @@ private suspend fun ProjectGitScreenContext.runBusy(
     updateState { copy(isBusy = true, actionError = null) }
     try {
         block()
-        refreshBranches(showLoading = false)
+        refreshProjectGit(showLoading = false)
         updateState { copy(isBusy = false, toastMessage = successToast) }
     } catch (e: CancellationException) {
         throw e

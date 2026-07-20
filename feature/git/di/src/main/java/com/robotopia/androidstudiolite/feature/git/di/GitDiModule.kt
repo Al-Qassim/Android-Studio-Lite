@@ -14,8 +14,10 @@ val gitDiModule = module {
     single<GitScreens> {
         DefaultGitScreens(
             gitService = get(),
+            gitHubClient = get(),
             projectService = get(),
             authSession = get(),
+            authScreens = get(),
         )
     }
     viewModel { CloneProjectViewModel() }

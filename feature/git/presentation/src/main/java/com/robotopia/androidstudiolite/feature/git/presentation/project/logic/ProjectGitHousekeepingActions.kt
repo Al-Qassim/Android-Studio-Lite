@@ -2,8 +2,6 @@ package com.robotopia.androidstudiolite.feature.git.presentation.project.logic
 
 import com.robotopia.androidstudiolite.core.error.userMessageOrNull
 import com.robotopia.androidstudiolite.feature.git.presentation.logic.credentialsOrNull
-import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeFile
-import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeKind
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
 import kotlinx.coroutines.CancellationException
@@ -43,42 +41,89 @@ fun ProjectGitScreenContext.dismissDiscardConfirm() {
     }
 }
 
-/** UI shell — drop one file’s local changes. */
 fun ProjectGitScreenContext.requestDiscardFile(path: String) {
-    updateState {
-        copy(
-            discardConfirmPath = null,
-            changeFiles = changeFiles.filterNot { it.path == path },
-            toastMessage = "Discarded changes in ${path.substringAfterLast('/')}.",
-        )
+    scope.launch {
+        updateState { copy(isBusy = true, discardConfirmPath = null, actionError = null) }
+        try {
+            gitService.discardPaths(projectRoot, listOf(path))
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(
+                    isBusy = false,
+                    selectedDiffPath = null,
+                    toastMessage = "Discarded changes in ${path.substringAfterLast('/')}.",
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't discard those changes.",
+                )
+            }
+        }
     }
 }
 
-/** UI shell — drop all local changes. */
 fun ProjectGitScreenContext.requestDiscardAll() {
-    updateState {
-        copy(
-            showDiscardAllConfirm = false,
-            changeFiles = emptyList(),
-            toastMessage = "Discarded all local changes.",
-        )
+    scope.launch {
+        updateState { copy(isBusy = true, showDiscardAllConfirm = false, actionError = null) }
+        try {
+            gitService.discardAll(projectRoot)
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(
+                    isBusy = false,
+                    selectedDiffPath = null,
+                    toastMessage = "Discarded all local changes.",
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't discard local changes.",
+                )
+            }
+        }
     }
 }
 
-/** UI shell — add path to .gitignore and remove from Changes. */
 fun ProjectGitScreenContext.requestIgnorePath(path: String) {
-    updateState {
-        copy(
-            changeFileMenuPath = null,
-            changeFiles = changeFiles.filterNot { it.path == path },
-            toastMessage = "Added to .gitignore.",
-        )
+    scope.launch {
+        updateState { copy(isBusy = true, changeFileMenuPath = null, actionError = null) }
+        try {
+            gitService.appendGitignore(projectRoot, path)
+            val untracked = path in gitService.status(projectRoot).untracked
+            if (untracked) {
+                gitService.discardPaths(projectRoot, listOf(path))
+            }
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(
+                    isBusy = false,
+                    toastMessage = "Added to .gitignore.",
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't update .gitignore.",
+                )
+            }
+        }
     }
 }
 
 /**
  * Fetches when a remote exists so ahead/behind is fresh, then shows undo confirm.
- * Local-only repos skip fetch.
  */
 fun ProjectGitScreenContext.openUndoCommitConfirm(state: ProjectGitUiState) {
     if (!state.hasRemote) {
@@ -89,6 +134,7 @@ fun ProjectGitScreenContext.openUndoCommitConfirm(state: ProjectGitUiState) {
         updateState { copy(isBusy = true, actionError = null) }
         try {
             gitService.fetch(projectRoot, credentialsOrNull(authSession))
+            refreshProjectGit(showLoading = false)
             updateState {
                 copy(
                     isBusy = false,
@@ -102,7 +148,7 @@ fun ProjectGitScreenContext.openUndoCommitConfirm(state: ProjectGitUiState) {
                 copy(
                     isBusy = false,
                     showUndoCommitConfirm = true,
-                    actionError = e.userMessageOrNull("ProjectGit")
+                    actionError = e.userMessageOrNull(TAG)
                         ?: "Could not fetch. Undo still applies locally only.",
                 )
             }
@@ -114,37 +160,39 @@ fun ProjectGitScreenContext.dismissUndoCommitConfirm() {
     updateState { copy(showUndoCommitConfirm = false) }
 }
 
-/**
- * UI shell — soft undo of the tip commit (keeps file contents as local changes).
- */
 fun ProjectGitScreenContext.requestUndoCommit(state: ProjectGitUiState) {
-    val tip = state.historyCommits.firstOrNull() ?: return
-    val restored = previewCommitFilesFor(tip.id).map { file ->
-        GitChangeFile(
-            path = file.path,
-            kind = file.kind,
-            staged = file.kind != GitChangeKind.Untracked,
-        )
-    }
-    updateState {
-        copy(
-            showUndoCommitConfirm = false,
-            historyCommits = historyCommits.drop(1),
-            changeFiles = (restored + changeFiles).distinctBy { it.path },
-            selectedCommit = null,
-            selectedCommitFiles = emptyList(),
-            toastMessage = "Undid commit ${tip.shortId}.",
-        )
+    if (state.historyCommits.isEmpty()) return
+    scope.launch {
+        updateState { copy(isBusy = true, showUndoCommitConfirm = false, actionError = null) }
+        try {
+            gitService.undoLastCommit(projectRoot)
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(
+                    isBusy = false,
+                    selectedCommit = null,
+                    selectedCommitFiles = emptyList(),
+                    toastMessage = "Undid last commit.",
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't undo the last commit.",
+                )
+            }
+        }
     }
 }
 
-/**
- * UI shell — open commit/branch on GitHub (host wires browser later).
- */
 fun ProjectGitScreenContext.requestOpenOnGitHub(url: String) {
+    openUrl(url)
     updateState {
         copy(
-            toastMessage = "Open $url",
+            toastMessage = "Opening in browser…",
             changeFileMenuPath = null,
         )
     }
@@ -155,3 +203,5 @@ fun githubCommitUrl(remoteHtmlUrl: String, commitId: String): String =
 
 fun githubTreeUrl(remoteHtmlUrl: String, branch: String): String =
     remoteHtmlUrl.trimEnd('/') + "/tree/" + branch
+
+private const val TAG = "ProjectGit"

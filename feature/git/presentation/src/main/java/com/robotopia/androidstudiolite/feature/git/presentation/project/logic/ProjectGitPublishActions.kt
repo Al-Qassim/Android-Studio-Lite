@@ -1,17 +1,21 @@
 package com.robotopia.androidstudiolite.feature.git.presentation.project.logic
 
-import com.robotopia.androidstudiolite.feature.git.api.GitBranch
-import com.robotopia.androidstudiolite.feature.git.api.GitBranchKind
+import com.robotopia.androidstudiolite.core.error.AppException
+import com.robotopia.androidstudiolite.core.error.userMessageOrNull
+import com.robotopia.androidstudiolite.feature.git.presentation.logic.credentialsOrNull
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitTab
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 fun ProjectGitScreenContext.openPublish(defaultRepoName: String = "") {
     updateState {
         copy(
             showPublish = true,
-            publishRepoName = publishRepoName.ifBlank { defaultRepoName },
+            publishRepoName = publishRepoName.ifBlank {
+                defaultRepoName.ifBlank { projectRoot.name }
+            },
             publishNameError = null,
             publishError = null,
             menuBranch = null,
@@ -40,17 +44,10 @@ fun ProjectGitScreenContext.setPublishPrivate(value: Boolean) {
     updateState { copy(publishPrivate = value) }
 }
 
-/** UI shell — host will open Settings / Connect; toast until wired. */
 fun ProjectGitScreenContext.requestConnectPublishAccount(state: ProjectGitUiState) {
-    updateState {
-        copy(toastMessage = "Connect ${state.publishProviderName} in Settings.")
-    }
+    onConnectAccount()
 }
 
-/**
- * UI shell — create empty GitHub repo, add origin, push current branch.
- * Real GitHub POST + JGit remote/push wiring comes later.
- */
 fun ProjectGitScreenContext.requestPublish(state: ProjectGitUiState) {
     if (!state.publishAccountConnected) return
     val name = state.publishRepoName.trim()
@@ -76,18 +73,41 @@ fun ProjectGitScreenContext.requestPublish(state: ProjectGitUiState) {
     }
     scope.launch {
         updateState { copy(isBusy = true, publishError = null, publishNameError = null) }
-        val branch = state.currentBranch.ifBlank { "main" }
-        updateState {
-            copy(
-                isBusy = false,
-                showPublish = false,
-                hasRemote = true,
-                tab = ProjectGitTab.Branches,
-                remoteBranches = listOf(
-                    GitBranch("origin/$branch", GitBranchKind.Remote),
-                ),
-                toastMessage = "Published to ${state.publishProviderName}.",
+        try {
+            val token = authSession.accessToken()
+                ?: throw AppException("Connect ${state.publishProviderName} to publish.")
+            val repo = gitHubClient.createUserRepo(
+                accessToken = token,
+                name = name,
+                private = state.publishPrivate,
             )
+            gitService.addRemote(projectRoot, "origin", repo.cloneUrl)
+            val branch = state.currentBranch.ifBlank { "main" }
+            val credentials = credentialsOrNull(authSession)
+                ?: throw AppException("Connect ${state.publishProviderName} to publish.")
+            gitService.pushSetUpstream(projectRoot, "origin", branch, credentials)
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(
+                    isBusy = false,
+                    showPublish = false,
+                    tab = ProjectGitTab.Branches,
+                    remoteHtmlUrl = repo.htmlUrl,
+                    toastMessage = "Published to ${state.publishProviderName}.",
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    publishError = e.userMessageOrNull(TAG)
+                        ?: "Couldn't publish that repository.",
+                )
+            }
         }
     }
 }
+
+private const val TAG = "ProjectGit"

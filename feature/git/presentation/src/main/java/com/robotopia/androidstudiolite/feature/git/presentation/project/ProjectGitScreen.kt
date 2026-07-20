@@ -1,5 +1,7 @@
 package com.robotopia.androidstudiolite.feature.git.presentation.project
 
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.robotopia.androidstudiolite.designsystem.component.IslandScaffold
@@ -25,9 +28,10 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.cl
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.closeChangeDiff
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.closeCommitDetail
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.dismissPublish
-import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.refreshBranches
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.refreshProjectGit
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ui.ProjectGitBody
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ui.ProjectGitDialogs
+import com.robotopia.androidstudiolite.feature.github.api.GitHubClient
 import java.io.File
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
@@ -36,29 +40,57 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 internal fun ProjectGitScreen(
     gitService: GitService,
+    gitHubClient: GitHubClient,
     authSession: AuthSession,
     projectRoot: File,
     projectName: String,
     onBack: () -> Unit,
+    onConnectAccount: () -> Unit,
 ) {
     val viewModel: ProjectGitViewModel = koinViewModel(key = projectRoot.absolutePath)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     val screenContext = remember(
         viewModel,
         gitService,
+        gitHubClient,
         authSession,
         projectRoot,
         onBack,
+        onConnectAccount,
+        context,
     ) {
         ProjectGitScreenContext(
             updateState = { updater -> viewModel.uiState.update { updater(it) } },
             gitService = gitService,
+            gitHubClient = gitHubClient,
             authSession = authSession,
             projectRoot = projectRoot,
             onBack = onBack,
+            onConnectAccount = onConnectAccount,
+            openUrl = { url ->
+                runCatching {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(
+                            Intent.FLAG_ACTIVITY_NEW_TASK,
+                        ),
+                    )
+                }
+            },
             scope = viewModel.viewModelScope,
         )
+    }
+
+    LaunchedEffect(authSession) {
+        authSession.observeAccount().collect { account ->
+            screenContext.updateState {
+                copy(
+                    publishAccountConnected = account != null,
+                    publishProviderName = authSession.providerDisplayName,
+                )
+            }
+        }
     }
 
     screenContext.ProjectGitScreen(state = state, projectName = projectName)
@@ -70,7 +102,7 @@ internal fun ProjectGitScreenContext.ProjectGitScreen(
     projectName: String,
 ) {
     LaunchedEffect(projectRoot) {
-        refreshBranches()
+        refreshProjectGit()
     }
 
     LaunchedEffect(state.toastMessage) {

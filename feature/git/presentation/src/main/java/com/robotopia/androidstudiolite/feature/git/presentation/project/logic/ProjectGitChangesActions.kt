@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.feature.git.presentation.project.logic
 
+import com.robotopia.androidstudiolite.core.error.userMessageOrNull
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeFile
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitChangeKind
 import com.robotopia.androidstudiolite.feature.git.presentation.project.GitDiffLine
@@ -7,6 +8,7 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.GitDiffL
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitScreenContext
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitTab
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 fun ProjectGitScreenContext.selectTab(tab: ProjectGitTab) {
@@ -18,12 +20,32 @@ fun ProjectGitScreenContext.setCommitMessage(value: String) {
 }
 
 fun ProjectGitScreenContext.toggleChangeStaged(path: String) {
-    updateState {
-        copy(
-            changeFiles = changeFiles.map { file ->
-                if (file.path == path) file.copy(staged = !file.staged) else file
-            },
-        )
+    scope.launch {
+        try {
+            var shouldStage = false
+            updateState {
+                val file = changeFiles.firstOrNull { it.path == path } ?: return@updateState this
+                shouldStage = !file.staged
+                copy(
+                    changeFiles = changeFiles.map {
+                        if (it.path == path) it.copy(staged = shouldStage) else it
+                    },
+                )
+            }
+            if (shouldStage) {
+                gitService.stagePaths(projectRoot, listOf(path))
+            } else {
+                gitService.unstagePaths(projectRoot, listOf(path))
+            }
+            refreshProjectGit(showLoading = false)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(actionError = e.userMessageOrNull(TAG) ?: "Couldn't update staging.")
+            }
+        }
     }
 }
 
@@ -36,14 +58,44 @@ fun ProjectGitScreenContext.openChangeDiff(file: GitChangeFile, state: ProjectGi
         )
         return
     }
-    updateState {
-        copy(
-            selectedDiffPath = file.path,
-            diffTitle = file.path.substringAfterLast('/'),
-            isDiffLoading = false,
-            isConflictEditor = false,
-            diffLines = previewDiffLinesFor(file.path),
-        )
+    scope.launch {
+        updateState {
+            copy(
+                selectedDiffPath = file.path,
+                diffTitle = file.path.substringAfterLast('/'),
+                isDiffLoading = true,
+                isConflictEditor = false,
+                conflictText = "",
+                conflictLinePaint = emptyList(),
+                diffLines = emptyList(),
+            )
+        }
+        try {
+            val lines = gitService.diffWorkingTree(projectRoot, file.path).map { it.toUiLine() }
+            updateState {
+                copy(
+                    isDiffLoading = false,
+                    diffLines = lines.ifEmpty {
+                        listOf(
+                            GitDiffLine(
+                                GitDiffLineKind.Context,
+                                "(No textual diff for this file.)",
+                            ),
+                        )
+                    },
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isDiffLoading = false,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't open that diff.",
+                    selectedDiffPath = null,
+                )
+            }
+        }
     }
 }
 
@@ -61,52 +113,95 @@ fun ProjectGitScreenContext.closeChangeDiff() {
     }
 }
 
-/** UI shell only — real init wiring comes later. */
 fun ProjectGitScreenContext.requestInitRepository() {
     scope.launch {
         updateState { copy(isBusy = true, actionError = null) }
-        updateState {
-            copy(
-                isBusy = false,
-                needsInit = false,
-                currentBranch = "main",
-                toastMessage = "Repository initialized.",
-            )
+        try {
+            gitService.init(projectRoot)
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(
+                    isBusy = false,
+                    toastMessage = "Repository initialized.",
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    actionError = e.userMessageOrNull(TAG) ?: "Couldn't initialize Git.",
+                )
+            }
         }
     }
 }
 
-/** UI shell only — real stage/commit wiring comes later. */
 fun ProjectGitScreenContext.requestCommit(state: ProjectGitUiState) {
     val message = state.commitMessage.trim()
     if (message.isEmpty()) {
         updateState { copy(commitError = "Enter a commit message.") }
         return
     }
-    val stagedCount = state.changeFiles.count { it.staged }
-    if (stagedCount == 0) {
+    val staged = state.changeFiles.filter { it.staged }
+    if (staged.isEmpty()) {
         updateState { copy(commitError = "Select at least one file to commit.") }
         return
     }
     val finishingMerge = state.mergeSourceBranch != null
-    updateState {
-        copy(
-            commitMessage = "",
-            commitError = null,
-            changeFiles = changeFiles.filterNot { it.staged },
-            mergeSourceBranch = null,
-            toastMessage = if (finishingMerge) {
-                "Merge committed."
-            } else {
-                "Committed $stagedCount file(s)."
-            },
-        )
+    scope.launch {
+        updateState { copy(isBusy = true, commitError = null, actionError = null) }
+        try {
+            val toStage = staged.map { it.path }
+            val toUnstage = state.changeFiles.filterNot { it.staged }.map { it.path }
+            gitService.unstagePaths(projectRoot, toUnstage)
+            gitService.stagePaths(projectRoot, toStage)
+            val (name, email) = commitIdentity()
+            gitService.commit(projectRoot, message, name, email)
+            refreshProjectGit(showLoading = false)
+            updateState {
+                copy(
+                    isBusy = false,
+                    commitMessage = "",
+                    selectedDiffPath = null,
+                    isConflictEditor = false,
+                    conflictText = "",
+                    conflictLinePaint = emptyList(),
+                    toastMessage = if (finishingMerge) {
+                        "Merge committed."
+                    } else {
+                        "Committed ${staged.size} file(s)."
+                    },
+                )
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            updateState {
+                copy(
+                    isBusy = false,
+                    commitError = e.userMessageOrNull(TAG) ?: "Couldn't create that commit.",
+                )
+            }
+        }
+    }
+}
+
+suspend fun ProjectGitScreenContext.commitIdentity(): Pair<String, String> {
+    val login = authSession.currentAccount()?.identity
+        ?.removePrefix("@")
+        ?.trim()
+        ?.ifBlank { null }
+    return if (login != null) {
+        login to "$login@users.noreply.github.com"
+    } else {
+        "Android Studio Lite" to "noreply@androidstudiolite.local"
     }
 }
 
 /**
- * Placeholder diff content for previews and the UI shell until a real diff API exists.
- * Line numbers follow unified-diff semantics (old / new sides).
+ * Placeholder diff content for Compose previews.
  */
 fun previewDiffLinesFor(path: String): List<GitDiffLine> {
     val name = path.substringAfterLast('/')
@@ -119,3 +214,5 @@ fun previewDiffLinesFor(path: String): List<GitDiffLine> {
         GitDiffLine(GitDiffLineKind.Add, "fun farewell() = \"Bye\"", oldLine = null, newLine = 5),
     )
 }
+
+private const val TAG = "ProjectGit"
