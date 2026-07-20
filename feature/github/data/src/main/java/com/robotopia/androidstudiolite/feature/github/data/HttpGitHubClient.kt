@@ -448,7 +448,8 @@ class HttpGitHubClient(
                   - name: Set up Gradle
                     uses: gradle/actions/setup-gradle@v4
                     with:
-                      gradle-version: "8.11.1"
+                      # Must match AGP in ASL / modern templates (AGP 9.x needs Gradle 9.4.1+).
+                      gradle-version: "9.4.1"
                   - name: Set up Android SDK
                     uses: android-actions/setup-android@v3
                   - name: Assemble debug APK
