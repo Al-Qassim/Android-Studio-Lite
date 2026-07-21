@@ -122,7 +122,6 @@ class DefaultProjectService(
             val id = UUID.randomUUID().toString()
             val stagingZip = File(context.cacheDir, "import-$id.zip")
             val extractDir = File(context.cacheDir, "import-extract-$id")
-            val rootDir = projectDir(id)
 
             try {
                 copyUriToFile(uri, stagingZip)
@@ -134,35 +133,64 @@ class DefaultProjectService(
                     ?.removeSuffix(".zip")
                     ?.removeSuffix(".ZIP")
                     ?: "ImportedProject"
-                val meta = ProjectImportMetadata.read(unpackedRoot, fallbackName = fallbackName)
-                val existingNames = projectDao.getAllNames().toSet()
-                val name = ProjectImportMetadata.allocateUniqueName(meta.name, existingNames)
-
-                if (rootDir.exists()) {
-                    throw AppException("Project directory already exists")
-                }
-                if (!unpackedRoot.copyRecursively(rootDir, overwrite = false)) {
-                    throw AppException("Couldn't copy the imported project files.")
-                }
-
-                val now = System.currentTimeMillis()
-                val entity = ProjectEntity(
-                    id = id,
-                    name = name,
-                    packageName = meta.packageName,
-                    rootPath = rootDir.absolutePath,
-                    lastOpenedAt = now,
-                )
-                projectDao.upsert(entity)
-                entity.toDomain()
-            } catch (t: Throwable) {
-                rootDir.deleteRecursively()
-                throw t
+                registerFromDisk(unpackedRoot, fallbackName = fallbackName, projectId = id)
             } finally {
                 stagingZip.delete()
                 extractDir.deleteRecursively()
             }
         }
+
+    override suspend fun importFromDirectory(directoryPath: String): Project =
+        withContext(Dispatchers.IO) {
+            val source = File(directoryPath)
+            if (!source.isDirectory) {
+                throw AppException("Couldn't find that project folder.")
+            }
+            if (
+                !File(source, "settings.gradle.kts").isFile &&
+                !File(source, "settings.gradle").isFile
+            ) {
+                throw AppException(
+                    "This isn't an Android Gradle project. It needs a settings.gradle or settings.gradle.kts file.",
+                )
+            }
+            val fallbackName = source.name.ifBlank { "ClonedProject" }
+            registerFromDisk(source, fallbackName = fallbackName, projectId = UUID.randomUUID().toString())
+        }
+
+    private suspend fun registerFromDisk(
+        unpackedRoot: File,
+        fallbackName: String,
+        projectId: String,
+    ): Project {
+        val rootDir = projectDir(projectId)
+        try {
+            val meta = ProjectImportMetadata.read(unpackedRoot, fallbackName = fallbackName)
+            val existingNames = projectDao.getAllNames().toSet()
+            val name = ProjectImportMetadata.allocateUniqueName(meta.name, existingNames)
+
+            if (rootDir.exists()) {
+                throw AppException("Project directory already exists")
+            }
+            if (!unpackedRoot.copyRecursively(rootDir, overwrite = false)) {
+                throw AppException("Couldn't copy the imported project files.")
+            }
+
+            val now = System.currentTimeMillis()
+            val entity = ProjectEntity(
+                id = projectId,
+                name = name,
+                packageName = meta.packageName,
+                rootPath = rootDir.absolutePath,
+                lastOpenedAt = now,
+            )
+            projectDao.upsert(entity)
+            return entity.toDomain()
+        } catch (t: Throwable) {
+            rootDir.deleteRecursively()
+            throw t
+        }
+    }
 
     override fun validateCreateProject(
         name: String,

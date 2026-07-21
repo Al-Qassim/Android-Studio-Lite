@@ -26,6 +26,7 @@ val projectsDiModule = module {
         DefaultProjectsScreens(
             projectService = get(),
             buildScreens = get(),
+            gitScreens = get(),
         )
     }
     viewModel { ProjectsListViewModel() }

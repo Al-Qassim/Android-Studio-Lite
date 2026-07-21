@@ -42,6 +42,7 @@ internal fun ProjectsListContent(
     onHubMenuOpen: () -> Unit,
     onHubMenuDismiss: () -> Unit,
     onNewProject: () -> Unit,
+    onCloneProject: () -> Unit,
     onImportProject: () -> Unit,
     onOpenClick: (Project) -> Unit,
     onMenuOpen: (Project) -> Unit,
@@ -90,6 +91,7 @@ internal fun ProjectsListContent(
     if (state.hubMenuOpen) {
         ProjectsHubOverflowMenu(
             onNewProject = onNewProject,
+            onCloneProject = onCloneProject,
             onImportProject = onImportProject,
             onDismiss = onHubMenuDismiss,
         )
@@ -318,6 +320,7 @@ private fun ProjectOverflowMenu(
 @Composable
 private fun ProjectsHubOverflowMenu(
     onNewProject: () -> Unit,
+    onCloneProject: () -> Unit,
     onImportProject: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -337,6 +340,11 @@ private fun ProjectsHubOverflowMenu(
                     label = "New project",
                     onClick = onNewProject,
                     icon = { tint, size -> IconAdd(tint = tint, size = size) },
+                ),
+                MenuItem.Button(
+                    label = "Clone from GitHub",
+                    onClick = onCloneProject,
+                    icon = { tint, size -> IconCloud(tint = tint, size = size) },
                 ),
                 MenuItem.Button(
                     label = "Import project",

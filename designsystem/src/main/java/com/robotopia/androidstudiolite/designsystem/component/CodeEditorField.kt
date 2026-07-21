@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -40,6 +41,7 @@ import com.robotopia.androidstudiolite.designsystem.typography.Typography
  *
  * @param wrapText when true, lines soft-wrap to the viewport width; when false, the editor
  * scrolls horizontally for long lines.
+ * @param outputTransformation defaults to Kotlin syntax highlighting; override for conflict paints.
  */
 @Composable
 fun CodeEditorField(
@@ -47,11 +49,13 @@ fun CodeEditorField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     wrapText: Boolean = false,
+    outputTransformation: OutputTransformation? = null,
 ) {
     val verticalScroll = rememberScrollState()
     val horizontalScroll = rememberScrollState()
     val colors = LocalColorScheme.current
-    val highlight = remember(colors) { codeHighlightOutputTransformation(colors) }
+    val highlight = outputTransformation
+        ?: remember(colors) { codeHighlightOutputTransformation(colors) }
     val textFieldState = rememberTextFieldState(initialText = value)
 
     LaunchedEffect(value) {

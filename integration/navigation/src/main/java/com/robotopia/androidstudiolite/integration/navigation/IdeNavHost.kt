@@ -89,6 +89,10 @@ fun IdeNavHost() {
                     onRun = {
                         route = current.toBuild()
                     },
+                    showGit = current.showGit,
+                    onShowGitChange = { showGit ->
+                        route = current.copy(showGit = showGit)
+                    },
                 )
             }
 

@@ -156,6 +156,13 @@ fun IconLocked(
     size: Dp = 24.dp,
 ) = VectorIcon(R.drawable.ic_locked, modifier, tint, size)
 
+@Composable
+fun IconGit(
+    modifier: Modifier = Modifier,
+    tint: Color = Theme.colors.Text,
+    size: Dp = 24.dp,
+) = VectorIcon(R.drawable.ic_git, modifier, tint, size)
+
 private data class IconPreviewItem(
     val name: String,
     val usage: String,
@@ -180,6 +187,7 @@ private fun IconsPreview() {
         IconPreviewItem("apk", "APK artifact") { IconApk() },
         IconPreviewItem("warning", "Warning / caution") { IconWarning() },
         IconPreviewItem("locked", "Read-only / locked") { IconLocked() },
+        IconPreviewItem("git", "Open project Git") { IconGit() },
     )
 
     Column(

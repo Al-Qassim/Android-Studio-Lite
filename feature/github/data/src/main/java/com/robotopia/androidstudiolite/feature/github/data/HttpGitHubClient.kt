@@ -72,6 +72,30 @@ class HttpGitHubClient(
             GitHubUser(login = json.getString("login"))
         }
 
+    override suspend fun createUserRepo(
+        accessToken: String,
+        name: String,
+        private: Boolean,
+    ): GitHubRepoRef = withContext(Dispatchers.IO) {
+        val createBody = JSONObject()
+            .put("name", name)
+            .put("private", private)
+            .put("auto_init", false)
+            .toString()
+            .toRequestBody(JSON)
+        val created = apiPost(accessToken, "/user/repos", createBody)
+        GitHubRepoRef(
+            owner = created.getJSONObject("owner").getString("login"),
+            name = created.getString("name"),
+            htmlUrl = created.optString("html_url").ifBlank {
+                "https://github.com/${created.getJSONObject("owner").getString("login")}/${created.getString("name")}"
+            },
+            cloneUrl = created.optString("clone_url").ifBlank {
+                "https://github.com/${created.getJSONObject("owner").getString("login")}/${created.getString("name")}.git"
+            },
+        )
+    }
+
     override suspend fun ensureSandboxRepo(accessToken: String): GitHubRepoRef =
         withContext(Dispatchers.IO) {
             val login = apiGet(accessToken, "/user").getString("login")
@@ -448,7 +472,8 @@ class HttpGitHubClient(
                   - name: Set up Gradle
                     uses: gradle/actions/setup-gradle@v4
                     with:
-                      gradle-version: "8.11.1"
+                      # Must match AGP in ASL / modern templates (AGP 9.x needs Gradle 9.4.1+).
+                      gradle-version: "9.4.1"
                   - name: Set up Android SDK
                     uses: android-actions/setup-android@v3
                   - name: Assemble debug APK

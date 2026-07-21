@@ -52,6 +52,15 @@ class StubGitHubClient : GitHubClient {
     override suspend fun ensureSandboxRepo(accessToken: String): GitHubRepoRef =
         notImplemented()
 
+    override suspend fun createUserRepo(
+        accessToken: String,
+        name: String,
+        private: Boolean,
+    ): GitHubRepoRef {
+        delay(200)
+        return GitHubRepoRef(owner = "alex-dev", name = name)
+    }
+
     override suspend fun ensureWorkflowFile(accessToken: String, repo: GitHubRepoRef) =
         notImplemented()
 

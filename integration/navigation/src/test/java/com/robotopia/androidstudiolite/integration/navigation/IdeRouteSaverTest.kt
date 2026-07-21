@@ -21,6 +21,7 @@ class IdeRouteSaverTest {
             rootPath = "/projects/p1",
             packageName = "com.example.hello",
         )
+        val filesGit = files.copy(showGit = true)
         val editor = IdeRoute.Editor(
             projectId = "p1",
             relativePath = "app/src/MainActivity.kt",
@@ -28,8 +29,13 @@ class IdeRouteSaverTest {
             rootPath = "/projects/p1",
             packageName = "com.example.hello",
         )
+        val editorFromGit = editor.copy(returnToGit = true)
         assertRoundTrip(files)
+        assertRoundTrip(filesGit)
         assertRoundTrip(editor)
+        assertRoundTrip(editorFromGit)
+        assertEquals(filesGit, filesGit.toEditor("app/src/MainActivity.kt").toFiles())
+        assertEquals(files, files.toEditor("app/src/MainActivity.kt").toFiles())
         assertRoundTrip(
             IdeRoute.Build(
                 projectId = "p1",
@@ -37,6 +43,15 @@ class IdeRouteSaverTest {
                 rootPath = "/projects/p1",
                 packageName = "com.example.hello",
                 returnTo = files,
+            ),
+        )
+        assertRoundTrip(
+            IdeRoute.Build(
+                projectId = "p1",
+                projectName = "Hello",
+                rootPath = "/projects/p1",
+                packageName = "com.example.hello",
+                returnTo = filesGit,
             ),
         )
         assertRoundTrip(

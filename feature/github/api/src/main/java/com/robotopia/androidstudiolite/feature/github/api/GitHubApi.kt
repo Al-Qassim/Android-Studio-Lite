@@ -24,6 +24,8 @@ sealed interface GitHubDeviceTokenResult {
 data class GitHubRepoRef(
     val owner: String,
     val name: String,
+    val htmlUrl: String = "https://github.com/$owner/$name",
+    val cloneUrl: String = "https://github.com/$owner/$name.git",
 ) {
     val fullName: String get() = "$owner/$name"
 }
@@ -56,6 +58,13 @@ interface GitHubClient {
 
     /** Ensure the ASL public build sandbox exists (or is a known ASL repo). */
     suspend fun ensureSandboxRepo(accessToken: String): GitHubRepoRef
+
+    /** Create a user-owned repository (Publish to GitHub). */
+    suspend fun createUserRepo(
+        accessToken: String,
+        name: String,
+        private: Boolean,
+    ): GitHubRepoRef
 
     suspend fun ensureWorkflowFile(accessToken: String, repo: GitHubRepoRef)
 

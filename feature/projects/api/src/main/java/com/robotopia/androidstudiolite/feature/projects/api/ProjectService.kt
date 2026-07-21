@@ -28,6 +28,12 @@ interface ProjectService {
     suspend fun importProject(zipUri: String): Project
 
     /**
+     * Registers an already-unpacked Gradle project directory (e.g. after git clone).
+     * Copies into app storage. Requires `settings.gradle` / `settings.gradle.kts`.
+     */
+    suspend fun importFromDirectory(directoryPath: String): Project
+
+    /**
      * Validates create-project form fields. Implementation lives in `:data`.
      * [minSdk] is null when the field is empty or not a number.
      */

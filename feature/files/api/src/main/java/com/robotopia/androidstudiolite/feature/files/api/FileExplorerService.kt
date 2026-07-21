@@ -32,6 +32,8 @@ interface FilesScreens {
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
         onRun: (() -> Unit)?,
+        showGit: Boolean,
+        onShowGitChange: (Boolean) -> Unit,
     )
 
     @Composable

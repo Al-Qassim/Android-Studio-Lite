@@ -128,6 +128,7 @@ private fun ProjectsListPreview(
         onHubMenuOpen = {},
         onHubMenuDismiss = {},
         onNewProject = {},
+        onCloneProject = {},
         onImportProject = {},
         onOpenClick = {},
         onMenuOpen = {},

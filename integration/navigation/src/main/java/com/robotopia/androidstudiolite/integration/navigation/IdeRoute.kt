@@ -36,6 +36,8 @@ internal sealed interface IdeRoute {
         val projectName: String,
         val rootPath: String,
         val packageName: String,
+        /** When true, the files host shows Project Git instead of the browser. */
+        val showGit: Boolean = false,
     ) : IdeRoute
 
     @Serializable
@@ -46,6 +48,8 @@ internal sealed interface IdeRoute {
         val projectName: String,
         val rootPath: String,
         val packageName: String,
+        /** Restore Project Git when leaving the editor if the file was opened from Changes. */
+        val returnToGit: Boolean = false,
     ) : IdeRoute
 
     @Serializable
@@ -66,6 +70,7 @@ internal fun IdeRoute.Files.toEditor(relativePath: String): IdeRoute.Editor =
         projectName = projectName,
         rootPath = rootPath,
         packageName = packageName,
+        returnToGit = showGit,
     )
 
 internal fun IdeRoute.Editor.toFiles(): IdeRoute.Files =
@@ -74,6 +79,7 @@ internal fun IdeRoute.Editor.toFiles(): IdeRoute.Files =
         projectName = projectName,
         rootPath = rootPath,
         packageName = packageName,
+        showGit = returnToGit,
     )
 
 internal fun IdeRoute.Files.toBuild(returnTo: IdeRoute = this): IdeRoute.Build =

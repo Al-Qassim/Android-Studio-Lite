@@ -21,6 +21,7 @@ Figma is **archived** (`archive/figma/`). Do not sync UI to Figma, open Figma ti
 | Screen previews | `feature/*/presentation/.../preview/` — `@Preview` composables + fixtures that call **real** Screen/Content (not on Screen/Content files; not duplicated fake screens). Preview `backgroundColor` `0xFF2B2D30` (canvas). Do not name a folder `build` — gitignores `**/build/`. |
 | Visual direction | JetBrains New UI / Islands Dark — radial canvas glow + rounded islands; `IslandScaffold` for product chrome |
 | Screen chrome | `IslandScaffold(topBar, body, footer?)` — edge-to-edge canvas under system bars; status/nav insets on top bar and island; one body island; optional footer under an inset divider; canvas glow soft-fades to transparent inside the scaffold |
+| Lists in islands | Prefer **one** `LazyColumn`/`LazyRow` for the scroll surface (chrome + rows as items). Do **not** nest a weighted list inside a `Column(spacedBy)` — the island’s rounded `clip` will cut the last row. Use `contentPadding` bottom (~40.dp) so the last item clears the corner when scrolled to the end. |
 | Toasts | `Toast` is the pill; bottom overlays use `ToastBottom` (nav-bar inset + gap) — never bottom-align a toast with only fixed `dp` padding |
 | Code coloring | `highlightCode(code)` / `CodeHighlightTransformation` — simple Kotlin syntax colors for the editor |
 | Code editor | `CodeEditorField` — editable code with line-number gutter; `wrapText` soft-wraps or scrolls horizontally. Editor menu: Auto save + Wrap text (persisted via `EditorPreferences`). |

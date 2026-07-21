@@ -31,6 +31,7 @@ internal fun ProjectsListScreen(
     onOpenProject: (Project) -> Unit,
     onRunProject: (Project) -> Unit,
     onCreateProject: () -> Unit,
+    onCloneProject: () -> Unit,
     onOpenSettings: () -> Unit,
     onBuildHistory: (Project) -> Unit,
     viewModel: ProjectsListViewModel = koinViewModel(),
@@ -77,6 +78,10 @@ internal fun ProjectsListScreen(
         onNewProject = {
             viewModel.uiState.update { it.copy(hubMenuOpen = false) }
             onCreateProject()
+        },
+        onCloneProject = {
+            viewModel.uiState.update { it.copy(hubMenuOpen = false) }
+            onCloneProject()
         },
         onImportProject = {
             viewModel.uiState.update { it.copy(hubMenuOpen = false) }

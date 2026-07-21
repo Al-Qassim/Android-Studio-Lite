@@ -177,6 +177,7 @@ private fun FileBrowserPreviewHost(state: FileBrowserUiState) {
             onOpenFile = {},
             onNavigateBack = {},
             onRun = {},
+            onOpenGit = {},
             scope = scope,
         )
     }
