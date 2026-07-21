@@ -53,6 +53,7 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.re
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestOpenWorkingFile
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.setCommitMessage
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.toggleChangeStaged
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.toggleSelectAllChanges
 
 @Composable
 internal fun ProjectGitScreenContext.ProjectGitChangesBody(state: ProjectGitUiState) {
@@ -76,16 +77,33 @@ internal fun ProjectGitScreenContext.ProjectGitChangesBody(state: ProjectGitUiSt
                     text = "On branch ${state.currentBranch.ifBlank { "—" }}",
                     style = Typography.Caption.copy(color = Theme.colors.Muted),
                 )
-                if (state.changeFiles.isNotEmpty() && state.mergeSourceBranch == null) {
-                    Button(
-                        label = "Discard all",
-                        onClick = { openDiscardAllConfirm() },
-                        variant = if (state.isBusy) {
-                            ButtonVariant.Disabled
-                        } else {
-                            ButtonVariant.DangerText
-                        },
-                    )
+                if (state.changeFiles.isNotEmpty()) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        val allSelected = state.changeFiles.all { it.staged }
+                        Button(
+                            label = if (allSelected) "Deselect all" else "Select all",
+                            onClick = { toggleSelectAllChanges() },
+                            variant = if (state.isBusy) {
+                                ButtonVariant.Disabled
+                            } else {
+                                ButtonVariant.TextAction
+                            },
+                        )
+                        if (state.mergeSourceBranch == null) {
+                            Button(
+                                label = "Discard all",
+                                onClick = { openDiscardAllConfirm() },
+                                variant = if (state.isBusy) {
+                                    ButtonVariant.Disabled
+                                } else {
+                                    ButtonVariant.DangerText
+                                },
+                            )
+                        }
+                    }
                 }
             }
             if (state.mergeSourceBranch != null) {

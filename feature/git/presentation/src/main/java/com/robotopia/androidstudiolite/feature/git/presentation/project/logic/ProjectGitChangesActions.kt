@@ -50,6 +50,40 @@ fun ProjectGitScreenContext.toggleChangeStaged(path: String) {
     }
 }
 
+/** Stage every change file, or unstage all when every file is already selected. */
+fun ProjectGitScreenContext.toggleSelectAllChanges() {
+    scope.launch {
+        try {
+            var selectAll = false
+            var paths = emptyList<String>()
+            updateState {
+                if (changeFiles.isEmpty()) return@updateState this
+                paths = changeFiles.map { it.path }
+                selectAll = !changeFiles.all { it.staged }
+                copy(
+                    changeFiles = changeFiles.map { it.copy(staged = selectAll) },
+                    actionError = null,
+                )
+            }
+            if (paths.isEmpty()) return@launch
+            if (selectAll) {
+                gitService.stagePaths(projectRoot, paths)
+            } else {
+                gitService.unstagePaths(projectRoot, paths)
+            }
+            refreshProjectGit(showLoading = false)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            refreshProjectGit(showLoading = false)
+            val message = e.userMessageOrNull(TAG) ?: "Couldn't update staging."
+            updateState {
+                copy(actionError = message, toastMessage = message)
+            }
+        }
+    }
+}
+
 fun ProjectGitScreenContext.openChangeDiff(file: GitChangeFile, state: ProjectGitUiState) {
     if (file.kind == GitChangeKind.Conflict) {
         openConflictFile(
