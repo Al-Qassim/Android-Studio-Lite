@@ -4,10 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -42,8 +39,10 @@ class DefaultFilesScreens(
         onOpenFile: (relativePath: String) -> Unit,
         onNavigateBack: () -> Unit,
         onRun: (() -> Unit)?,
+        showGit: Boolean,
+        onShowGitChange: (Boolean) -> Unit,
     ) {
-        var route by rememberSaveable { mutableStateOf(FilesRoute.Browser) }
+        val route = if (showGit) FilesRoute.Git else FilesRoute.Browser
 
         AnimatedContent(
             targetState = route,
@@ -60,7 +59,7 @@ class DefaultFilesScreens(
                         onOpenFile = onOpenFile,
                         onNavigateBack = onNavigateBack,
                         onRun = onRun,
-                        onOpenGit = { route = FilesRoute.Git },
+                        onOpenGit = { onShowGitChange(true) },
                     )
                 }
 
@@ -68,7 +67,7 @@ class DefaultFilesScreens(
                     gitScreens.ProjectGit(
                         projectRoot = File(root.absolutePath),
                         projectName = projectName,
-                        onBack = { route = FilesRoute.Browser },
+                        onBack = { onShowGitChange(false) },
                         onOpenFile = onOpenFile,
                     )
                 }

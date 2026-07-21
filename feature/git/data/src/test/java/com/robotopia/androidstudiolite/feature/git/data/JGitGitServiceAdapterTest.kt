@@ -146,6 +146,34 @@ class JGitGitServiceAdapterTest {
     }
 
     @Test
+    fun checkout_force_discards_local_changes_that_block_switch() = runBlocking {
+        git.init(root)
+        File(root, "tracked.txt").writeText("base\n")
+        git.stageAll(root)
+        git.commit(root, "base", "ASL", "asl@local")
+
+        git.createBranch(root, "feature/hello-1")
+        git.checkout(root, "feature/hello-1")
+        File(root, "tracked.txt").writeText("on feature\n")
+        git.stageAll(root)
+        git.commit(root, "feature change", "ASL", "asl@local")
+
+        git.checkout(root, "master")
+        File(root, "tracked.txt").writeText("local edit that conflicts\n")
+
+        try {
+            git.checkout(root, "feature/hello-1", force = false)
+            throw AssertionError("expected conflict")
+        } catch (_: com.robotopia.androidstudiolite.feature.git.api.GitCheckoutConflictException) {
+            // expected — dialog path
+        }
+
+        git.checkout(root, "feature/hello-1", force = true)
+        assertEquals("feature/hello-1", git.currentBranch(root))
+        assertEquals("on feature\n", File(root, "tracked.txt").readText())
+    }
+
+    @Test
     fun merge_conflict_and_abort() = runBlocking {
         git.init(root)
         File(root, "conflict.txt").writeText("base\n")

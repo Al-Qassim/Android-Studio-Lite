@@ -33,7 +33,7 @@ import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectG
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ProjectGitUiState
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.acceptConflictOurs
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.acceptConflictTheirs
-import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.conflictHighlightTransformation
+import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.conflictHighlightOutputTransformation
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.markConflictResolvedManually
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.requestOpenWorkingFile
 import com.robotopia.androidstudiolite.feature.git.presentation.project.logic.setConflictText
@@ -60,7 +60,7 @@ internal fun ProjectGitScreenContext.ProjectGitDiffBody(state: ProjectGitUiState
                     ConflictResolveHeader(state)
                     val colors = LocalColorScheme.current
                     val conflictHighlight = remember(state.conflictLinePaint, colors) {
-                        conflictHighlightTransformation(state.conflictLinePaint, colors)
+                        conflictHighlightOutputTransformation(state.conflictLinePaint, colors)
                     }
                     CodeEditorField(
                         value = state.conflictText,
@@ -69,7 +69,7 @@ internal fun ProjectGitScreenContext.ProjectGitDiffBody(state: ProjectGitUiState
                             .weight(1f)
                             .fillMaxWidth(),
                         wrapText = true,
-                        visualTransformation = conflictHighlight,
+                        outputTransformation = conflictHighlight,
                     )
                     ConflictResolveActions(
                         acceptEnabled = !state.isBusy && state.hasOpenConflictHunks,

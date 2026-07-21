@@ -1,12 +1,8 @@
 package com.robotopia.androidstudiolite.feature.git.presentation.project.logic
 
+import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.withStyle
 import com.robotopia.androidstudiolite.designsystem.color.ColorScheme
 import com.robotopia.androidstudiolite.feature.git.presentation.project.ConflictLinePaint
 
@@ -65,23 +61,23 @@ fun updateConflictLinePaintAfterEdit(
     }
 }
 
-fun conflictHighlightTransformation(
+fun conflictHighlightOutputTransformation(
     paints: List<ConflictLinePaint>,
     colors: ColorScheme,
-): VisualTransformation = VisualTransformation { text ->
-    val body = text.text
+): OutputTransformation = OutputTransformation {
+    val body = toString()
     val lines = body.split('\n')
-    val annotated = buildAnnotatedString {
-        lines.forEachIndexed { index, line ->
-            if (index > 0) append('\n')
-            val paint = paints.getOrElse(index) { ConflictLinePaint.None }
-            val (fg, bg) = conflictPaintColors(paint, colors)
-            withStyle(SpanStyle(color = fg, background = bg)) {
-                append(line)
-            }
+    var offset = 0
+    lines.forEachIndexed { index, line ->
+        if (index > 0) offset++ // newline between lines
+        val paint = paints.getOrElse(index) { ConflictLinePaint.None }
+        val (fg, bg) = conflictPaintColors(paint, colors)
+        val end = offset + line.length
+        if (offset < end) {
+            addStyle(SpanStyle(color = fg, background = bg), offset, end)
         }
+        offset = end
     }
-    TransformedText(annotated, OffsetMapping.Identity)
 }
 
 private fun conflictPaintColors(

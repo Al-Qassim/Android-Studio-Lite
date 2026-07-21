@@ -280,7 +280,8 @@ class JGitGitServiceAdapter : GitService {
                 checkoutRemoteTracking(git, name, force)
             } else {
                 try {
-                    git.checkout().setName(name).setForce(force).call()
+                    // JGit: setForced == git checkout --force. setForce() only forces ref updates.
+                    git.checkout().setName(name).setForced(force).call()
                 } catch (e: CheckoutConflictException) {
                     throw GitCheckoutConflictException(
                         conflictingPaths = e.conflictingPaths.orEmpty().sorted(),
@@ -844,7 +845,7 @@ class JGitGitServiceAdapter : GitService {
             val command = git.checkout()
                 .setName(localName)
                 .setStartPoint(remoteName)
-                .setForce(force)
+                .setForced(force)
             if (!localExists) {
                 command.setCreateBranch(true)
                     .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
