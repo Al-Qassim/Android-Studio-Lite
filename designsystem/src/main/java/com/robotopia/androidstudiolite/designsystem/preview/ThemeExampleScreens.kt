@@ -134,7 +134,7 @@ private fun ExampleEditorScreen() {
             """.trimIndent(),
             onValueChange = {},
             wrapText = true,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }
