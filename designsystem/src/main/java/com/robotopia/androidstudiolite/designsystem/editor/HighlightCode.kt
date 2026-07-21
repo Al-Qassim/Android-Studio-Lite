@@ -1,5 +1,6 @@
 package com.robotopia.androidstudiolite.designsystem.editor
 
+import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -96,6 +97,19 @@ fun codeHighlightTransformation(
     colors: ColorScheme = DarkColorScheme,
 ): VisualTransformation = VisualTransformation { text ->
     TransformedText(highlightCode(text.text, colors), OffsetMapping.Identity)
+}
+
+/**
+ * [OutputTransformation] that applies [highlightCode] styles for [BasicTextField] with
+ * [androidx.compose.foundation.text.input.TextFieldState].
+ */
+fun codeHighlightOutputTransformation(
+    colors: ColorScheme = DarkColorScheme,
+): OutputTransformation = OutputTransformation {
+    val annotated = highlightCode(toString(), colors)
+    annotated.spanStyles.forEach { range ->
+        addStyle(range.item, range.start, range.end)
+    }
 }
 
 /** Dark-scheme highlight transform (default product theme). */
